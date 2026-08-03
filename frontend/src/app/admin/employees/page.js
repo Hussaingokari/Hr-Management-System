@@ -26,6 +26,23 @@ function Badge({ status }) {
   );
 }
 
+// Shared style object for all text/select inputs so they always render
+// with a light background + dark text, regardless of the page/browser
+// being in dark mode. Without this, dark mode UA styles can make the
+// typed value (and placeholder) nearly invisible against the input.
+const INPUT_BASE_STYLE = {
+  width: '100%',
+  padding: '9px 12px',
+  border: '1.5px solid #e2e8f0',
+  borderRadius: '8px',
+  fontSize: '13px',
+  outline: 'none',
+  boxSizing: 'border-box',
+  background: '#ffffff',
+  color: '#1e293b',
+  colorScheme: 'light', // stops the browser from re-theming the field (and its placeholder) for dark mode
+};
+
 function InputField({
   label,
   name,
@@ -44,6 +61,7 @@ function InputField({
         {label} {required && <span style={{ color: '#ef4444' }}>*</span>}
       </label>
       <input
+        className="hrms-input"
         type={type}
         value={value || ''}
         onChange={e => {
@@ -75,15 +93,7 @@ function InputField({
         max={max}
         maxLength={maxLength}
         inputMode={numericOnly ? 'numeric' : undefined}
-        style={{
-          width: '100%',
-          padding: '9px 12px',
-          border: '1.5px solid #e2e8f0',
-          borderRadius: '8px',
-          fontSize: '13px',
-          outline: 'none',
-          boxSizing: 'border-box',
-        }}
+        style={INPUT_BASE_STYLE}
         onFocus={e => e.target.style.borderColor = '#3b82f6'}
         onBlur={e => e.target.style.borderColor = '#e2e8f0'}
       />
@@ -235,6 +245,15 @@ export default function EmployeeManagementPage() {
 
   return (
     <div>
+      {/* Scoped style so the placeholder text also stays visible in dark mode
+          (::placeholder can't be set via inline style). */}
+      <style>{`
+        .hrms-input::placeholder {
+          color: #94a3b8;
+          opacity: 1;
+        }
+      `}</style>
+
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <div>
@@ -265,6 +284,7 @@ export default function EmployeeManagementPage() {
           <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
         </svg>
         <input
+          className="hrms-input"
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Search by name, email, department..."
@@ -272,6 +292,7 @@ export default function EmployeeManagementPage() {
             width: '100%', paddingLeft: '38px', paddingRight: '16px',
             height: '40px', border: '1.5px solid #e2e8f0',
             borderRadius: '10px', fontSize: '13px', outline: 'none',
+            background: '#ffffff', color: '#1e293b', colorScheme: 'light',
           }}
           onFocus={e => e.target.style.borderColor = '#3b82f6'}
           onBlur={e => e.target.style.borderColor = '#e2e8f0'}
@@ -471,7 +492,7 @@ export default function EmployeeManagementPage() {
                   numericOnly
                   maxLength={10}
                 />
-                <InputField label="Department" name="department" placeholder="Engineering" value={form.department} onChange={handleFieldChange} />
+                <InputField label="Department" name="department" placeholder="IT" value={form.department} onChange={handleFieldChange} />
                 <InputField label="Designation" name="designation" placeholder="Software Engineer" value={form.designation} onChange={handleFieldChange} />
                 <InputField label="Basic Salary" name="basicSalary" type="number" placeholder="50000" value={form.basicSalary} onChange={handleFieldChange} />
                 <InputField label="Date of Joining" name="dateOfJoining" type="date" value={form.dateOfJoining} onChange={handleFieldChange} />
@@ -493,7 +514,11 @@ export default function EmployeeManagementPage() {
                 <select
                   value={form.role}
                   onChange={e => setForm({ ...form, role: e.target.value })}
-                  style={{ width: '100%', padding: '9px 12px', border: '1.5px solid #e2e8f0', borderRadius: '8px', fontSize: '13px', outline: 'none', background: 'white' }}
+                  style={{
+                    width: '100%', padding: '9px 12px', border: '1.5px solid #e2e8f0',
+                    borderRadius: '8px', fontSize: '13px', outline: 'none',
+                    background: '#ffffff', color: '#1e293b', colorScheme: 'light',
+                  }}
                 >
                   <option value="EMPLOYEE">EMPLOYEE</option>
                   <option value="HR">HR</option>

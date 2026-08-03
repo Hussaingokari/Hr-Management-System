@@ -23,7 +23,12 @@ export const downloadPayslipPdf = (payslipNumber) =>
   api.get(`/api/payslips/${payslipNumber}/download`, {
     responseType: 'blob',
   });
+// ── Breaks ──
+export const startBreak = (breakType = 'GENERAL') =>
+  api.post('/api/attendance/break-start', { breakType });
 
+export const endBreak = () =>
+  api.post('/api/attendance/break-end', {});
 export const getMyNotifications = (page = 0, size = 20) =>
   api.get(`/api/notifications?page=${page}&size=${size}`);
 

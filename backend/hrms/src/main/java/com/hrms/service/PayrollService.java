@@ -25,11 +25,8 @@ public class PayrollService {
     // ---- Configurable rates (adjust to match your company policy) ----
     private static final BigDecimal HRA_RATE = new BigDecimal("0.40");
     private static final BigDecimal DA_RATE = new BigDecimal("0.10");
-    private static final BigDecimal PF_RATE = new BigDecimal("0.12");
     private static final BigDecimal ESI_RATE = new BigDecimal("0.0075");
     private static final BigDecimal ESI_GROSS_LIMIT = new BigDecimal("21000");
-    private static final BigDecimal PT_AMOUNT = new BigDecimal("200");
-    private static final BigDecimal PT_GROSS_THRESHOLD = new BigDecimal("15000");
 
     @Transactional
     public PayrollDTOs.Response generatePayroll(PayrollDTOs.GenerateRequest request) {
@@ -57,14 +54,12 @@ public class PayrollService {
         basic = actualBasic;
         BigDecimal grossSalary = basic.add(hra).add(da).add(specialAllowance);
 
-        BigDecimal pf = round(basic.multiply(PF_RATE));
         BigDecimal esi = grossSalary.compareTo(ESI_GROSS_LIMIT) <= 0
                 ? round(grossSalary.multiply(ESI_RATE))
                 : BigDecimal.ZERO;
-        BigDecimal pt = grossSalary.compareTo(PT_GROSS_THRESHOLD) > 0 ? PT_AMOUNT : BigDecimal.ZERO;
         BigDecimal tds = BigDecimal.ZERO; // no tax slab logic yet
 
-        BigDecimal totalDeductions = pf.add(esi).add(pt).add(tds);
+        BigDecimal totalDeductions = esi.add(tds);
         BigDecimal netSalary = grossSalary.subtract(totalDeductions);
 
         Payroll payroll = Payroll.builder()
@@ -76,9 +71,7 @@ public class PayrollService {
                 .da(da)
                 .specialAllowance(specialAllowance)
                 .grossSalary(grossSalary)
-                .pf(pf)
                 .esi(esi)
-                .pt(pt)
                 .tds(tds)
                 .totalDeductions(totalDeductions)
                 .netSalary(netSalary)
@@ -130,9 +123,7 @@ public class PayrollService {
         r.setDa(p.getDa());
         r.setSpecialAllowance(p.getSpecialAllowance());
         r.setGrossSalary(p.getGrossSalary());
-        r.setPf(p.getPf());
         r.setEsi(p.getEsi());
-        r.setPt(p.getPt());
         r.setTds(p.getTds());
         r.setTotalDeductions(p.getTotalDeductions());
         r.setNetSalary(p.getNetSalary());

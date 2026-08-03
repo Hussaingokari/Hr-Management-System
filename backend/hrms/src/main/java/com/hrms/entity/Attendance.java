@@ -6,6 +6,8 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "attendance", uniqueConstraints = @UniqueConstraint(columnNames = { "employee_id", "date" }))
@@ -34,4 +36,11 @@ public class Attendance {
     private AttendanceStatus status = AttendanceStatus.ABSENT;
 
     private String remarks;
+
+    // Sum of unpaid break minutes for the day. Recalculated whenever a break ends.
+    private Integer totalBreakMinutes;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "attendance", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<AttendanceBreak> breaks = new ArrayList<>();
 }

@@ -23,9 +23,7 @@ public class PayslipDTOs {
         private BigDecimal da;
         private BigDecimal specialAllowance;
         private BigDecimal grossSalary;
-        private BigDecimal pf;
         private BigDecimal esi;
-        private BigDecimal pt;
         private BigDecimal tds;
         private BigDecimal totalDeductions;
         private BigDecimal netSalary;

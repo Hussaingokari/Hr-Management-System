@@ -44,9 +44,7 @@ public class PayslipService {
                 .da(payroll.getDa())
                 .specialAllowance(payroll.getSpecialAllowance())
                 .grossSalary(payroll.getGrossSalary())
-                .pf(payroll.getPf())
                 .esi(payroll.getEsi())
-                .pt(payroll.getPt())
                 .tds(payroll.getTds())
                 .totalDeductions(payroll.getTotalDeductions())
                 .netSalary(payroll.getNetSalary())
@@ -93,9 +91,7 @@ public class PayslipService {
         r.setDa(p.getDa());
         r.setSpecialAllowance(p.getSpecialAllowance());
         r.setGrossSalary(p.getGrossSalary());
-        r.setPf(p.getPf());
         r.setEsi(p.getEsi());
-        r.setPt(p.getPt());
         r.setTds(p.getTds());
         r.setTotalDeductions(p.getTotalDeductions());
         r.setNetSalary(p.getNetSalary());

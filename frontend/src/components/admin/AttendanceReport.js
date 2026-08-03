@@ -4,14 +4,14 @@ import { getAttendanceSummaryByDate, exportAttendanceRange } from '@/lib/adminAp
 import { downloadBlob } from '@/lib/downloadFile';
 import EmployeeAttendanceModal from './EmployeeAttendanceModal';
 import toast from 'react-hot-toast';
- 
+
 const STATUS_COLORS = {
     PRESENT: { bg: '#dcfce7', color: '#16a34a' },
     HALF_DAY: { bg: '#fff7ed', color: '#f59e0b' },
     ON_LEAVE: { bg: '#eff6ff', color: '#3b82f6' },
     ABSENT: { bg: '#fee2e2', color: '#dc2626' },
 };
- 
+
 function StatusBadge({ status }) {
     const s = STATUS_COLORS[status] || { bg: '#f1f5f9', color: '#64748b' };
     return (
@@ -24,23 +24,47 @@ function StatusBadge({ status }) {
         </span>
     );
 }
- 
+
 function formatDuration(mins) {
     if (!mins) return '--';
     const h = Math.floor(mins / 60);
     const m = mins % 60;
     return h > 0 ? `${h}h ${m}m` : `${m}m`;
 }
- 
+
+function formatBreakTimes(breaks) {
+    if (!breaks || breaks.length === 0) return '--';
+    return breaks
+        .map((b) => {
+            const start = b.breakStart ? String(b.breakStart).slice(0, 5) : '--';
+            const end = b.breakEnd ? String(b.breakEnd).slice(0, 5) : '...';
+            return `${start}-${end}`;
+        })
+        .join(', ');
+}
+
 function todayIST() {
     const now = new Date();
     const ist = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
     return ist.toISOString().split('T')[0];
 }
- 
+
+// Shared style for text inputs, date inputs, and the status select.
+// color/background are set explicitly so the fields never inherit a
+// faded/muted text color from a global stylesheet or dark-mode rule.
+const fieldStyle = {
+    padding: '8px 12px',
+    border: '1px solid #e2e8f0',
+    borderRadius: '8px',
+    fontSize: '13px',
+    color: '#1e293b',
+    background: 'white',
+    colorScheme: 'light',
+};
+
 export default function AttendanceReport() {
     const maxDate = useMemo(() => todayIST(), []);
- 
+
     const [fromDate, setFromDate] = useState(todayIST());
     const [toDate, setToDate] = useState(todayIST());
     const [search, setSearch] = useState('');
@@ -51,7 +75,7 @@ export default function AttendanceReport() {
     const [totalPages, setTotalPages] = useState(1);
     const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
     const [exporting, setExporting] = useState(false);
- 
+
     useEffect(() => {
         let active = true;
         setLoading(true);
@@ -70,7 +94,7 @@ export default function AttendanceReport() {
             });
         return () => { active = false; };
     }, [toDate, page]);
- 
+
     const filteredRows = useMemo(() => {
         return rows.filter((r) => {
             const matchesSearch = !search ||
@@ -80,7 +104,7 @@ export default function AttendanceReport() {
             return matchesSearch && matchesStatus;
         });
     }, [rows, search, statusFilter]);
- 
+
     const handleFromDateChange = (e) => {
         const val = e.target.value;
         if (val > maxDate) {
@@ -93,7 +117,7 @@ export default function AttendanceReport() {
         }
         setFromDate(val);
     };
- 
+
     const handleToDateChange = (e) => {
         const val = e.target.value;
         if (val > maxDate) {
@@ -107,7 +131,7 @@ export default function AttendanceReport() {
         setToDate(val);
         setPage(0);
     };
- 
+
     const handleExport = async () => {
         setExporting(true);
         try {
@@ -119,9 +143,23 @@ export default function AttendanceReport() {
             setExporting(false);
         }
     };
- 
+
     return (
         <div>
+            {/* Ensures placeholder text (e.g. "Search employee or code...")
+                stays a visible, deliberate gray instead of inheriting a
+                near-invisible color from elsewhere. */}
+            <style jsx>{`
+                input::placeholder {
+                    color: #94a3b8;
+                    opacity: 1;
+                }
+                input[type='date']::-webkit-calendar-picker-indicator {
+                    filter: none;
+                    opacity: 1;
+                }
+            `}</style>
+
             <div style={{ marginBottom: '20px' }}>
                 <h1 style={{ fontSize: '22px', fontWeight: '800', color: '#1e293b', marginBottom: '4px' }}>
                     Attendance report
@@ -130,7 +168,7 @@ export default function AttendanceReport() {
                     View attendance for all employees by date range.
                 </p>
             </div>
- 
+
             <div style={{
                 display: 'flex', gap: '12px', marginBottom: '16px', flexWrap: 'wrap',
                 background: 'white', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '14px 16px',
@@ -140,38 +178,26 @@ export default function AttendanceReport() {
                     placeholder="Search employee or code..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    style={{
-                        flex: 1, minWidth: '200px', padding: '8px 12px',
-                        border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '13px',
-                    }}
+                    style={{ ...fieldStyle, flex: 1, minWidth: '200px' }}
                 />
                 <input
                     type="date"
                     value={fromDate}
                     max={maxDate}
                     onChange={handleFromDateChange}
-                    style={{
-                        padding: '8px 12px', border: '1px solid #e2e8f0',
-                        borderRadius: '8px', fontSize: '13px',
-                    }}
+                    style={fieldStyle}
                 />
                 <input
                     type="date"
                     value={toDate}
                     max={maxDate}
                     onChange={handleToDateChange}
-                    style={{
-                        padding: '8px 12px', border: '1px solid #e2e8f0',
-                        borderRadius: '8px', fontSize: '13px',
-                    }}
+                    style={fieldStyle}
                 />
                 <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
-                    style={{
-                        padding: '8px 12px', border: '1px solid #e2e8f0',
-                        borderRadius: '8px', fontSize: '13px',
-                    }}
+                    style={fieldStyle}
                 >
                     <option value="ALL">All status</option>
                     <option value="PRESENT">Present</option>
@@ -191,7 +217,7 @@ export default function AttendanceReport() {
                     {exporting ? 'Exporting...' : '⬇ Export'}
                 </button>
             </div>
- 
+
             <div style={{
                 background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0',
                 boxShadow: '0 1px 4px rgba(0,0,0,0.04)', overflow: 'hidden',
@@ -211,7 +237,7 @@ export default function AttendanceReport() {
                                 </div>
                             ))}
                         </div>
- 
+
                         {loading ? (
                             <div style={{ textAlign: 'center', padding: '60px', color: '#94a3b8' }}>Loading...</div>
                         ) : filteredRows.length === 0 ? (
@@ -239,7 +265,7 @@ export default function AttendanceReport() {
                                         {r.checkOut ? String(r.checkOut).slice(0, 5) : '--'}
                                     </div>
                                     <div style={{ fontSize: '13px', color: r.onBreak ? '#f59e0b' : '#64748b', fontWeight: r.onBreak ? '700' : '400' }}>
-                                        {r.onBreak ? 'On break' : formatDuration(r.totalBreakMinutes)}
+                                        {r.onBreak ? 'On break' : formatBreakTimes(r.breaks)}
                                     </div>
                                     <div>
                                         <button
@@ -258,7 +284,7 @@ export default function AttendanceReport() {
                         )}
                     </div>
                 </div>
- 
+
                 {totalPages > 1 && (
                     <div style={{
                         display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px',
@@ -284,7 +310,7 @@ export default function AttendanceReport() {
                     </div>
                 )}
             </div>
- 
+
             {selectedEmployeeId && (
                 <EmployeeAttendanceModal
                     employeeId={selectedEmployeeId}

@@ -163,9 +163,17 @@ export default function OnboardingProfilePage() {
                             { label: 'Date of Birth', value: onboarding.employeeDateOfBirth },
                             { label: 'Assigned HR', value: onboarding.assignedHrName },
                         ].map(f => (
-                            <div key={f.label} style={{ marginBottom: '12px' }}>
+                            <div key={f.label} style={{ marginBottom: '12px', minWidth: 0 }}>
                                 <div style={{ fontSize: '11px', color: '#94a3b8', marginBottom: '2px' }}>{f.label}</div>
-                                <div style={{ fontSize: '13px', color: '#1e293b', fontWeight: '500' }}>{f.value || '—'}</div>
+                                <div style={{
+                                    fontSize: '13px',
+                                    color: '#1e293b',
+                                    fontWeight: '500',
+                                    wordBreak: 'break-word',
+                                    overflowWrap: 'anywhere',
+                                }}>
+                                    {f.value || '—'}
+                                </div>
                             </div>
                         ))}
                     </div>

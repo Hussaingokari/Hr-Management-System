@@ -1,14 +1,14 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
-import { getMyAttendance, checkIn, checkOut } from '@/lib/employeeApi';
+import { getMyAttendance, checkIn, checkOut, startBreak, endBreak } from '@/lib/employeeApi';
 import toast from 'react-hot-toast';
 
 function Badge({ status }) {
   const map = {
-    PRESENT:  { bg: '#dcfce7', color: '#16a34a' },
-    ABSENT:   { bg: '#fee2e2', color: '#dc2626' },
+    PRESENT: { bg: '#dcfce7', color: '#16a34a' },
+    ABSENT: { bg: '#fee2e2', color: '#dc2626' },
     HALF_DAY: { bg: '#fff7ed', color: '#f59e0b' },
-    LATE:     { bg: '#fdf4ff', color: '#9333ea' },
+    LATE: { bg: '#fdf4ff', color: '#9333ea' },
   };
   const s = map[status] || { bg: '#f1f5f9', color: '#64748b' };
   return (
@@ -22,12 +22,20 @@ function Badge({ status }) {
   );
 }
 
+function formatDuration(mins) {
+  if (mins == null) return '--';
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+}
+
 export default function AttendancePage() {
   const [records, setRecords] = useState([]);
   const [todayAtt, setTodayAtt] = useState(null);
   const [loading, setLoading] = useState(true);
   const [checkingIn, setCheckingIn] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
+  const [togglingBreak, setTogglingBreak] = useState(false);
   const [showRemarks, setShowRemarks] = useState(false);
   const [remarks, setRemarks] = useState('');
   const [page, setPage] = useState(0);
@@ -87,9 +95,31 @@ export default function AttendancePage() {
     }
   };
 
+  const handleToggleBreak = async () => {
+    setTogglingBreak(true);
+    try {
+      if (todayAtt?.onBreak) {
+        await endBreak();
+        toast.success('Break ended — welcome back!');
+      } else {
+        await startBreak();
+        toast.success('Break started');
+      }
+      fetchAttendance();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Could not update break');
+      console.error(err);
+    } finally {
+      setTogglingBreak(false);
+    }
+  };
+
   const presentCount = records.filter(r => r.status === 'PRESENT').length;
   const halfDayCount = records.filter(r => r.status === 'HALF_DAY').length;
   const absentCount = records.filter(r => r.status === 'ABSENT').length;
+
+  const canBreak = !!todayAtt?.checkIn && !todayAtt?.checkOut;
+  const onBreak = !!todayAtt?.onBreak;
 
   return (
     <div>
@@ -109,27 +139,45 @@ export default function AttendancePage() {
         borderRadius: '16px', padding: '24px',
         marginBottom: '24px', color: 'white',
       }}>
-        <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)', marginBottom: '16px', fontWeight: '600' }}>
-          TODAY — {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+          <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)', fontWeight: '600' }}>
+            TODAY — {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+          </div>
+          {onBreak && (
+            <span style={{
+              background: 'rgba(245,158,11,0.2)', color: '#fbbf24',
+              padding: '4px 12px', borderRadius: '20px',
+              fontSize: '11px', fontWeight: '700',
+            }}>
+              ⏸ On break
+            </span>
+          )}
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px' }}>
           {/* Check in / out times */}
-          <div style={{ display: 'flex', gap: '40px' }}>
+          <div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap' }}>
             <div>
               <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)', marginBottom: '4px' }}>CHECK IN</div>
               <div style={{ fontSize: '28px', fontWeight: '800' }}>
                 {todayAtt?.checkIn ? todayAtt.checkIn.substring(0, 5) : '--:--'}
               </div>
             </div>
-            <div style={{ width: '1px', background: 'rgba(255,255,255,0.2)' }}/>
+            <div style={{ width: '1px', background: 'rgba(255,255,255,0.2)' }} />
             <div>
               <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)', marginBottom: '4px' }}>CHECK OUT</div>
               <div style={{ fontSize: '28px', fontWeight: '800' }}>
                 {todayAtt?.checkOut ? todayAtt.checkOut.substring(0, 5) : '--:--'}
               </div>
             </div>
-            <div style={{ width: '1px', background: 'rgba(255,255,255,0.2)' }}/>
+            <div style={{ width: '1px', background: 'rgba(255,255,255,0.2)' }} />
+            <div>
+              <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)', marginBottom: '4px' }}>BREAK TIME</div>
+              <div style={{ fontSize: '28px', fontWeight: '800' }}>
+                {formatDuration(todayAtt?.totalBreakMinutes ?? 0)}
+              </div>
+            </div>
+            <div style={{ width: '1px', background: 'rgba(255,255,255,0.2)' }} />
             <div>
               <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)', marginBottom: '4px' }}>WORK HOURS</div>
               <div style={{ fontSize: '28px', fontWeight: '800' }}>
@@ -139,7 +187,7 @@ export default function AttendancePage() {
           </div>
 
           {/* Action Buttons */}
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
             <button
               onClick={handleCheckIn}
               disabled={loading || !!todayAtt?.checkIn || checkingIn}
@@ -154,6 +202,21 @@ export default function AttendancePage() {
               }}
             >
               {checkingIn ? '⏳ Checking in...' : todayAtt?.checkIn ? '✓ Checked In' : '→ Check In'}
+            </button>
+
+            <button
+              onClick={handleToggleBreak}
+              disabled={loading || !canBreak || togglingBreak}
+              style={{
+                padding: '12px 24px',
+                background: !canBreak ? 'rgba(255,255,255,0.1)' : onBreak ? '#fbbf24' : 'rgba(255,255,255,0.15)',
+                color: !canBreak ? 'rgba(255,255,255,0.4)' : onBreak ? '#1e3a5f' : 'white',
+                border: '1.5px solid rgba(255,255,255,0.3)',
+                borderRadius: '10px', fontSize: '14px', fontWeight: '700',
+                cursor: !canBreak ? 'not-allowed' : 'pointer',
+              }}
+            >
+              {togglingBreak ? '⏳' : onBreak ? '▶ Resume work' : '⏸ Take a break'}
             </button>
 
             {!showRemarks ? (
@@ -220,12 +283,35 @@ export default function AttendancePage() {
         {/* Status badge */}
         {todayAtt && (
           <div style={{ marginTop: '16px' }}>
-            <Badge status={todayAtt.status}/>
+            <Badge status={todayAtt.status} />
             {todayAtt.remarks && (
               <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.7)', marginLeft: '10px' }}>
                 Remarks: {todayAtt.remarks}
               </span>
             )}
+          </div>
+        )}
+
+        {/* Today's breaks list */}
+        {todayAtt?.breaks?.length > 0 && (
+          <div style={{ marginTop: '16px', borderTop: '1px solid rgba(255,255,255,0.15)', paddingTop: '14px' }}>
+            <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)', marginBottom: '8px', fontWeight: '600' }}>
+              TODAY&apos;S BREAKS
+            </div>
+            {todayAtt.breaks.map((b) => (
+              <div key={b.id} style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                fontSize: '13px', padding: '4px 0', color: 'rgba(255,255,255,0.9)',
+              }}>
+                <span>
+                  {b.breakStart?.substring(0, 5)} – {b.breakEnd ? b.breakEnd.substring(0, 5) : 'ongoing'}
+                </span>
+                <span style={{ color: b.flagged ? '#fca5a5' : 'rgba(255,255,255,0.7)' }}>
+                  {b.breakEnd ? formatDuration(b.durationMinutes) : ''}
+                  {b.flagged ? ' ⚠ long break' : ''}
+                </span>
+              </div>
+            ))}
           </div>
         )}
       </div>
@@ -274,46 +360,49 @@ export default function AttendancePage() {
           </div>
         ) : (
           <div className="table-responsive">
-            <div className="admin-data-table" style={{ minWidth: '760px' }}>
+            <div className="admin-data-table" style={{ minWidth: '840px' }}>
               {/* Table Header */}
               <div style={{
-                display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr 1fr 1.5fr',
+                display: 'grid', gridTemplateColumns: '1.3fr 0.9fr 0.9fr 0.9fr 0.9fr 0.9fr 1.3fr',
                 padding: '10px 20px', background: '#f8fafc',
                 borderBottom: '1px solid #e2e8f0',
               }}>
-                {['Date', 'Check In', 'Check Out', 'Work Hours', 'Status', 'Remarks'].map(h => (
+                {['Date', 'Check In', 'Check Out', 'Break', 'Work Hours', 'Status', 'Remarks'].map(h => (
                   <div key={h} style={{ fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                     {h}
                   </div>
                 ))}
               </div>
 
-            {/* Table Rows */}
-            {records.map((r, i) => (
-              <div key={r.id || r.date || i} style={{
-                display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr 1fr 1.5fr',
-                padding: '12px 20px', borderBottom: '1px solid #f1f5f9',
-                alignItems: 'center',
-              }}>
-                <div style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>
-                  {new Date(r.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+              {/* Table Rows */}
+              {records.map((r, i) => (
+                <div key={r.id || r.date || i} style={{
+                  display: 'grid', gridTemplateColumns: '1.3fr 0.9fr 0.9fr 0.9fr 0.9fr 0.9fr 1.3fr',
+                  padding: '12px 20px', borderBottom: '1px solid #f1f5f9',
+                  alignItems: 'center',
+                }}>
+                  <div style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>
+                    {new Date(r.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                  </div>
+                  <div style={{ fontSize: '13px', color: '#16a34a', fontWeight: '600' }}>
+                    {r.checkIn ? r.checkIn.substring(0, 5) : '--'}
+                  </div>
+                  <div style={{ fontSize: '13px', color: '#f59e0b', fontWeight: '600' }}>
+                    {r.checkOut ? r.checkOut.substring(0, 5) : '--'}
+                  </div>
+                  <div style={{ fontSize: '13px', color: '#64748b' }}>
+                    {formatDuration(r.totalBreakMinutes)}
+                  </div>
+                  <div style={{ fontSize: '13px', color: '#64748b' }}>
+                    {r.workHours ? `${r.workHours}h` : '--'}
+                  </div>
+                  <div><Badge status={r.status} /></div>
+                  <div style={{ fontSize: '12px', color: '#94a3b8' }}>
+                    {r.remarks || '--'}
+                  </div>
                 </div>
-                <div style={{ fontSize: '13px', color: '#16a34a', fontWeight: '600' }}>
-                  {r.checkIn ? r.checkIn.substring(0, 5) : '--'}
-                </div>
-                <div style={{ fontSize: '13px', color: '#f59e0b', fontWeight: '600' }}>
-                  {r.checkOut ? r.checkOut.substring(0, 5) : '--'}
-                </div>
-                <div style={{ fontSize: '13px', color: '#64748b' }}>
-                  {r.workHours ? `${r.workHours}h` : '--'}
-                </div>
-                <div><Badge status={r.status}/></div>
-                <div style={{ fontSize: '12px', color: '#94a3b8' }}>
-                  {r.remarks || '--'}
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
 
             {/* Pagination */}
             {totalPages > 1 && (

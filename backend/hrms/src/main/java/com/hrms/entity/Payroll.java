@@ -44,13 +44,7 @@ public class Payroll {
 
     // Deductions
     @Column(precision = 12, scale = 2)
-    private BigDecimal pf; // Provident Fund (12% of basic)
-
-    @Column(precision = 12, scale = 2)
     private BigDecimal esi; // ESI (0.75% of gross if <= 21000)
-
-    @Column(precision = 12, scale = 2)
-    private BigDecimal pt; // Professional Tax
 
     @Column(precision = 12, scale = 2)
     private BigDecimal tds; // Tax Deducted at Source

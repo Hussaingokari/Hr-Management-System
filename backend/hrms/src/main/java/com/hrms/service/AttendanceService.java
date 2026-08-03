@@ -2,8 +2,11 @@ package com.hrms.service;
 
 import com.hrms.dto.AttendanceDTOs;
 import com.hrms.entity.Attendance;
+import com.hrms.entity.AttendanceBreak;
 import com.hrms.entity.Employee;
 import com.hrms.enums.AttendanceStatus;
+import com.hrms.enums.BreakType;
+import com.hrms.repository.AttendanceBreakRepository;
 import com.hrms.repository.AttendanceRepository;
 import com.hrms.repository.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +24,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.YearMonth;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,16 +36,18 @@ import java.util.stream.Collectors;
 public class AttendanceService {
 
     private final AttendanceRepository attendanceRepo;
+    private final AttendanceBreakRepository attendanceBreakRepo;
     private final EmployeeService employeeService;
     private final EmployeeRepository employeeRepo;
 
     private static final LocalTime LATE_THRESHOLD = LocalTime.of(9, 15);
+    private static final int FLAG_BREAK_MINUTES = 60;
 
     @Transactional
     @org.springframework.cache.annotation.CacheEvict(value = "dashboardData", allEntries = true)
     public AttendanceDTOs.Response checkIn(Long employeeId, AttendanceDTOs.CheckInRequest req) {
         Employee emp = employeeService.findById(employeeId);
-        java.time.ZoneId istZone = java.time.ZoneId.of("Asia/Kolkata");
+        ZoneId istZone = ZoneId.of("Asia/Kolkata");
         LocalDate date = (req != null && req.getDate() != null) ? req.getDate() : LocalDate.now(istZone);
 
         if (attendanceRepo.findByEmployeeAndDate(emp, date).isPresent()) {
@@ -65,7 +71,7 @@ public class AttendanceService {
     @org.springframework.cache.annotation.CacheEvict(value = "dashboardData", allEntries = true)
     public AttendanceDTOs.Response checkOut(Long employeeId, AttendanceDTOs.CheckOutRequest req) {
         Employee emp = employeeService.findById(employeeId);
-        java.time.ZoneId istZone = java.time.ZoneId.of("Asia/Kolkata");
+        ZoneId istZone = ZoneId.of("Asia/Kolkata");
         LocalDate today = LocalDate.now(istZone);
 
         Attendance att = attendanceRepo.findByEmployeeAndDate(emp, today)
@@ -76,13 +82,22 @@ public class AttendanceService {
                 : LocalTime.now(istZone).withNano(0);
         att.setCheckOut(checkOut);
 
-        double hours = att.getCheckIn().until(checkOut, ChronoUnit.MINUTES) / 60.0;
-        if (hours < 0) {
-            hours += 24.0;
-        }
-        att.setWorkHours(Math.round(hours * 100.0) / 100.0);
+        // If a break is still open, close it automatically at checkout time.
+        attendanceBreakRepo.findFirstByAttendanceAndBreakEndIsNull(att).ifPresent(openBreak -> {
+            closeBreak(openBreak, checkOut);
+            attendanceBreakRepo.save(openBreak);
+        });
+        recalculateTotalBreakMinutes(att);
 
-        if (hours < 4)
+        double grossHours = att.getCheckIn().until(checkOut, ChronoUnit.MINUTES) / 60.0;
+        if (grossHours < 0) {
+            grossHours += 24.0;
+        }
+        double breakHours = (att.getTotalBreakMinutes() != null ? att.getTotalBreakMinutes() : 0) / 60.0;
+        double netHours = Math.max(0, grossHours - breakHours);
+        att.setWorkHours(Math.round(netHours * 100.0) / 100.0);
+
+        if (netHours < 4)
             att.setStatus(AttendanceStatus.HALF_DAY);
         else
             att.setStatus(AttendanceStatus.PRESENT);
@@ -92,6 +107,80 @@ public class AttendanceService {
         }
 
         return toResponse(attendanceRepo.save(att));
+    }
+
+    @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "dashboardData", allEntries = true)
+    public AttendanceDTOs.Response breakStart(Long employeeId, AttendanceDTOs.BreakStartRequest req) {
+        Employee emp = employeeService.findById(employeeId);
+        ZoneId istZone = ZoneId.of("Asia/Kolkata");
+        LocalDate today = LocalDate.now(istZone);
+
+        Attendance att = attendanceRepo.findByEmployeeAndDate(emp, today)
+                .orElseThrow(() -> new IllegalStateException("Check in before starting a break"));
+
+        if (att.getCheckOut() != null) {
+            throw new IllegalStateException("Already checked out for today");
+        }
+        if (attendanceBreakRepo.findFirstByAttendanceAndBreakEndIsNull(att).isPresent()) {
+            throw new IllegalStateException("A break is already in progress");
+        }
+
+        LocalTime start = (req != null && req.getBreakStart() != null) ? req.getBreakStart()
+                : LocalTime.now(istZone).withNano(0);
+
+        AttendanceBreak brk = AttendanceBreak.builder()
+                .attendance(att)
+                .breakType(req != null && req.getBreakType() != null ? req.getBreakType() : BreakType.GENERAL)
+                .breakStart(start)
+                .build();
+
+        attendanceBreakRepo.save(brk);
+        return toResponse(att);
+    }
+
+    @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = "dashboardData", allEntries = true)
+    public AttendanceDTOs.Response breakEnd(Long employeeId, AttendanceDTOs.BreakEndRequest req) {
+        Employee emp = employeeService.findById(employeeId);
+        ZoneId istZone = ZoneId.of("Asia/Kolkata");
+        LocalDate today = LocalDate.now(istZone);
+
+        Attendance att = attendanceRepo.findByEmployeeAndDate(emp, today)
+                .orElseThrow(() -> new IllegalStateException("No attendance record for today"));
+
+        AttendanceBreak brk = attendanceBreakRepo.findFirstByAttendanceAndBreakEndIsNull(att)
+                .orElseThrow(() -> new IllegalStateException("No break in progress"));
+
+        LocalTime end = (req != null && req.getBreakEnd() != null) ? req.getBreakEnd()
+                : LocalTime.now(istZone).withNano(0);
+
+        closeBreak(brk, end);
+        attendanceBreakRepo.save(brk);
+
+        recalculateTotalBreakMinutes(att);
+        attendanceRepo.save(att);
+
+        return toResponse(att);
+    }
+
+    private void closeBreak(AttendanceBreak brk, LocalTime end) {
+        brk.setBreakEnd(end);
+        int minutes = (int) brk.getBreakStart().until(end, ChronoUnit.MINUTES);
+        if (minutes < 0) {
+            minutes += 24 * 60;
+        }
+        brk.setDurationMinutes(minutes);
+        brk.setFlagged(minutes > FLAG_BREAK_MINUTES);
+    }
+
+    private void recalculateTotalBreakMinutes(Attendance att) {
+        List<AttendanceBreak> breaks = attendanceBreakRepo.findByAttendanceOrderByBreakStartAsc(att);
+        int totalUnpaid = breaks.stream()
+                .filter(b -> b.getDurationMinutes() != null && !b.isPaid())
+                .mapToInt(AttendanceBreak::getDurationMinutes)
+                .sum();
+        att.setTotalBreakMinutes(totalUnpaid);
     }
 
     @Transactional(readOnly = true)
@@ -120,10 +209,10 @@ public class AttendanceService {
         LocalDate monthEnd = yearMonth.atEndOfMonth();
         List<Attendance> monthRecords = attendanceRepo.findByEmployeeAndDateRangeOrderByDate(emp, monthStart, monthEnd);
 
-        List<AttendanceDTOs.DailyRecord> weeklyRecords = buildWeeklyRecords(emp, weekStart, asOfDate, weekRecords);
+        List<AttendanceDTOs.DailyRecord> weeklyRecords = buildDailyRecords(weekStart, asOfDate, weekRecords);
         AttendanceDTOs.WeeklyStats weeklyStats = calculateWeeklyStats(weekRecords);
 
-        List<AttendanceDTOs.DailyRecord> monthlyRecords = buildMonthlyRecords(emp, monthStart, monthEnd, monthRecords);
+        List<AttendanceDTOs.DailyRecord> monthlyRecords = buildDailyRecords(monthStart, monthEnd, monthRecords);
         AttendanceDTOs.MonthlyStats monthlyStats = calculateMonthlyStats(monthRecords, monthStart, monthEnd);
 
         return new AttendanceDTOs.EmployeeDetailedReport(
@@ -159,6 +248,10 @@ public class AttendanceService {
             summary.setCheckIn(att.getCheckIn());
             summary.setCheckOut(att.getCheckOut());
             summary.setWorkHours(att.getWorkHours());
+            summary.setTotalBreakMinutes(att.getTotalBreakMinutes());
+            summary.setBreaks(attendanceBreakRepo.findByAttendanceOrderByBreakStartAsc(att).stream()
+                    .map(this::toBreakResponse).collect(Collectors.toList()));
+            summary.setOnBreak(attendanceBreakRepo.findFirstByAttendanceAndBreakEndIsNull(att).isPresent());
         } else {
             summary.setStatus("ABSENT");
             summary.setWorkHours(0.0);
@@ -182,6 +275,12 @@ public class AttendanceService {
                     summary.setCheckIn(att.getCheckIn());
                     summary.setCheckOut(att.getCheckOut());
                     summary.setWorkHours(att.getWorkHours());
+                    summary.setTotalBreakMinutes(att.getTotalBreakMinutes());
+                    summary.setOnBreak(attendanceBreakRepo.findFirstByAttendanceAndBreakEndIsNull(att).isPresent());
+                    summary.setTotalBreakMinutes(att.getTotalBreakMinutes());
+                    summary.setBreaks(attendanceBreakRepo.findByAttendanceOrderByBreakStartAsc(att).stream()
+                            .map(this::toBreakResponse).collect(Collectors.toList()));
+                    summary.setOnBreak(attendanceBreakRepo.findFirstByAttendanceAndBreakEndIsNull(att).isPresent());
                     return summary;
                 });
     }
@@ -257,7 +356,8 @@ public class AttendanceService {
                     List.of("Name", "Employee ID", "Department", "Role", "Employment status"));
             for (LocalDate d : days)
                 headers.add(d.toString());
-            headers.addAll(List.of("Total hours", "Present", "Half day", "Absent", "Leave", "Late arrivals"));
+            headers.addAll(List.of("Total hours", "Total break (min)", "Present", "Half day", "Absent", "Leave",
+                    "Late arrivals"));
 
             Row headerRow = sheet.createRow(0);
             for (int i = 0; i < headers.size(); i++) {
@@ -280,6 +380,7 @@ public class AttendanceService {
 
                 int present = 0, half = 0, absent = 0, leave = 0, late = 0;
                 double totalHours = 0;
+                int totalBreakMin = 0;
                 int col = 5;
 
                 for (LocalDate d : days) {
@@ -300,9 +401,20 @@ public class AttendanceService {
                     }
 
                     AttendanceStatus st = att.getStatus();
+                    List<AttendanceBreak> dayBreaks = attendanceBreakRepo.findByAttendanceOrderByBreakStartAsc(att);
+                    String breakSuffix = "";
+                    if (!dayBreaks.isEmpty()) {
+                        String ranges = dayBreaks.stream()
+                                .map(b -> fmt(b.getBreakStart()) + "-"
+                                        + (b.getBreakEnd() != null ? fmt(b.getBreakEnd()) : "..."))
+                                .collect(Collectors.joining(", "));
+                        breakSuffix = " [brk " + ranges + "]";
+                    }
                     String label = switch (st) {
-                        case PRESENT -> "P (" + fmt(att.getCheckIn()) + "-" + fmt(att.getCheckOut()) + ")";
-                        case HALF_DAY -> "H (" + fmt(att.getCheckIn()) + "-" + fmt(att.getCheckOut()) + ")";
+                        case PRESENT ->
+                            "P (" + fmt(att.getCheckIn()) + "-" + fmt(att.getCheckOut()) + ")" + breakSuffix;
+                        case HALF_DAY ->
+                            "H (" + fmt(att.getCheckIn()) + "-" + fmt(att.getCheckOut()) + ")" + breakSuffix;
                         case ON_LEAVE -> "L";
                         default -> "A";
                     };
@@ -321,11 +433,14 @@ public class AttendanceService {
 
                     if (att.getWorkHours() != null)
                         totalHours += att.getWorkHours();
+                    if (att.getTotalBreakMinutes() != null)
+                        totalBreakMin += att.getTotalBreakMinutes();
                     if (att.getCheckIn() != null && att.getCheckIn().isAfter(LATE_THRESHOLD))
                         late++;
                 }
 
                 row.createCell(col++).setCellValue(Math.round(totalHours * 100.0) / 100.0);
+                row.createCell(col++).setCellValue(totalBreakMin);
                 row.createCell(col++).setCellValue(present);
                 row.createCell(col++).setCellValue(half);
                 row.createCell(col++).setCellValue(absent);
@@ -355,76 +470,34 @@ public class AttendanceService {
         return t == null ? "--" : t.toString().substring(0, 5);
     }
 
-    private List<AttendanceDTOs.DailyRecord> buildWeeklyRecords(Employee emp, LocalDate weekStart, LocalDate weekEnd,
+    private List<AttendanceDTOs.DailyRecord> buildDailyRecords(LocalDate rangeStart, LocalDate rangeEnd,
             List<Attendance> records) {
         Map<LocalDate, Attendance> recordMap = records.stream()
                 .collect(Collectors.toMap(Attendance::getDate, a -> a));
 
         List<AttendanceDTOs.DailyRecord> dailyRecords = new ArrayList<>();
-        for (LocalDate date = weekStart; !date.isAfter(weekEnd); date = date.plusDays(1)) {
+        for (LocalDate date = rangeStart; !date.isAfter(rangeEnd); date = date.plusDays(1)) {
             String dayName = date.getDayOfWeek().toString().substring(0, 3);
+            AttendanceDTOs.DailyRecord day = new AttendanceDTOs.DailyRecord();
+            day.setDate(date);
+            day.setDayName(dayName);
 
             if (isWeekend(date)) {
-                AttendanceDTOs.DailyRecord day = new AttendanceDTOs.DailyRecord();
-                day.setDate(date);
-                day.setDayName(dayName);
                 day.setStatus("WEEKEND");
-                dailyRecords.add(day);
             } else if (recordMap.containsKey(date)) {
                 Attendance att = recordMap.get(date);
-                AttendanceDTOs.DailyRecord day = new AttendanceDTOs.DailyRecord();
-                day.setDate(date);
-                day.setDayName(dayName);
                 day.setStatus(att.getStatus().name());
                 day.setCheckIn(att.getCheckIn());
                 day.setCheckOut(att.getCheckOut());
                 day.setWorkHours(att.getWorkHours());
                 day.setRemarks(att.getRemarks());
-                dailyRecords.add(day);
+                day.setTotalBreakMinutes(att.getTotalBreakMinutes());
+                day.setBreaks(attendanceBreakRepo.findByAttendanceOrderByBreakStartAsc(att).stream()
+                        .map(this::toBreakResponse).collect(Collectors.toList()));
             } else {
-                AttendanceDTOs.DailyRecord day = new AttendanceDTOs.DailyRecord();
-                day.setDate(date);
-                day.setDayName(dayName);
                 day.setStatus("ABSENT");
-                dailyRecords.add(day);
             }
-        }
-        return dailyRecords;
-    }
-
-    private List<AttendanceDTOs.DailyRecord> buildMonthlyRecords(Employee emp, LocalDate monthStart, LocalDate monthEnd,
-            List<Attendance> records) {
-        Map<LocalDate, Attendance> recordMap = records.stream()
-                .collect(Collectors.toMap(Attendance::getDate, a -> a));
-
-        List<AttendanceDTOs.DailyRecord> dailyRecords = new ArrayList<>();
-        for (LocalDate date = monthStart; !date.isAfter(monthEnd); date = date.plusDays(1)) {
-            String dayName = date.getDayOfWeek().toString().substring(0, 3);
-
-            if (isWeekend(date)) {
-                AttendanceDTOs.DailyRecord day = new AttendanceDTOs.DailyRecord();
-                day.setDate(date);
-                day.setDayName(dayName);
-                day.setStatus("WEEKEND");
-                dailyRecords.add(day);
-            } else if (recordMap.containsKey(date)) {
-                Attendance att = recordMap.get(date);
-                AttendanceDTOs.DailyRecord day = new AttendanceDTOs.DailyRecord();
-                day.setDate(date);
-                day.setDayName(dayName);
-                day.setStatus(att.getStatus().name());
-                day.setCheckIn(att.getCheckIn());
-                day.setCheckOut(att.getCheckOut());
-                day.setWorkHours(att.getWorkHours());
-                day.setRemarks(att.getRemarks());
-                dailyRecords.add(day);
-            } else {
-                AttendanceDTOs.DailyRecord day = new AttendanceDTOs.DailyRecord();
-                day.setDate(date);
-                day.setDayName(dayName);
-                day.setStatus("ABSENT");
-                dailyRecords.add(day);
-            }
+            dailyRecords.add(day);
         }
         return dailyRecords;
     }
@@ -493,6 +566,22 @@ public class AttendanceService {
         r.setWorkHours(a.getWorkHours());
         r.setStatus(a.getStatus().name());
         r.setRemarks(a.getRemarks());
+        r.setTotalBreakMinutes(a.getTotalBreakMinutes());
+        r.setOnBreak(attendanceBreakRepo.findFirstByAttendanceAndBreakEndIsNull(a).isPresent());
+        r.setBreaks(attendanceBreakRepo.findByAttendanceOrderByBreakStartAsc(a).stream()
+                .map(this::toBreakResponse).collect(Collectors.toList()));
         return r;
+    }
+
+    private AttendanceDTOs.BreakResponse toBreakResponse(AttendanceBreak b) {
+        AttendanceDTOs.BreakResponse br = new AttendanceDTOs.BreakResponse();
+        br.setId(b.getId());
+        br.setBreakType(b.getBreakType().name());
+        br.setBreakStart(b.getBreakStart());
+        br.setBreakEnd(b.getBreakEnd());
+        br.setDurationMinutes(b.getDurationMinutes());
+        br.setPaid(b.isPaid());
+        br.setFlagged(b.isFlagged());
+        return br;
     }
 }

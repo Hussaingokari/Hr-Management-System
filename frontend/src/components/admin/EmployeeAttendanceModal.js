@@ -13,6 +13,18 @@ const STATUS_COLORS = {
     HOLIDAY: { bg: '#fdf4ff', color: '#9333ea' },
 };
 
+// Explicit color/background/colorScheme so date inputs never inherit a
+// faded text color from a global stylesheet or dark color-scheme rule.
+const dateFieldStyle = {
+    padding: '6px 10px',
+    border: '1px solid #e2e8f0',
+    borderRadius: '6px',
+    fontSize: '12px',
+    color: '#1e293b',
+    background: 'white',
+    colorScheme: 'light',
+};
+
 function StatusBadge({ status }) {
     const s = STATUS_COLORS[status] || { bg: '#f1f5f9', color: '#64748b' };
     return (
@@ -26,25 +38,174 @@ function StatusBadge({ status }) {
     );
 }
 
-function DayCell({ day }) {
-    const s = STATUS_COLORS[day.status] || { bg: '#f1f5f9', color: '#64748b' };
-    const shortLabel = day.status === 'PRESENT' ? 'P'
-        : day.status === 'HALF_DAY' ? 'H'
-            : day.status === 'ON_LEAVE' ? 'L'
-                : day.status === 'WEEKEND' ? 'WK'
-                    : day.status === 'HOLIDAY' ? 'HO'
+function formatDuration(mins) {
+    if (!mins) return '0m';
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return h > 0 ? `${h}h ${m}m` : `${m}m`;
+}
+
+function formatTime(t) {
+    return t ? String(t).slice(0, 5) : '--';
+}
+
+// The backend labels a day WEEKEND/ABSENT purely from the calendar date,
+// before checking whether an attendance record actually exists — so an
+// employee who genuinely checked in on a Saturday still gets shown as
+// WEEKEND. Since the real checkIn/checkOut/workHours are still present on
+// the payload either way, derive the status the same way the backend does
+// for a normal workday (workHours < 4 => HALF_DAY, else PRESENT) whenever
+// there's an actual check-in, and only trust WEEKEND/ABSENT when there's
+// truly nothing recorded.
+function effectiveStatus(day) {
+    const hasRecord = !!day.checkIn;
+    if (hasRecord && (day.status === 'WEEKEND' || day.status === 'ABSENT')) {
+        return day.workHours != null && day.workHours < 4 ? 'HALF_DAY' : 'PRESENT';
+    }
+    return day.status;
+}
+
+// index: this cell's position among the 7 day cells (0 = Sun ... 6 = Sat)
+// total: how many day cells there are (7)
+function DayCell({ day, index = 0, total = 7 }) {
+    const [hovered, setHovered] = useState(false);
+    const status = effectiveStatus(day);
+    const s = STATUS_COLORS[status] || { bg: '#f1f5f9', color: '#64748b' };
+    const shortLabel = status === 'PRESENT' ? 'P'
+        : status === 'HALF_DAY' ? 'H'
+            : status === 'ON_LEAVE' ? 'L'
+                : status === 'WEEKEND' ? 'WK'
+                    : status === 'HOLIDAY' ? 'HO'
                         : 'A';
+    const breaks = day.breaks || [];
+    const hasBreaks = breaks.length > 0;
+
+    // Rank breaks by impact: longest duration first. This surfaces the
+    // break that most affected the day's total break time at the top,
+    // rather than showing them in whatever order they were taken.
+    const sortedBreaks = [...breaks].sort(
+        (a, b) => (b.durationMinutes || 0) - (a.durationMinutes || 0)
+    );
+    const longestDuration = sortedBreaks[0]?.durationMinutes || 0;
+    const longestId = (sortedBreaks[0] && longestDuration > 60)
+        ? (sortedBreaks[0].id ?? `${sortedBreaks[0].breakStart}-${sortedBreaks[0].breakEnd}`)
+        : null;
+    const totalMinutes = breaks.reduce((sum, b) => sum + (b.durationMinutes || 0), 0);
+
+    // Decide which edge of the tooltip anchors to the cell so it never
+    // pokes past the modal's left/right edge. First ~2 cells anchor left,
+    // last ~2 cells anchor right, everything else stays centered.
+    let align = 'center';
+    if (index <= 1) align = 'left';
+    else if (index >= total - 2) align = 'right';
+
+    const tooltipPositionStyle = align === 'left'
+        ? { left: 0, transform: 'none' }
+        : align === 'right'
+            ? { right: 0, left: 'auto', transform: 'none' }
+            : { left: '50%', transform: 'translateX(-50%)' };
+
+    const arrowPositionStyle = align === 'left'
+        ? { left: '16px', transform: 'none' }
+        : align === 'right'
+            ? { right: '16px', left: 'auto', transform: 'none' }
+            : { left: '50%', transform: 'translateX(-50%)' };
+
     return (
-        <div style={{ textAlign: 'center' }}>
+        <div
+            style={{ textAlign: 'center', position: 'relative' }}
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+        >
             <div style={{ fontSize: '11px', color: '#94a3b8', marginBottom: '4px' }}>{day.dayName}</div>
             <div style={{
                 width: '32px', height: '32px', borderRadius: '6px',
                 background: s.bg, color: s.color,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: '11px', fontWeight: '700', margin: '0 auto',
-            }} title={`${day.date} · ${day.status}`}>
+                cursor: hasBreaks ? 'pointer' : 'default',
+                boxShadow: hasBreaks ? 'inset 0 0 0 1.5px rgba(0,0,0,0.15)' : 'none',
+            }}>
                 {shortLabel}
             </div>
+
+            {hovered && (
+                <div style={{
+                    position: 'absolute', bottom: 'calc(100% + 6px)',
+                    zIndex: 20, maxWidth: '230px', minWidth: '150px',
+                    background: '#1e293b', color: 'white', borderRadius: '8px',
+                    padding: '10px 12px', fontSize: '11px', textAlign: 'left',
+                    boxShadow: '0 6px 20px rgba(0,0,0,0.25)',
+                    whiteSpace: 'normal', wordBreak: 'break-word',
+                    ...tooltipPositionStyle,
+                }}>
+                    <div style={{ fontWeight: '700', marginBottom: (hasBreaks || day.checkIn) ? '6px' : 0 }}>
+                        {day.date} · {status?.replace(/_/g, ' ')}
+                    </div>
+                    {day.checkIn && (
+                        <div style={{ color: '#e2e8f0', marginBottom: hasBreaks ? '4px' : 0 }}>
+                            In: {formatTime(day.checkIn)} · Out: {formatTime(day.checkOut)}
+                            {day.workHours != null && ` · ${day.workHours}h`}
+                        </div>
+                    )}
+                    {hasBreaks ? (
+                        <>
+                            {sortedBreaks.map((b, idx) => {
+                                const bId = b.id ?? `${b.breakStart}-${b.breakEnd}`;
+                                const isLongest = bId === longestId && sortedBreaks.length > 1;
+                                return (
+                                    <div key={idx} style={{
+                                        display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap',
+                                        padding: '3px 0',
+                                        color: b.flagged ? '#fca5a5' : '#e2e8f0',
+                                        fontWeight: isLongest ? '700' : '400',
+                                    }}>
+                                        <span>
+                                            {formatTime(b.breakStart)} – {formatTime(b.breakEnd)}
+                                        </span>
+                                        <span style={{ color: isLongest ? '#fbbf24' : '#94a3b8', fontWeight: isLongest ? '700' : '400' }}>
+                                            ({formatDuration(b.durationMinutes)}{b.flagged ? ', flagged' : ''})
+                                        </span>
+                                        {isLongest && (
+                                            <span style={{
+                                                background: '#fbbf24', color: '#1e293b',
+                                                fontSize: '9px', fontWeight: '800',
+                                                padding: '1px 5px', borderRadius: '4px',
+                                                textTransform: 'uppercase', letterSpacing: '0.3px',
+                                            }}>
+                                                Longest
+                                            </span>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                            {sortedBreaks.length > 1 && (
+                                <div style={{
+                                    marginTop: '6px', paddingTop: '6px',
+                                    borderTop: '1px solid rgba(255,255,255,0.15)',
+                                    color: '#e2e8f0', fontWeight: '700',
+                                }}>
+                                    Total: {formatDuration(totalMinutes)}
+                                </div>
+                            )}
+                        </>
+                    ) : (
+                        day.totalBreakMinutes ? (
+                            <div style={{ color: '#e2e8f0' }}>Break: {formatDuration(day.totalBreakMinutes)}</div>
+                        ) : !day.checkIn ? (
+                            <div style={{ color: '#94a3b8' }}>No breaks</div>
+                        ) : null
+                    )}
+                    {/* little arrow pointing down at the day cell */}
+                    <div style={{
+                        position: 'absolute', top: '100%',
+                        width: 0, height: 0,
+                        borderLeft: '6px solid transparent', borderRight: '6px solid transparent',
+                        borderTop: '6px solid #1e293b',
+                        ...arrowPositionStyle,
+                    }} />
+                </div>
+            )}
         </div>
     );
 }
@@ -58,6 +219,7 @@ export default function EmployeeAttendanceModal({ employeeId, asOfDate, onClose 
 
     useEffect(() => {
         let active = true;
+        setLoading(true);
         getEmployeeDetailedReport(employeeId, asOfDate)
             .then((res) => {
                 if (active) setReport(res.data?.data || null);
@@ -102,7 +264,8 @@ export default function EmployeeAttendanceModal({ employeeId, asOfDate, onClose 
                 onClick={(e) => e.stopPropagation()}
                 style={{
                     background: 'white', borderRadius: '14px', width: '460px',
-                    maxWidth: '100%', maxHeight: '85vh', overflowY: 'auto',
+                    maxWidth: '100%', maxHeight: '85vh',
+                    overflowY: 'auto', overflowX: 'visible',
                     padding: '20px 24px', boxShadow: '0 10px 40px rgba(0,0,0,0.2)',
                 }}
             >
@@ -142,14 +305,14 @@ export default function EmployeeAttendanceModal({ employeeId, asOfDate, onClose 
                                 type="date"
                                 value={fromDate}
                                 onChange={(e) => setFromDate(e.target.value)}
-                                style={{ padding: '6px 10px', border: '1px solid #e2e8f0', borderRadius: '6px', fontSize: '12px' }}
+                                style={dateFieldStyle}
                             />
                             <span style={{ fontSize: '12px', color: '#94a3b8' }}>to</span>
                             <input
                                 type="date"
                                 value={toDate}
                                 onChange={(e) => setToDate(e.target.value)}
-                                style={{ padding: '6px 10px', border: '1px solid #e2e8f0', borderRadius: '6px', fontSize: '12px' }}
+                                style={dateFieldStyle}
                             />
                             <button
                                 onClick={handleExport}
@@ -168,7 +331,7 @@ export default function EmployeeAttendanceModal({ employeeId, asOfDate, onClose 
                             <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '700', textTransform: 'uppercase', marginBottom: '6px' }}>
                                 Yesterday ({report.yesterdayDate})
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', color: '#334155' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', color: '#334155', flexWrap: 'wrap' }}>
                                 <StatusBadge status={report.yesterdayStatus} />
                                 <span>Hours: {report.yesterdayWorkHours ?? 0}</span>
                                 {report.yesterdayCheckIn && (
@@ -187,7 +350,9 @@ export default function EmployeeAttendanceModal({ employeeId, asOfDate, onClose 
                                 This week
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', gap: '4px' }}>
-                                {report.weeklyRecords?.map((d) => <DayCell key={d.date} day={d} />)}
+                                {report.weeklyRecords?.map((d, i) => (
+                                    <DayCell key={d.date} day={d} index={i} total={report.weeklyRecords.length} />
+                                ))}
                             </div>
                             <div style={{ fontSize: '12px', color: '#64748b', marginTop: '10px' }}>
                                 P: {report.weeklyStats?.presentCount ?? 0} &nbsp;
@@ -195,6 +360,9 @@ export default function EmployeeAttendanceModal({ employeeId, asOfDate, onClose 
                                 A: {report.weeklyStats?.absentCount ?? 0} &nbsp;
                                 L: {report.weeklyStats?.leaveCount ?? 0} &nbsp;
                                 Avg hrs: {report.weeklyStats?.avgWorkHours ?? 0}
+                            </div>
+                            <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '4px' }}>
+                                Hover a day to see its break time · red-flagged breaks ran over 60 min
                             </div>
                         </div>
 

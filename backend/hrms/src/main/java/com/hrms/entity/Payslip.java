@@ -49,13 +49,7 @@ public class Payslip {
     private BigDecimal grossSalary;
 
     @Column(precision = 12, scale = 2)
-    private BigDecimal pf;
-
-    @Column(precision = 12, scale = 2)
     private BigDecimal esi;
-
-    @Column(precision = 12, scale = 2)
-    private BigDecimal pt;
 
     @Column(precision = 12, scale = 2)
     private BigDecimal tds;

@@ -1,6 +1,7 @@
 package com.hrms.dto;
 
 import com.hrms.enums.AttendanceStatus;
+import com.hrms.enums.BreakType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -23,6 +24,28 @@ public class AttendanceDTOs {
     }
 
     @Data
+    public static class BreakStartRequest {
+        private LocalTime breakStart;
+        private BreakType breakType;
+    }
+
+    @Data
+    public static class BreakEndRequest {
+        private LocalTime breakEnd;
+    }
+
+    @Data
+    public static class BreakResponse {
+        private Long id;
+        private String breakType;
+        private LocalTime breakStart;
+        private LocalTime breakEnd;
+        private Integer durationMinutes;
+        private boolean paid;
+        private boolean flagged;
+    }
+
+    @Data
     public static class Response {
         private Long id;
         private Long employeeDbId;
@@ -33,6 +56,9 @@ public class AttendanceDTOs {
         private Double workHours;
         private String status;
         private String remarks;
+        private Integer totalBreakMinutes;
+        private boolean onBreak;
+        private List<BreakResponse> breaks;
     }
 
     @Data
@@ -44,6 +70,8 @@ public class AttendanceDTOs {
         private LocalTime checkOut;
         private Double workHours;
         private String remarks;
+        private Integer totalBreakMinutes;
+        private List<BreakResponse> breaks;
     }
 
     @Data
@@ -101,5 +129,8 @@ public class AttendanceDTOs {
         private LocalTime checkIn;
         private LocalTime checkOut;
         private Double workHours;
+        private Integer totalBreakMinutes;
+        private boolean onBreak;
+        private List<BreakResponse> breaks;
     }
 }

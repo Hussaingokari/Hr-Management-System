@@ -180,10 +180,10 @@ function PayslipDetailView({ selected, loadingDetail, formatCurrency }) {
   ];
 
   const deductionsList = [
-    { label: 'PF (12%)', value: selected.pf },
-    { label: 'ESI (0.75%)', value: selected.esi },
-    { label: 'Professional Tax', value: selected.pt },
+    { label: 'ESI ', value: selected.esi },
     { label: 'TDS', value: selected.tds },
+    { label: 'PF', value: 0 },
+    { label: 'Professional Tax', value: 0 },
   ];
 
   return (

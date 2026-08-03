@@ -111,21 +111,29 @@ public class PayslipPdfService {
                         : "-";
                 String employeeCode = p.getEmployee() != null ? p.getEmployee().getEmployeeId() : "-";
                 String designation = p.getEmployee() != null ? p.getEmployee().getDesignation() : "-";
-                String doj = p.getPayDate() != null ? p.getPayDate().toString() : "-";
+                String department = p.getEmployee() != null ? nullSafe(p.getEmployee().getDepartment()) : "-";
+                String phone = p.getEmployee() != null ? nullSafe(p.getEmployee().getPhone()) : "-";
+                String email = p.getEmployee() != null ? nullSafe(p.getEmployee().getEmail()) : "-";
+                String doj = (p.getEmployee() != null && p.getEmployee().getDateOfJoining() != null)
+                        ? p.getEmployee().getDateOfJoining().toString()
+                        : "-";
+                String dob = (p.getEmployee() != null && p.getEmployee().getDateOfBirth() != null)
+                        ? p.getEmployee().getDateOfBirth().toString()
+                        : "-";
 
                 String[][] leftRows = {
                         { "NAME", nullSafe(employeeName) },
-                        { "EMPPAN", "-" },
-                        { "A/CNO", "-" },
-                        { "BANK", "-" },
-                        { "DESIG", nullSafe(designation) },
+                        { "DEPARTMENT", department },
+                        { "DESIGNATION", nullSafe(designation) },
+                        { "EMAIL", email },
+                        { "PHONE", phone },
                 };
                 String[][] rightRows = {
                         { "EMPNO", nullSafe(employeeCode) },
-                        { "EMPDOB", "-" },
-                        { "EMP DOJ", doj },
-                        { "GENDER", "-" },
-                        { "GRADE", "-" },
+                        { "DOB", dob },
+                        { "DOJ", doj },
+                        { "", "" },
+                        { "", "" },
                 };
 
                 float rowY = infoBoxTop - 13;
@@ -171,8 +179,8 @@ public class PayslipPdfService {
                 float midX = tableLeft + (tableRight - tableLeft) * 0.55f;
 
                 float earnLabelX = tableLeft + 6;
-                float earnCurX = tableLeft + 190;
-                float earnArrX = tableLeft + 240;
+                float earnCurX = tableLeft + 200;
+                float earnArrX = tableLeft + 280;
                 float earnTotX = midX - 55;
                 float dedLabelX = midX + 6;
                 float dedTotX = tableRight - 55;
@@ -180,7 +188,7 @@ public class PayslipPdfService {
                 float headerH = 20f;
                 float headerTextY = tableTop - 14;
                 drawText(cs, FONT_BOLD, 9, BLACK, earnLabelX, headerTextY, "EARNINGS");
-                drawText(cs, FONT_BOLD, 9, BLACK, earnCurX, headerTextY, "CURRENT MONTH");
+                drawText(cs, FONT_BOLD, 7.5f, BLACK, earnCurX, headerTextY, "CURRENT MONTH");
                 drawText(cs, FONT_BOLD, 8, BLACK, earnArrX, headerTextY, "ARREAR");
                 drawText(cs, FONT_BOLD, 9, BLACK, earnTotX, headerTextY, "TOTAL");
                 drawText(cs, FONT_BOLD, 9, BLACK, dedLabelX, headerTextY, "DEDUCTIONS");
@@ -195,10 +203,9 @@ public class PayslipPdfService {
                         { "SPECIAL ALLOWANCE", fmt(p.getSpecialAllowance()) },
                 };
                 String[][] deductions = {
-                        { "PF", fmt(p.getPf()) },
                         { "ESI", fmt(p.getEsi()) },
-                        { "PROFESSION TAX", fmt(p.getPt()) },
                         { "TDS", fmt(p.getTds()) },
+                        { "PF", "0" },
                 };
 
                 int maxRows = Math.max(earnings.length, deductions.length);

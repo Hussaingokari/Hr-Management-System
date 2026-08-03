@@ -50,6 +50,23 @@ public class AttendanceController {
         return ResponseEntity.ok(ApiResponse.success("Checked out", attendanceService.checkOut(emp.getId(), req)));
     }
 
+    @PostMapping("/break-start")
+    @Operation(summary = "Start a break")
+    public ResponseEntity<ApiResponse<AttendanceDTOs.Response>> breakStart(
+            @AuthenticationPrincipal Employee emp,
+            @RequestBody(required = false) AttendanceDTOs.BreakStartRequest req) {
+        return ResponseEntity
+                .ok(ApiResponse.success("Break started", attendanceService.breakStart(emp.getId(), req)));
+    }
+
+    @PostMapping("/break-end")
+    @Operation(summary = "End the current break")
+    public ResponseEntity<ApiResponse<AttendanceDTOs.Response>> breakEnd(
+            @AuthenticationPrincipal Employee emp,
+            @RequestBody(required = false) AttendanceDTOs.BreakEndRequest req) {
+        return ResponseEntity.ok(ApiResponse.success("Break ended", attendanceService.breakEnd(emp.getId(), req)));
+    }
+
     @GetMapping("/my")
     @Operation(summary = "Get my attendance records")
     public ResponseEntity<ApiResponse<Page<AttendanceDTOs.Response>>> my(
