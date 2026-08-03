@@ -6,16 +6,20 @@ import Navbar from '@/components/layout/Navbar';
 import Sidebar from '@/components/layout/Sidebar';
 
 export default function AdminLayout({ children }) {
-  const { isAuthenticated, user } = useSelector((state) => state.auth);
+  const { isAuthenticated, isInitialized, user } = useSelector((state) => state.auth);
   const router = useRouter();
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/');
-    } else if (user?.role === 'EMPLOYEE') {
-      router.push('/employee/dashboard');
+    if (isInitialized) {
+      if (!isAuthenticated) {
+        router.push('/');
+      } else if (user?.role === 'EMPLOYEE') {
+        router.push('/employee/dashboard');
+      }
     }
-  }, [isAuthenticated, user, router]);
+  }, [isInitialized, isAuthenticated, user, router]);
+
+  if (!isInitialized) return null;
 
   return (
     <div className="app-container">
