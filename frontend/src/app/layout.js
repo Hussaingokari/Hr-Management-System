@@ -8,7 +8,7 @@ import { Toaster } from 'react-hot-toast';
 import { loadUser } from '@/store/authSlice';
 import { useEffect } from 'react';
 
-const geist = Geist({ subsets: ['latin'] });
+const geist = Geist({ subsets: ['latin'], preload: false });
 
 export default function RootLayout({ children }) {
   useEffect(() => {
