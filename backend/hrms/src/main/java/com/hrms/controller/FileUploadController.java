@@ -11,6 +11,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.apache.tika.Tika;
+
+import java.io.InputStream;
+import java.util.List;
+import java.util.Arrays;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -28,6 +33,14 @@ public class FileUploadController { // here file will be uploaded for the leave 
 
     // Local disk storage — swap this with Azure Blob Storage SDK calls when ready
     private static final String UPLOAD_DIR = "uploads/";
+    private final Tika tika = new Tika();
+    private static final List<String> ALLOWED_MIME_TYPES = Arrays.asList(
+            "application/pdf",
+            "image/jpeg",
+            "image/png",
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    );
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Upload a file attachment (e.g. medical certificate for leave)")
@@ -35,6 +48,16 @@ public class FileUploadController { // here file will be uploaded for the leave 
             @RequestParam("file") MultipartFile file) {
 
         try {
+            // Validate MIME type strictly using Apache Tika
+            try (InputStream is = file.getInputStream()) {
+                String detectedType = tika.detect(is);
+                if (!ALLOWED_MIME_TYPES.contains(detectedType)) {
+                    log.warn("Blocked upload of invalid file type: {}", detectedType);
+                    return ResponseEntity.badRequest()
+                            .body(ApiResponse.error("Invalid file type. Allowed: PDF, JPG, PNG, DOC/DOCX."));
+                }
+            }
+
             Path uploadPath = Paths.get(UPLOAD_DIR);
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
