@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { store } from '@/store/store';
+import { logout } from '@/store/authSlice';
 
 const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL !== undefined 
   ? process.env.NEXT_PUBLIC_API_BASE_URL 
@@ -26,9 +28,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401 && !error.config?.url?.includes('/auth/login')) {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('user');
-      window.location.href = '/';
+      store.dispatch(logout());
     }
     return Promise.reject(error);
   }
