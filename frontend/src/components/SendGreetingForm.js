@@ -41,13 +41,19 @@ export default function SendGreetingForm() {
                     }
                 });
                 const data = response.data;
-                setTemplates(data);
-                if (data.length > 0) {
-                    // FIX: pick the "Admission Greeting" template specifically instead of
-                    // blindly using whichever template happens to come back first.
-                    const greetingTemplate =
-                        data.find(t => t.templateName === 'Admission Greeting') || data[0];
-                    setTemplateId(greetingTemplate.id);
+                
+                if (Array.isArray(data)) {
+                    setTemplates(data);
+                    if (data.length > 0) {
+                        const greetingTemplate =
+                            data.find(t => t.templateName === 'Admission Greeting') || data[0];
+                        if (greetingTemplate) {
+                            setTemplateId(greetingTemplate.id);
+                        }
+                    }
+                } else {
+                    console.error('Invalid response format for templates:', data);
+                    setTemplates([]);
                 }
             } catch (err) {
                 console.error('Failed to fetch templates:', err);
