@@ -10,6 +10,8 @@ services:
     restart: always
     env_file:
       - .env
+    environment:
+      JWT_SECRET: ${JWT_SECRET}
     # Only expose port 8080 to the internal Docker network (Nginx communicates with it securely)
     expose:
       - "8080"
