@@ -53,15 +53,18 @@ public class PayslipController {
         @GetMapping("/{payslipNumber}")
         @Operation(summary = "Get payslip by payslip number (e.g. PS-2024-12-EMP0003)")
         public ResponseEntity<ApiResponse<PayslipDTOs.Response>> getByNumber(
-                        @PathVariable String payslipNumber) {
+                        @PathVariable String payslipNumber,
+                        @AuthenticationPrincipal Employee emp) {
                 return ResponseEntity.ok(ApiResponse.success("Payslip found",
-                                payslipService.getByPayslipNumber(payslipNumber)));
+                                payslipService.getByPayslipNumber(payslipNumber, emp)));
         }
 
         @GetMapping("/{payslipNumber}/download")
         @Operation(summary = "Download payslip as PDF")
-        public ResponseEntity<byte[]> downloadPdf(@PathVariable String payslipNumber) {
-                Payslip payslip = payslipService.getEntityByPayslipNumber(payslipNumber);
+        public ResponseEntity<byte[]> downloadPdf(
+                        @PathVariable String payslipNumber,
+                        @AuthenticationPrincipal Employee emp) {
+                Payslip payslip = payslipService.getEntityByPayslipNumber(payslipNumber, emp);
                 byte[] pdfBytes = payslipPdfService.generatePayslipPdf(payslip);
 
                 String filename = payslipNumber + ".pdf";

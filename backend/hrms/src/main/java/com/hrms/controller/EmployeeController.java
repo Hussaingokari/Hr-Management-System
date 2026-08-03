@@ -13,6 +13,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.hrms.entity.Employee;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -55,16 +57,20 @@ public class EmployeeController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get employee by ID")
-    public ResponseEntity<ApiResponse<EmployeeDTOs.Response>> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(ApiResponse.success("Employee found", employeeService.getById(id)));
+    public ResponseEntity<ApiResponse<EmployeeDTOs.Response>> getById(
+            @PathVariable Long id,
+            @AuthenticationPrincipal Employee principal) {
+        return ResponseEntity.ok(ApiResponse.success("Employee found", employeeService.getById(id, principal)));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','HR','EMPLOYEE')")
     @Operation(summary = "Update employee")
     public ResponseEntity<ApiResponse<EmployeeDTOs.Response>> update(
-            @PathVariable Long id, @RequestBody EmployeeDTOs.UpdateRequest req) {
-        return ResponseEntity.ok(ApiResponse.success("Employee updated", employeeService.updateEmployee(id, req)));
+            @PathVariable Long id, 
+            @RequestBody EmployeeDTOs.UpdateRequest req,
+            @AuthenticationPrincipal Employee principal) {
+        return ResponseEntity.ok(ApiResponse.success("Employee updated", employeeService.updateEmployee(id, req, principal)));
     }
 
     @DeleteMapping("/{id}")

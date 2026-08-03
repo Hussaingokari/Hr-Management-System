@@ -160,8 +160,14 @@ public class PerformanceService {
     }
 
     @Transactional(readOnly = true)
-    public PerformanceDTOs.Response getById(Long id) {
-        return toResponse(findById(id));
+    public PerformanceDTOs.Response getById(Long id, Employee emp) {
+        PerformanceReview review = findById(id);
+        if (emp.getRole() == com.hrms.enums.Role.EMPLOYEE && 
+            !review.getEmployee().getId().equals(emp.getId()) &&
+            !review.getReviewer().getId().equals(emp.getId())) {
+            throw new org.springframework.security.access.AccessDeniedException("You are not authorized to view this review.");
+        }
+        return toResponse(review);
     }
 
     private PerformanceReview findById(Long id) {

@@ -80,7 +80,9 @@ public class PerformanceController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get review by ID")
-    public ResponseEntity<ApiResponse<PerformanceDTOs.Response>> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(ApiResponse.success("Review found", performanceService.getById(id)));
+    public ResponseEntity<ApiResponse<PerformanceDTOs.Response>> getById(
+            @PathVariable Long id,
+            @AuthenticationPrincipal Employee emp) {
+        return ResponseEntity.ok(ApiResponse.success("Review found", performanceService.getById(id, emp)));
     }
 }

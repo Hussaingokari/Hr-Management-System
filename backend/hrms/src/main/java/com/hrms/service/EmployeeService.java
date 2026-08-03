@@ -122,13 +122,19 @@ public class EmployeeService {
     }
 
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
-    public EmployeeDTOs.Response getById(Long id) {
+    public EmployeeDTOs.Response getById(Long id, Employee principal) {
+        if (principal.getRole() == Role.EMPLOYEE && !id.equals(principal.getId())) {
+            throw new org.springframework.security.access.AccessDeniedException("You are not authorized to view this employee's profile.");
+        }
         return toResponse(findById(id));
     }
 
     @Transactional
     @CacheEvict(value = "dashboardData", allEntries = true)
-    public EmployeeDTOs.Response updateEmployee(Long id, EmployeeDTOs.UpdateRequest req) {
+    public EmployeeDTOs.Response updateEmployee(Long id, EmployeeDTOs.UpdateRequest req, Employee principal) {
+        if (principal.getRole() == Role.EMPLOYEE && !id.equals(principal.getId())) {
+            throw new org.springframework.security.access.AccessDeniedException("You are not authorized to update this employee's profile.");
+        }
         Employee emp = findById(id);
         if (req.getFirstName() != null)
             emp.setFirstName(req.getFirstName());
@@ -140,14 +146,14 @@ public class EmployeeService {
             emp.setDepartment(req.getDepartment());
         if (req.getDesignation() != null)
             emp.setDesignation(req.getDesignation());
-        if (req.getBasicSalary() != null)
-            emp.setBasicSalary(req.getBasicSalary());
         if (req.getDateOfBirth() != null)
             emp.setDateOfBirth(req.getDateOfBirth());
-        if (req.getRole() != null)
-            emp.setRole(req.getRole());
-        if (req.getActive() != null)
+        if (req.getActive() != null && (principal.getRole() == Role.ADMIN || principal.getRole() == Role.HR))
             emp.setActive(req.getActive());
+        if (req.getBasicSalary() != null && (principal.getRole() == Role.ADMIN || principal.getRole() == Role.HR))
+            emp.setBasicSalary(req.getBasicSalary());
+        if (req.getRole() != null && (principal.getRole() == Role.ADMIN || principal.getRole() == Role.HR))
+            emp.setRole(req.getRole());
         if (req.getPassword() != null && !req.getPassword().isBlank()) {
             emp.setPassword(passwordEncoder.encode(req.getPassword()));
         }
