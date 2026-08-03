@@ -9,8 +9,8 @@ export default function InterviewPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const token = localStorage.getItem('accessToken');
-        const userStr = localStorage.getItem('user');
+        const token = sessionStorage.getItem('accessToken');
+        const userStr = sessionStorage.getItem('user');
         const user = userStr ? JSON.parse(userStr) : null;
         const userRole = user?.role;
         if (!token) {

@@ -16,7 +16,7 @@ export default function SendGreetingForm() {
     const [currentUser, setCurrentUser] = useState(null);
 
     useEffect(() => {
-        const userStr = localStorage.getItem('user');
+        const userStr = sessionStorage.getItem('user');
         if (userStr) {
             try {
                 const user = JSON.parse(userStr);

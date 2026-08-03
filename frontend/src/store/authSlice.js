@@ -14,20 +14,20 @@ const authSlice = createSlice({
       state.token = action.payload.token;
       state.isAuthenticated = true;
       state.isInitialized = true;
-      localStorage.setItem('accessToken', action.payload.token);
-      localStorage.setItem('user', JSON.stringify(action.payload.user));
+      sessionStorage.setItem('accessToken', action.payload.token);
+      sessionStorage.setItem('user', JSON.stringify(action.payload.user));
     },
     logout: (state) => {
       state.user = null;
       state.token = null;
       state.isAuthenticated = false;
       state.isInitialized = true;
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('user');
+      sessionStorage.removeItem('accessToken');
+      sessionStorage.removeItem('user');
     },
     loadUser: (state) => {
-      const token = localStorage.getItem('accessToken');
-      const user = localStorage.getItem('user');
+      const token = sessionStorage.getItem('accessToken');
+      const user = sessionStorage.getItem('user');
       if (token && user) {
         state.token = token;
         state.user = JSON.parse(user);
