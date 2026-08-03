@@ -28,7 +28,6 @@ public class NotificationService {
     private final EmployeeRepository employeeRepository;
 
     @Transactional
-    @CacheEvict(value = "dashboardData", allEntries = true)
     public Notification createAndSend(
             Employee recipient,
             String title,
@@ -124,14 +123,12 @@ public class NotificationService {
                 .map(this::toResponse);
     }
 
-    @Cacheable("dashboardData")
     public long getUnreadCount(Employee employee) {
         return notificationRepo
                 .countByRecipientAndIsReadFalse(employee);
     }
 
     @Transactional
-    @CacheEvict(value = "dashboardData", allEntries = true)
     public void markAsRead(Long notificationId) {
         notificationRepo.findById(notificationId)
                 .ifPresent(n -> {
@@ -141,7 +138,6 @@ public class NotificationService {
     }
 
     @Transactional
-    @CacheEvict(value = "dashboardData", allEntries = true)
     public void markAllAsRead(Employee employee) {
         notificationRepo
                 .findByRecipientAndIsReadFalse(employee,

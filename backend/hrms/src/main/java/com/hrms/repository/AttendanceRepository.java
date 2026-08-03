@@ -24,16 +24,17 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 
     List<Attendance> findByEmployeeAndDateBetween(Employee employee, LocalDate from, LocalDate to);
 
-    @EntityGraph(attributePaths = { "employee" })
+    @EntityGraph(attributePaths = { "employee", "breaks" })
     Page<Attendance> findByEmployee(Employee employee, Pageable pageable);
 
-    @EntityGraph(attributePaths = { "employee" })
+    @EntityGraph(attributePaths = { "employee", "breaks" })
     Page<Attendance> findByDate(LocalDate date, Pageable pageable);
 
     long countByEmployeeAndDateBetweenAndStatus(Employee employee, LocalDate from, LocalDate to,
             AttendanceStatus status);
 
     // New queries for detailed reports
+    @EntityGraph(attributePaths = { "employee", "breaks" })
     @Query("SELECT a FROM Attendance a WHERE a.employee = :employee AND a.date BETWEEN :from AND :to ORDER BY a.date ASC")
     List<Attendance> findByEmployeeAndDateRangeOrderByDate(@Param("employee") Employee employee,
             @Param("from") LocalDate from,
@@ -57,7 +58,7 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
     @Query("SELECT a FROM Attendance a WHERE a.date = :date ORDER BY a.employee.id ASC")
     Page<Attendance> findByDateWithPagination(@Param("date") LocalDate date, Pageable pageable);
 
-    @EntityGraph(attributePaths = { "employee" })
+    @EntityGraph(attributePaths = { "employee", "breaks" })
     @Query("SELECT a FROM Attendance a WHERE a.date BETWEEN :from AND :to ORDER BY a.date DESC, a.employee.id ASC")
     List<Attendance> findByDateRangeBetween(@Param("from") LocalDate from, @Param("to") LocalDate to);
 

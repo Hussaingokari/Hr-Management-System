@@ -44,7 +44,6 @@ public class AttendanceService {
     private static final int FLAG_BREAK_MINUTES = 60;
 
     @Transactional
-    @org.springframework.cache.annotation.CacheEvict(value = "dashboardData", allEntries = true)
     public AttendanceDTOs.Response checkIn(Long employeeId, AttendanceDTOs.CheckInRequest req) {
         Employee emp = employeeService.findById(employeeId);
         ZoneId istZone = ZoneId.of("Asia/Kolkata");
@@ -68,7 +67,6 @@ public class AttendanceService {
     }
 
     @Transactional
-    @org.springframework.cache.annotation.CacheEvict(value = "dashboardData", allEntries = true)
     public AttendanceDTOs.Response checkOut(Long employeeId, AttendanceDTOs.CheckOutRequest req) {
         Employee emp = employeeService.findById(employeeId);
         ZoneId istZone = ZoneId.of("Asia/Kolkata");
@@ -110,7 +108,6 @@ public class AttendanceService {
     }
 
     @Transactional
-    @org.springframework.cache.annotation.CacheEvict(value = "dashboardData", allEntries = true)
     public AttendanceDTOs.Response breakStart(Long employeeId, AttendanceDTOs.BreakStartRequest req) {
         Employee emp = employeeService.findById(employeeId);
         ZoneId istZone = ZoneId.of("Asia/Kolkata");
@@ -140,7 +137,6 @@ public class AttendanceService {
     }
 
     @Transactional
-    @org.springframework.cache.annotation.CacheEvict(value = "dashboardData", allEntries = true)
     public AttendanceDTOs.Response breakEnd(Long employeeId, AttendanceDTOs.BreakEndRequest req) {
         Employee emp = employeeService.findById(employeeId);
         ZoneId istZone = ZoneId.of("Asia/Kolkata");
@@ -249,9 +245,9 @@ public class AttendanceService {
             summary.setCheckOut(att.getCheckOut());
             summary.setWorkHours(att.getWorkHours());
             summary.setTotalBreakMinutes(att.getTotalBreakMinutes());
-            summary.setBreaks(attendanceBreakRepo.findByAttendanceOrderByBreakStartAsc(att).stream()
+            summary.setBreaks(att.getBreaks().stream()
                     .map(this::toBreakResponse).collect(Collectors.toList()));
-            summary.setOnBreak(attendanceBreakRepo.findFirstByAttendanceAndBreakEndIsNull(att).isPresent());
+            summary.setOnBreak(att.getBreaks().stream().anyMatch(b -> b.getBreakEnd() == null));
         } else {
             summary.setStatus("ABSENT");
             summary.setWorkHours(0.0);
@@ -278,9 +274,9 @@ public class AttendanceService {
                     summary.setTotalBreakMinutes(att.getTotalBreakMinutes());
                     summary.setOnBreak(attendanceBreakRepo.findFirstByAttendanceAndBreakEndIsNull(att).isPresent());
                     summary.setTotalBreakMinutes(att.getTotalBreakMinutes());
-                    summary.setBreaks(attendanceBreakRepo.findByAttendanceOrderByBreakStartAsc(att).stream()
+                    summary.setBreaks(att.getBreaks().stream()
                             .map(this::toBreakResponse).collect(Collectors.toList()));
-                    summary.setOnBreak(attendanceBreakRepo.findFirstByAttendanceAndBreakEndIsNull(att).isPresent());
+                    summary.setOnBreak(att.getBreaks().stream().anyMatch(b -> b.getBreakEnd() == null));
                     return summary;
                 });
     }
@@ -401,7 +397,7 @@ public class AttendanceService {
                     }
 
                     AttendanceStatus st = att.getStatus();
-                    List<AttendanceBreak> dayBreaks = attendanceBreakRepo.findByAttendanceOrderByBreakStartAsc(att);
+                    List<AttendanceBreak> dayBreaks = att.getBreaks();
                     String breakSuffix = "";
                     if (!dayBreaks.isEmpty()) {
                         String ranges = dayBreaks.stream()
@@ -492,7 +488,7 @@ public class AttendanceService {
                 day.setWorkHours(att.getWorkHours());
                 day.setRemarks(att.getRemarks());
                 day.setTotalBreakMinutes(att.getTotalBreakMinutes());
-                day.setBreaks(attendanceBreakRepo.findByAttendanceOrderByBreakStartAsc(att).stream()
+                day.setBreaks(att.getBreaks().stream()
                         .map(this::toBreakResponse).collect(Collectors.toList()));
             } else {
                 day.setStatus("ABSENT");
@@ -567,8 +563,8 @@ public class AttendanceService {
         r.setStatus(a.getStatus().name());
         r.setRemarks(a.getRemarks());
         r.setTotalBreakMinutes(a.getTotalBreakMinutes());
-        r.setOnBreak(attendanceBreakRepo.findFirstByAttendanceAndBreakEndIsNull(a).isPresent());
-        r.setBreaks(attendanceBreakRepo.findByAttendanceOrderByBreakStartAsc(a).stream()
+        r.setOnBreak(a.getBreaks().stream().anyMatch(b -> b.getBreakEnd() == null));
+        r.setBreaks(a.getBreaks().stream()
                 .map(this::toBreakResponse).collect(Collectors.toList()));
         return r;
     }
