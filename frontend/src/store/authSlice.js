@@ -26,6 +26,12 @@ const authSlice = createSlice({
       sessionStorage.removeItem('user');
     },
     loadUser: (state) => {
+      // Clean up old localStorage items from previous versions
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('user');
+      }
+
       const token = sessionStorage.getItem('accessToken');
       const user = sessionStorage.getItem('user');
       if (token && user) {
