@@ -42,6 +42,7 @@ public class EmployeeController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sort) {
+        if (size > 100) size = 100; // FIX: Prevent massive queries (DoS)
         if (department != null && !department.trim().isEmpty() && !department.equalsIgnoreCase("All Departments")) {
             return ResponseEntity.ok(ApiResponse.success("Employees fetched",
                     employeeService.getByDepartment(department, PageRequest.of(page, size, Sort.by(sort)))));

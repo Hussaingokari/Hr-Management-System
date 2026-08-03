@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useGreeting } from '@/lib/useGreeting';
 import { Mail, Loader } from 'lucide-react';
+import DOMPurify from 'dompurify';
 
 export default function SendGreetingForm() {
     const { loading, error, success, sendGreeting } = useGreeting();
@@ -235,10 +236,7 @@ export default function SendGreetingForm() {
                     }}>
                         Greeting Preview
                     </label>
-                    {/* FIX: use dangerouslySetInnerHTML so <strong> tags in the template
-                        body render as real bold text instead of literal markup. This is
-                        safe here because the content comes from our own trusted DB
-                        templates, not from arbitrary user input. */}
+                    {/* FIX: sanitize the template body before rendering to prevent XSS. */}
                     <div
                         style={{
                             width: '100%',
@@ -255,7 +253,7 @@ export default function SendGreetingForm() {
                             boxSizing: 'border-box',
                         }}
                         dangerouslySetInnerHTML={{
-                            __html: greetingPreview || 'Enter candidate name to see preview...',
+                            __html: greetingPreview ? DOMPurify.sanitize(greetingPreview) : 'Enter candidate name to see preview...',
                         }}
                     />
                 </div>
