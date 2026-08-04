@@ -155,6 +155,9 @@ public class EmployeeService {
         if (req.getRole() != null && (principal.getRole() == Role.ADMIN || principal.getRole() == Role.HR))
             emp.setRole(req.getRole());
         if (req.getPassword() != null && !req.getPassword().isBlank()) {
+            if (passwordEncoder.matches(req.getPassword(), emp.getPassword())) {
+                throw new IllegalArgumentException("New password cannot be the same as the current password");
+            }
             emp.setPassword(passwordEncoder.encode(req.getPassword()));
         }
         Employee saved = employeeRepository.save(emp);
