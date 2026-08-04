@@ -96,6 +96,8 @@ public class AttendanceService {
         att.setWorkHours(Math.round(netHours * 100.0) / 100.0);
 
         if (netHours < 4)
+            att.setStatus(AttendanceStatus.ABSENT);
+        else if (netHours < 8)
             att.setStatus(AttendanceStatus.HALF_DAY);
         else
             att.setStatus(AttendanceStatus.PRESENT);
