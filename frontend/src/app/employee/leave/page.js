@@ -433,6 +433,7 @@ export default function LeavePage() {
                   onChange={e => setForm(prev => ({ ...prev, reason: e.target.value }))}
                   placeholder="Enter reason for leave..."
                   rows={3}
+                  maxLength={255}
                   style={{
                     width: '100%', padding: '10px 12px',
                     border: '1.5px solid #e2e8f0', borderRadius: '10px',
@@ -564,7 +565,7 @@ export default function LeavePage() {
                         {cancelling === l.id ? '⏳' : 'Cancel'}
                       </button>
                     )}
-                  {l.status === 'APPROVED' && (
+                  {l.status === 'APPROVED' && l.endDate >= today && (
                     <button
                       onClick={() => handleCancel(l.id)}
                       disabled={cancelling === l.id}
