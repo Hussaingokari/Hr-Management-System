@@ -52,16 +52,19 @@ export default function PerformancePage() {
   const [form, setForm]           = useState(EMPTY_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [selected, setSelected]   = useState(null);
+  const [page, setPage]           = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
       const [revRes, empRes] = await Promise.allSettled([
-        api.get('/api/performance'),
+        api.get(`/api/performance?page=${page}`),
         getAllEmployees(0, 100),
       ]);
       if (revRes.status === 'fulfilled') {
         setReviews(revRes.value.data?.data?.content || []);
+        setTotalPages(revRes.value.data?.data?.totalPages || 1);
       }
       if (empRes.status === 'fulfilled') {
         setEmployees(empRes.value.data?.data?.content || []);
@@ -71,7 +74,7 @@ export default function PerformancePage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [page]);
 
   useEffect(() => {
     const timer = setTimeout(() => { fetchAll(); }, 0);
@@ -209,6 +212,28 @@ export default function PerformancePage() {
           ))
         )}
         </div>
+        {/* Pagination controls */}
+        {!loading && reviews.length > 0 && (
+          <div style={{ padding: '16px 20px', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'white', borderBottomLeftRadius: '12px', borderBottomRightRadius: '12px' }}>
+            <div style={{ fontSize: '13px', color: '#64748b', fontWeight: '500' }}>
+              Page {page + 1} of {totalPages || 1}
+            </div>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button 
+                onClick={() => setPage(p => Math.max(0, p - 1))}
+                disabled={page === 0}
+                style={{ padding: '6px 12px', border: '1px solid #e2e8f0', borderRadius: '6px', background: page === 0 ? '#f8fafc' : 'white', color: page === 0 ? '#94a3b8' : '#374151', cursor: page === 0 ? 'not-allowed' : 'pointer', fontSize: '13px', fontWeight: '600', transition: 'all 0.2s' }}>
+                Previous
+              </button>
+              <button 
+                onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+                disabled={page >= totalPages - 1}
+                style={{ padding: '6px 12px', border: '1px solid #e2e8f0', borderRadius: '6px', background: page >= totalPages - 1 ? '#f8fafc' : 'white', color: page >= totalPages - 1 ? '#94a3b8' : '#374151', cursor: page >= totalPages - 1 ? 'not-allowed' : 'pointer', fontSize: '13px', fontWeight: '600', transition: 'all 0.2s' }}>
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Create Review Modal */}

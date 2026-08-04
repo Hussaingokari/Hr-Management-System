@@ -152,18 +152,18 @@ export default function SendInterviewForm() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* ONLINE INTERVIEW */}
-      <div className="bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg p-6">
+      <div className="bg-white border border-gray-300 rounded-lg p-6">
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-2">
             <Mail size={24} className="text-blue-500" />
-            <h2 className="text-lg font-medium text-gray-900 dark:text-slate-100">Online Interview</h2>
+            <h2 className="text-lg font-medium text-gray-900 ">Online Interview</h2>
           </div>
-          <p className="text-sm text-gray-600 dark:text-slate-400">Send online interview invitation via email</p>
+          <p className="text-sm text-gray-600 ">Send online interview invitation via email</p>
         </div>
 
         <form onSubmit={handleSendOnlineInterview} className="flex flex-col gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-900 dark:text-slate-100 mb-2">Candidate Name</label>
+            <label className="block text-sm font-medium text-gray-900 mb-2">Candidate Name</label>
             <input
               type="text"
               name="candidateName"
@@ -172,12 +172,12 @@ export default function SendInterviewForm() {
               placeholder="Enter candidate name"
               disabled={onlineLoading}
               required
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-60"
+              className="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-900 dark:text-slate-100 mb-2">Email Address</label>
+            <label className="block text-sm font-medium text-gray-900 mb-2">Email Address</label>
             <input
               type="email"
               name="recipientEmail"
@@ -186,12 +186,12 @@ export default function SendInterviewForm() {
               placeholder="Enter email"
               disabled={onlineLoading}
               required
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-60"
+              className="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-900 dark:text-slate-100 mb-2">Job Title</label>
+            <label className="block text-sm font-medium text-gray-900 mb-2">Job Title</label>
             <input
               type="text"
               name="jobTitle"
@@ -200,12 +200,12 @@ export default function SendInterviewForm() {
               placeholder="e.g., Operations Executive"
               disabled={onlineLoading}
               required
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-60"
+              className="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-900 dark:text-slate-100 mb-2">Interview Date</label>
+            <label className="block text-sm font-medium text-gray-900 mb-2">Interview Date</label>
             <input
               type="date"
               name="interviewDate"
@@ -213,12 +213,12 @@ export default function SendInterviewForm() {
               onChange={handleOnlineChange}
               disabled={onlineLoading}
               required
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-60"
+              className="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-900 dark:text-slate-100 mb-2">Interview Time</label>
+            <label className="block text-sm font-medium text-gray-900 mb-2">Interview Time</label>
             <input
               type="time"
               name="interviewTime"
@@ -226,12 +226,12 @@ export default function SendInterviewForm() {
               onChange={handleOnlineChange}
               disabled={onlineLoading}
               required
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-60"
+              className="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-900 dark:text-slate-100 mb-2">Platform</label>
+            <label className="block text-sm font-medium text-gray-900 mb-2">Platform</label>
             <input
               type="text"
               name="platform"
@@ -240,12 +240,12 @@ export default function SendInterviewForm() {
               placeholder="e.g., Microsoft Teams"
               disabled={onlineLoading}
               required
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-60"
+              className="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-900 dark:text-slate-100 mb-2">Meeting Link</label>
+            <label className="block text-sm font-medium text-gray-900 mb-2">Meeting Link</label>
             <input
               type="url"
               name="meetingLink"
@@ -254,12 +254,12 @@ export default function SendInterviewForm() {
               placeholder="https://teams.microsoft.com/..."
               disabled={onlineLoading}
               required
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-60"
+              className="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-900 dark:text-slate-100 mb-2">Meeting ID</label>
+            <label className="block text-sm font-medium text-gray-900 mb-2">Meeting ID</label>
             <input
               type="text"
               name="meetingId"
@@ -268,12 +268,12 @@ export default function SendInterviewForm() {
               placeholder="Meeting ID"
               disabled={onlineLoading}
               required
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-60"
+              className="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-900 dark:text-slate-100 mb-2">Passcode</label>
+            <label className="block text-sm font-medium text-gray-900 mb-2">Passcode</label>
             <input
               type="text"
               name="passcode"
@@ -282,33 +282,33 @@ export default function SendInterviewForm() {
               placeholder="Passcode"
               disabled={onlineLoading}
               required
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-60"
+              className="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
             />
           </div>
 
           {onlineError && <div className="p-3 bg-red-100 border border-red-300 rounded-lg"><p className="text-sm text-red-800">❌ {onlineError}</p></div>}
           {showOnlineSuccess && onlineSuccess && <div className="p-3 bg-green-100 border border-green-300 rounded-lg"><p className="text-sm text-green-800">✓ {onlineSuccess}</p></div>}
 
-          <div className="flex gap-3 justify-end pt-4 border-t border-gray-300 dark:border-slate-700">
-            <button type="button" onClick={() => setOnlineData({ candidateName: '', recipientEmail: '', jobTitle: '', interviewDate: '', interviewTime: '', platform: '', meetingLink: '', meetingId: '', passcode: '' })} disabled={onlineLoading} className="px-4 py-2 border border-gray-300 dark:border-slate-700 rounded-lg text-sm font-medium text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 dark:bg-slate-800 disabled:opacity-60">CANCEL</button>
+          <div className="flex gap-3 justify-end pt-4 border-t border-gray-300 ">
+            <button type="button" onClick={() => setOnlineData({ candidateName: '', recipientEmail: '', jobTitle: '', interviewDate: '', interviewTime: '', platform: '', meetingLink: '', meetingId: '', passcode: '' })} disabled={onlineLoading} className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60">CANCEL</button>
             <button type="submit" disabled={onlineLoading} className="px-5 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 disabled:opacity-70 flex items-center gap-2">{onlineLoading ? (<><Loader size={14} className="animate-spin" />Sending...</>) : (<><Mail size={14} />SEND ONLINE</>)}</button>
           </div>
         </form>
       </div>
 
       {/* OFFLINE INTERVIEW */}
-      <div className="bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg p-6">
+      <div className="bg-white border border-gray-300 rounded-lg p-6">
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-2">
             <Mail size={24} className="text-blue-500" />
-            <h2 className="text-lg font-medium text-gray-900 dark:text-slate-100">Offline Interview</h2>
+            <h2 className="text-lg font-medium text-gray-900 ">Offline Interview</h2>
           </div>
-          <p className="text-sm text-gray-600 dark:text-slate-400">Send offline interview invitation via email</p>
+          <p className="text-sm text-gray-600 ">Send offline interview invitation via email</p>
         </div>
 
         <form onSubmit={handleSendOfflineInterview} className="flex flex-col gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-900 dark:text-slate-100 mb-2">Candidate Name</label>
+            <label className="block text-sm font-medium text-gray-900 mb-2">Candidate Name</label>
             <input
               type="text"
               name="candidateName"
@@ -317,12 +317,12 @@ export default function SendInterviewForm() {
               placeholder="Enter candidate name"
               disabled={offlineLoading}
               required
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-60"
+              className="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-900 dark:text-slate-100 mb-2">Email Address</label>
+            <label className="block text-sm font-medium text-gray-900 mb-2">Email Address</label>
             <input
               type="email"
               name="recipientEmail"
@@ -331,12 +331,12 @@ export default function SendInterviewForm() {
               placeholder="Enter email"
               disabled={offlineLoading}
               required
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-60"
+              className="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-900 dark:text-slate-100 mb-2">Job Title</label>
+            <label className="block text-sm font-medium text-gray-900 mb-2">Job Title</label>
             <input
               type="text"
               name="jobTitle"
@@ -345,12 +345,12 @@ export default function SendInterviewForm() {
               placeholder="e.g., Data Entry Executive"
               disabled={offlineLoading}
               required
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-60"
+              className="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-900 dark:text-slate-100 mb-2">Interview Date</label>
+            <label className="block text-sm font-medium text-gray-900 mb-2">Interview Date</label>
             <input
               type="date"
               name="interviewDate"
@@ -358,12 +358,12 @@ export default function SendInterviewForm() {
               onChange={handleOfflineChange}
               disabled={offlineLoading}
               required
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-60"
+              className="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-900 dark:text-slate-100 mb-2">Interview Time</label>
+            <label className="block text-sm font-medium text-gray-900 mb-2">Interview Time</label>
             <input
               type="time"
               name="interviewTime"
@@ -371,12 +371,12 @@ export default function SendInterviewForm() {
               onChange={handleOfflineChange}
               disabled={offlineLoading}
               required
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-60"
+              className="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-900 dark:text-slate-100 mb-2">Venue Address</label>
+            <label className="block text-sm font-medium text-gray-900 mb-2">Venue Address</label>
             <textarea
               name="venueAddress"
               value={offlineData.venueAddress}
@@ -384,12 +384,12 @@ export default function SendInterviewForm() {
               placeholder="Enter full venue address"
               disabled={offlineLoading}
               required
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-60 min-h-20"
+              className="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60 min-h-20"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-900 dark:text-slate-100 mb-2">City / Location</label>
+            <label className="block text-sm font-medium text-gray-900 mb-2">City / Location</label>
             <input
               type="text"
               name="cityLocation"
@@ -398,15 +398,15 @@ export default function SendInterviewForm() {
               placeholder="e.g., Tirupati"
               disabled={offlineLoading}
               required
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-60"
+              className="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
             />
           </div>
 
           {offlineError && <div className="p-3 bg-red-100 border border-red-300 rounded-lg"><p className="text-sm text-red-800">❌ {offlineError}</p></div>}
           {showOfflineSuccess && offlineSuccess && <div className="p-3 bg-green-100 border border-green-300 rounded-lg"><p className="text-sm text-green-800">✓ {offlineSuccess}</p></div>}
 
-          <div className="flex gap-3 justify-end pt-4 border-t border-gray-300 dark:border-slate-700">
-            <button type="button" onClick={() => setOfflineData({ candidateName: '', recipientEmail: '', jobTitle: '', interviewDate: '', interviewTime: '', venueAddress: '', cityLocation: '' })} disabled={offlineLoading} className="px-4 py-2 border border-gray-300 dark:border-slate-700 rounded-lg text-sm font-medium text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 dark:bg-slate-800 disabled:opacity-60">CANCEL</button>
+          <div className="flex gap-3 justify-end pt-4 border-t border-gray-300 ">
+            <button type="button" onClick={() => setOfflineData({ candidateName: '', recipientEmail: '', jobTitle: '', interviewDate: '', interviewTime: '', venueAddress: '', cityLocation: '' })} disabled={offlineLoading} className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60">CANCEL</button>
             <button type="submit" disabled={offlineLoading} className="px-5 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 disabled:opacity-70 flex items-center gap-2">{offlineLoading ? (<><Loader size={14} className="animate-spin" />Sending...</>) : (<><Mail size={14} />SEND OFFLINE</>)}</button>
           </div>
         </form>

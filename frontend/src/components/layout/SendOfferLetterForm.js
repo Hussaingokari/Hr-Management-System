@@ -89,19 +89,19 @@ export default function SendOfferLetterForm() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <div className="bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg p-4 sm:p-6">
+      <div className="bg-white border border-gray-300 rounded-lg p-4 sm:p-6">
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-2">
             <Mail size={24} className="text-blue-500" />
-            <h2 className="text-lg font-medium text-gray-900 dark:text-slate-100">Send Offer Letter</h2>
+            <h2 className="text-lg font-medium text-gray-900 ">Send Offer Letter</h2>
           </div>
-          <p className="text-sm text-gray-600 dark:text-slate-400">Send employment offer letter to selected candidate</p>
+          <p className="text-sm text-gray-600 ">Send employment offer letter to selected candidate</p>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
 
           <div>
-            <label className="block text-sm font-medium text-gray-900 dark:text-slate-100 mb-2">Candidate Name</label>
+            <label className="block text-sm font-medium text-gray-900 mb-2">Candidate Name</label>
             <input
               type="text"
               name="candidateName"
@@ -109,12 +109,12 @@ export default function SendOfferLetterForm() {
               onChange={handleChange}
               placeholder="Enter candidate name"
               disabled={loading}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-60"
+              className="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-900 dark:text-slate-100 mb-2">Email Address</label>
+            <label className="block text-sm font-medium text-gray-900 mb-2">Email Address</label>
             <input
               type="email"
               name="recipientEmail"
@@ -122,12 +122,12 @@ export default function SendOfferLetterForm() {
               onChange={handleChange}
               placeholder="Enter email"
               disabled={loading}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-60"
+              className="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-900 dark:text-slate-100 mb-2">Job Title</label>
+            <label className="block text-sm font-medium text-gray-900 mb-2">Job Title</label>
             <input
               type="text"
               name="jobTitle"
@@ -135,12 +135,12 @@ export default function SendOfferLetterForm() {
               onChange={handleChange}
               placeholder="e.g., Senior Operations Executive"
               disabled={loading}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-60"
+              className="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-900 dark:text-slate-100 mb-2">Salary</label>
+            <label className="block text-sm font-medium text-gray-900 mb-2">Salary</label>
             <input
               type="text"
               name="salary"
@@ -148,12 +148,12 @@ export default function SendOfferLetterForm() {
               onChange={handleChange}
               placeholder="e.g., Rs. 3,50,000 Per Annum"
               disabled={loading}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-60"
+              className="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-900 dark:text-slate-100 mb-2">Joining Date</label>
+            <label className="block text-sm font-medium text-gray-900 mb-2">Joining Date</label>
             <input
               type="date"
               name="joiningDate"
@@ -161,12 +161,12 @@ export default function SendOfferLetterForm() {
               value={offerData.joiningDate}
               onChange={handleChange}
               disabled={loading}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-60"
+              className="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-900 dark:text-slate-100 mb-2">Reporting To</label>
+            <label className="block text-sm font-medium text-gray-900 mb-2">Reporting To</label>
             <input
               type="text"
               name="reportingTo"
@@ -174,12 +174,12 @@ export default function SendOfferLetterForm() {
               onChange={handleChange}
               placeholder="e.g., HR Manager"
               disabled={loading}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-60"
+              className="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-900 dark:text-slate-100 mb-2">Acceptance Deadline</label>
+            <label className="block text-sm font-medium text-gray-900 mb-2">Acceptance Deadline</label>
             <input
               type="date"
               name="acceptanceDeadline"
@@ -187,19 +187,19 @@ export default function SendOfferLetterForm() {
               value={offerData.acceptanceDeadline}
               onChange={handleChange}
               disabled={loading}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-60"
+              className="w-full px-3 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
             />
           </div>
 
           {error && <div className="p-3 bg-red-100 border border-red-300 rounded-lg"><p className="text-sm text-red-800">❌ {error}</p></div>}
           {showSuccess && success && <div className="p-3 bg-green-100 border border-green-300 rounded-lg"><p className="text-sm text-green-800">✓ {success}</p></div>}
 
-          <div className="flex gap-3 justify-end pt-4 border-t border-gray-300 dark:border-slate-700">
+          <div className="flex gap-3 justify-end pt-4 border-t border-gray-300 ">
             <button
               type="button"
               onClick={handleCancel}
               disabled={loading}
-              className="px-4 py-2 border border-gray-300 dark:border-slate-700 rounded-lg text-sm font-medium text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 dark:bg-slate-800 disabled:opacity-60"
+              className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60"
             >
               CANCEL
             </button>
