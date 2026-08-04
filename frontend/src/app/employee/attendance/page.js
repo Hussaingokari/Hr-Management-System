@@ -26,7 +26,7 @@ function formatDuration(mins) {
   if (mins == null) return '--';
   const h = Math.floor(mins / 60);
   const m = mins % 60;
-  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+  return h > 0 ? `${h}h ${m} min` : `${m} min`;
 }
 
 export default function AttendancePage() {
@@ -49,9 +49,17 @@ export default function AttendancePage() {
       const content = data?.content || [];
       setRecords(content);
       setTotalPages(data?.totalPages || 0);
+      
       const today = new Date().toISOString().split('T')[0];
-      const todayRecord = content.find(r => r.date === today);
-      setTodayAtt(todayRecord || null);
+      if (page === 0) {
+        const todayRecord = content.find(r => r.date === today);
+        setTodayAtt(todayRecord || null);
+      } else {
+        const todayRes = await getMyAttendance(0, 5);
+        const todayContent = todayRes.data?.data?.content || [];
+        const todayRecord = todayContent.find(r => r.date === today);
+        setTodayAtt(todayRecord || null);
+      }
     } catch (err) {
       toast.error('Failed to load attendance');
       console.error(err);
