@@ -65,7 +65,7 @@ public class LeaveController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(ApiResponse.success("Pending leaves",
-                leaveService.getPendingLeaves(PageRequest.of(page, size))));
+                leaveService.getPendingLeaves(PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "appliedAt")))));
     }
 
     // Two-step approval
@@ -122,7 +122,7 @@ public class LeaveController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(ApiResponse.success("Pending cancellations",
-                leaveService.getPendingCancellations(PageRequest.of(page, size))));
+                leaveService.getPendingCancellations(PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "appliedAt")))));
     }
 
     // Leave Balance
