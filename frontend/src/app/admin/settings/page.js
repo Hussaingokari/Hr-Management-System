@@ -45,6 +45,10 @@ export default function AdminSettingsPage() {
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
+    if (newPassword === currentPassword) {
+      toast.error('New password cannot be the same as the current password');
+      return;
+    }
     if (newPassword !== confirmPassword) {
       toast.error('New passwords do not match');
       return;
