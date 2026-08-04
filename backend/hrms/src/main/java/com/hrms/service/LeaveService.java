@@ -70,6 +70,20 @@ public class LeaveService {
                     "End date must be after start date");
         }
 
+        if (req.getReason() != null && req.getReason().length() > 255) {
+            throw new IllegalArgumentException("Reason must be 255 characters or less");
+        }
+
+        List<LeaveRequest> existingLeaves = leaveRepo.findAllByEmployee(emp);
+        boolean hasOverlap = existingLeaves.stream()
+                .anyMatch(l -> l.getStatus() != LeaveStatus.REJECTED
+                        && l.getStatus() != LeaveStatus.CANCELLED
+                        && !req.getStartDate().isAfter(l.getEndDate())
+                        && !req.getEndDate().isBefore(l.getStartDate()));
+        if (hasOverlap) {
+            throw new IllegalArgumentException("You already have a leave request during this period");
+        }
+
         int days = calculateWorkingDays(
                 req.getStartDate(), req.getEndDate());
 
@@ -112,27 +126,29 @@ public class LeaveService {
                 + req.getStartDate() + " to "
                 + req.getEndDate() + ".";
 
-        // Notify manager if selected
-        if (manager != null) {
-            notificationService.createAndSend(
-                    manager,
+        java.util.concurrent.CompletableFuture.runAsync(() -> {
+            // Notify manager if selected
+            if (manager != null) {
+                notificationService.createAndSend(
+                        manager,
+                        "New Leave Request",
+                        notifMsg,
+                        NotificationType.LEAVE_APPLIED,
+                        "LEAVE_REQUEST",
+                        saved.getId()
+                );
+            }
+
+            // Notify ALL admins and HR
+            notifyAllAdmins(
                     "New Leave Request",
                     notifMsg,
                     NotificationType.LEAVE_APPLIED,
                     "LEAVE_REQUEST",
-                    saved.getId()
+                    saved.getId(),
+                    manager != null ? manager.getId() : null
             );
-        }
-
-        // Notify ALL admins and HR
-        notifyAllAdmins(
-                "New Leave Request",
-                notifMsg,
-                NotificationType.LEAVE_APPLIED,
-                "LEAVE_REQUEST",
-                saved.getId(),
-                manager != null ? manager.getId() : null
-        );
+        });
 
         return toResponse(saved);
     }
