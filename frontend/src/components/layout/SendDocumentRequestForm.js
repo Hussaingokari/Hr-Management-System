@@ -36,6 +36,20 @@ export default function SendDocumentRequestForm() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setBanner(null);
+
+        if (!/^[A-Za-z\s]+$/.test(candidateName)) {
+            setBanner({ type: "error", message: "Candidate name should only contain letters and spaces." });
+            return;
+        }
+        if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
+            setBanner({ type: "error", message: "Please enter a valid email address." });
+            return;
+        }
+        if (/^\d+$/.test(jobTitle) || !/[a-zA-Z]/.test(jobTitle)) {
+            setBanner({ type: "error", message: "Job Role must contain letters." });
+            return;
+        }
+
         setSubmitting(true);
 
         try {
@@ -60,7 +74,7 @@ export default function SendDocumentRequestForm() {
     };
 
     return (
-        <div className="max-w-xl mx-auto bg-white rounded-2xl shadow-sm p-8">
+        <div className="max-w-xl mx-auto bg-white rounded-2xl shadow-sm p-8" style={{ colorScheme: 'light' }}>
             <div className="flex items-center gap-3 mb-1">
                 <span className="text-blue-600 text-2xl">✉️</span>
                 <h2 className="text-2xl font-bold text-gray-900 ">Send Document Request</h2>
@@ -89,7 +103,7 @@ export default function SendDocumentRequestForm() {
                         value={candidateName}
                         onChange={(e) => setCandidateName(e.target.value)}
                         placeholder="Enter Candidate Name"
-                        className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full bg-white text-gray-900 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                 </div>
 
@@ -103,7 +117,7 @@ export default function SendDocumentRequestForm() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="Enter Email Address"
-                        className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full bg-white text-gray-900 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                 </div>
 
@@ -117,7 +131,7 @@ export default function SendDocumentRequestForm() {
                         value={jobTitle}
                         onChange={(e) => setJobTitle(e.target.value)}
                         placeholder="Enter Job Role"
-                        className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full bg-white text-gray-900 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                 </div>
 
@@ -131,7 +145,7 @@ export default function SendDocumentRequestForm() {
                         max={today}
                         value={interviewDate}
                         onChange={(e) => setInterviewDate(e.target.value)}
-                        className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full bg-white text-gray-900 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                 </div>
 
@@ -145,7 +159,7 @@ export default function SendDocumentRequestForm() {
                         min={today}
                         value={submissionDeadline}
                         onChange={(e) => setSubmissionDeadline(e.target.value)}
-                        className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full bg-white text-gray-900 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                 </div>
 
