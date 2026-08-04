@@ -111,7 +111,17 @@ useEffect(() => {
           ? '✅ Forwarded to HR for verification!'
           : '❌ Leave rejected!'
       );
-      fetchData();
+      setManagerPending(prev => prev.map(l => {
+        if (l.id === id) {
+          return {
+            ...l,
+            approvalStage: action === 'APPROVED' ? 'HR_PENDING' : 'REJECTED',
+            status: action === 'APPROVED' ? 'MANAGER_PENDING' : 'REJECTED',
+            actionTaken: true
+          };
+        }
+        return l;
+      }));
     } catch (err) {
       toast.error(err.response?.data?.message || 'Action failed');
     } finally {
@@ -134,7 +144,17 @@ useEffect(() => {
           ? '✅ Leave approved successfully!'
           : '❌ Leave rejected!'
       );
-      fetchData();
+      setHrPending(prev => prev.map(l => {
+        if (l.id === id) {
+          return {
+            ...l,
+            approvalStage: action === 'APPROVED' ? 'APPROVED' : 'REJECTED',
+            status: action === 'APPROVED' ? 'APPROVED' : 'REJECTED',
+            actionTaken: true
+          };
+        }
+        return l;
+      }));
     } catch (err) {
       toast.error(err.response?.data?.message || 'Action failed');
     } finally {
@@ -154,7 +174,17 @@ useEffect(() => {
       toast.success(
         approve ? 'Cancellation approved!' : 'Cancellation denied!'
       );
-      fetchData();
+      setCancellations(prev => prev.map(l => {
+        if (l.id === id) {
+          return {
+            ...l,
+            approvalStage: approve ? 'CANCELLED' : 'APPROVED',
+            status: approve ? 'CANCELLED' : 'APPROVED',
+            actionTaken: true
+          };
+        }
+        return l;
+      }));
     } catch (err) {
       toast.error(err.response?.data?.message || 'Action failed');
     } finally {
@@ -318,23 +348,23 @@ useEffect(() => {
                     <>
                       <button
                         onClick={() => handleManagerAction(l.id, 'APPROVED')}
-                        disabled={!!actioning}
+                        disabled={!!actioning || l.actionTaken}
                         style={{
-                          padding: '6px 12px', background: '#dcfce7',
-                          color: '#16a34a', border: '1px solid #bbf7d0',
+                          padding: '6px 12px', background: l.actionTaken ? '#f1f5f9' : '#dcfce7',
+                          color: l.actionTaken ? '#94a3b8' : '#16a34a', border: '1px solid ' + (l.actionTaken ? '#e2e8f0' : '#bbf7d0'),
                           borderRadius: '6px', fontSize: '11px', fontWeight: '700',
-                          cursor: 'pointer', whiteSpace: 'nowrap',
+                          cursor: l.actionTaken ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap',
                         }}>
                         {actioning === l.id + 'APPROVED' ? '⏳' : '✓ Forward to HR'}
                       </button>
                       <button
                         onClick={() => handleManagerAction(l.id, 'REJECTED')}
-                        disabled={!!actioning}
+                        disabled={!!actioning || l.actionTaken}
                         style={{
-                          padding: '6px 12px', background: '#fee2e2',
-                          color: '#dc2626', border: '1px solid #fecaca',
+                          padding: '6px 12px', background: l.actionTaken ? '#f1f5f9' : '#fee2e2',
+                          color: l.actionTaken ? '#94a3b8' : '#dc2626', border: '1px solid ' + (l.actionTaken ? '#e2e8f0' : '#fecaca'),
                           borderRadius: '6px', fontSize: '11px', fontWeight: '700',
-                          cursor: 'pointer',
+                          cursor: l.actionTaken ? 'not-allowed' : 'pointer',
                         }}>
                         {actioning === l.id + 'REJECTED' ? '⏳' : '✗ Reject'}
                       </button>
@@ -345,23 +375,23 @@ useEffect(() => {
                     <>
                       <button
                         onClick={() => handleHrAction(l.id, 'APPROVED')}
-                        disabled={!!actioning}
+                        disabled={!!actioning || l.actionTaken}
                         style={{
-                          padding: '6px 12px', background: '#dcfce7',
-                          color: '#16a34a', border: '1px solid #bbf7d0',
+                          padding: '6px 12px', background: l.actionTaken ? '#f1f5f9' : '#dcfce7',
+                          color: l.actionTaken ? '#94a3b8' : '#16a34a', border: '1px solid ' + (l.actionTaken ? '#e2e8f0' : '#bbf7d0'),
                           borderRadius: '6px', fontSize: '11px', fontWeight: '700',
-                          cursor: 'pointer',
+                          cursor: l.actionTaken ? 'not-allowed' : 'pointer',
                         }}>
                         {actioning === l.id + 'APPROVED' ? '⏳' : '✓ Approve'}
                       </button>
                       <button
                         onClick={() => handleHrAction(l.id, 'REJECTED')}
-                        disabled={!!actioning}
+                        disabled={!!actioning || l.actionTaken}
                         style={{
-                          padding: '6px 12px', background: '#fee2e2',
-                          color: '#dc2626', border: '1px solid #fecaca',
+                          padding: '6px 12px', background: l.actionTaken ? '#f1f5f9' : '#fee2e2',
+                          color: l.actionTaken ? '#94a3b8' : '#dc2626', border: '1px solid ' + (l.actionTaken ? '#e2e8f0' : '#fecaca'),
                           borderRadius: '6px', fontSize: '11px', fontWeight: '700',
-                          cursor: 'pointer',
+                          cursor: l.actionTaken ? 'not-allowed' : 'pointer',
                         }}>
                         {actioning === l.id + 'REJECTED' ? '⏳' : '✗ Reject'}
                       </button>
@@ -372,23 +402,23 @@ useEffect(() => {
                     <>
                       <button
                         onClick={() => handleCancelAction(l.id, true)}
-                        disabled={!!actioning}
+                        disabled={!!actioning || l.actionTaken}
                         style={{
-                          padding: '6px 12px', background: '#dcfce7',
-                          color: '#16a34a', border: '1px solid #bbf7d0',
+                          padding: '6px 12px', background: l.actionTaken ? '#f1f5f9' : '#dcfce7',
+                          color: l.actionTaken ? '#94a3b8' : '#16a34a', border: '1px solid ' + (l.actionTaken ? '#e2e8f0' : '#bbf7d0'),
                           borderRadius: '6px', fontSize: '11px', fontWeight: '700',
-                          cursor: 'pointer',
+                          cursor: l.actionTaken ? 'not-allowed' : 'pointer',
                         }}>
                         {actioning === l.id + 'true' ? '⏳' : '✓ Confirm'}
                       </button>
                       <button
                         onClick={() => handleCancelAction(l.id, false)}
-                        disabled={!!actioning}
+                        disabled={!!actioning || l.actionTaken}
                         style={{
-                          padding: '6px 12px', background: '#fee2e2',
-                          color: '#dc2626', border: '1px solid #fecaca',
+                          padding: '6px 12px', background: l.actionTaken ? '#f1f5f9' : '#fee2e2',
+                          color: l.actionTaken ? '#94a3b8' : '#dc2626', border: '1px solid ' + (l.actionTaken ? '#e2e8f0' : '#fecaca'),
                           borderRadius: '6px', fontSize: '11px', fontWeight: '700',
-                          cursor: 'pointer',
+                          cursor: l.actionTaken ? 'not-allowed' : 'pointer',
                         }}>
                         {actioning === l.id + 'false' ? '⏳' : '✗ Deny'}
                       </button>
