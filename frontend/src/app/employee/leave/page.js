@@ -113,6 +113,10 @@ export default function LeavePage() {
 
   const handleApply = async (e) => {
     e.preventDefault();
+    if (!form.leaveType) {
+      toast.error('Please select a leave type');
+      return;
+    }
     if (!form.startDate || !form.endDate) {
       toast.error('Please select start and end dates');
       return;
@@ -127,6 +131,10 @@ export default function LeavePage() {
     }
     if (!form.managerId) {
       toast.error('Please select a manager');
+      return;
+    }
+    if (!form.reason || form.reason.trim() === '') {
+      toast.error('Please enter a reason for the leave');
       return;
     }
     setSubmitting(true);
@@ -294,6 +302,7 @@ export default function LeavePage() {
           <div style={{
             background: 'white', borderRadius: '16px',
             padding: '28px', width: '100%', maxWidth: '480px',
+            maxHeight: '90vh', overflowY: 'auto',
             boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
@@ -315,7 +324,7 @@ export default function LeavePage() {
                 </label>
                 <select
                   value={form.leaveType}
-                  onChange={e => setForm({ ...form, leaveType: e.target.value })}
+                  onChange={e => setForm(prev => ({ ...prev, leaveType: e.target.value }))}
                   style={{
                     width: '100%', padding: '10px 12px',
                     border: '1.5px solid #e2e8f0', borderRadius: '10px',
@@ -351,7 +360,6 @@ export default function LeavePage() {
                         endDate: prev.endDate && prev.endDate < newStart ? '' : prev.endDate,
                       }));
                     }}
-                    required
                     style={{
                       width: '100%', padding: '10px 12px',
                       border: '1.5px solid #e2e8f0', borderRadius: '10px',
@@ -369,8 +377,7 @@ export default function LeavePage() {
                     className="leave-date-input"
                     value={form.endDate}
                     min={form.startDate || today}
-                    onChange={e => setForm({ ...form, endDate: e.target.value })}
-                    required
+                    onChange={e => setForm(prev => ({ ...prev, endDate: e.target.value }))}
                     style={{
                       width: '100%', padding: '10px 12px',
                       border: '1.5px solid #e2e8f0', borderRadius: '10px',
@@ -388,8 +395,7 @@ export default function LeavePage() {
                 </label>
                 <select
                   value={form.managerId}
-                  onChange={e => setForm({ ...form, managerId: e.target.value })}
-                  required
+                  onChange={e => setForm(prev => ({ ...prev, managerId: e.target.value }))}
                   style={{
                     width: '100%', padding: '10px 12px',
                     border: '1.5px solid #e2e8f0', borderRadius: '10px',
@@ -424,9 +430,8 @@ export default function LeavePage() {
                 <textarea
                   className="leave-reason-textarea"
                   value={form.reason}
-                  onChange={e => setForm({ ...form, reason: e.target.value })}
+                  onChange={e => setForm(prev => ({ ...prev, reason: e.target.value }))}
                   placeholder="Enter reason for leave..."
-                  required
                   rows={3}
                   style={{
                     width: '100%', padding: '10px 12px',
