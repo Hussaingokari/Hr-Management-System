@@ -32,7 +32,7 @@ public class LeaveBalanceService {
         int year = Year.now().getValue();
         return balanceRepo.findByEmployeeAndLeaveTypeAndYear(employee, leaveType, year)
                 .orElseGet(() -> {
-                    LeaveBalance lb = LeaveBalance.builder()
+                    return LeaveBalance.builder()
                             .employee(employee)
                             .leaveType(leaveType)
                             .year(year)
@@ -40,7 +40,6 @@ public class LeaveBalanceService {
                             .used(0)
                             .remaining(DEFAULT_QUOTA.getOrDefault(leaveType, 12.0))
                             .build();
-                    return balanceRepo.save(lb);
                 });
     }
 

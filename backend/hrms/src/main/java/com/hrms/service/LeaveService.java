@@ -441,12 +441,21 @@ public class LeaveService {
     @Transactional(readOnly = true)
     @Cacheable("dashboardData")
     public Page<LeaveDTOs.Response> getPendingLeaves(Pageable pageable) {
-        return leaveRepo.findByApprovalStageIn(
+        org.springframework.data.domain.Page<com.hrms.entity.LeaveRequest> allPending = leaveRepo.findByApprovalStageIn(
                 java.util.List.of(
                         ApprovalStage.MANAGER_PENDING,
                         ApprovalStage.HR_PENDING
                 ), pageable
-        ).map(this::toResponse);
+        );
+        
+        java.util.List<LeaveDTOs.Response> filteredList = allPending.stream()
+                .filter(leave -> leave.getStatus() != LeaveStatus.CANCELLED &&
+                                 leave.getStatus() != LeaveStatus.REJECTED &&
+                                 leave.getStatus() != LeaveStatus.CANCELLATION_PENDING)
+                .map(this::toResponse)
+                .toList();
+        
+        return new org.springframework.data.domain.PageImpl<>(filteredList, pageable, allPending.getTotalElements());
     }
 
     @Transactional(readOnly = true)
