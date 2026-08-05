@@ -204,6 +204,7 @@ public class EmployeeService {
                     .createQuery("UPDATE OnboardingDocument d SET d.reviewedByHr = null WHERE d.reviewedByHr.id = :id")
                     .setParameter("id", id).executeUpdate();
 
+            entityManager.createQuery("DELETE FROM AttendanceBreak ab WHERE ab.attendance.employee.id = :id").setParameter("id", id).executeUpdate();
             entityManager.createQuery("DELETE FROM Attendance a WHERE a.employee.id = :id").setParameter("id", id)
                     .executeUpdate();
             entityManager.createQuery("DELETE FROM LeaveRequest l WHERE l.employee.id = :id").setParameter("id", id)
