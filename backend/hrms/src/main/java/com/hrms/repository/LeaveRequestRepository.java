@@ -15,6 +15,8 @@ public interface LeaveRequestRepository
         extends JpaRepository<LeaveRequest, Long> {
 
     @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"employee", "manager", "approvedBy"})
+    java.util.Optional<LeaveRequest> findById(Long id);
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"employee", "manager", "approvedBy"})
     Page<LeaveRequest> findByEmployee(
             Employee emp, Pageable pageable);
 
