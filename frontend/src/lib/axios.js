@@ -17,9 +17,15 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = sessionStorage.getItem('accessToken');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  if (typeof window !== 'undefined') {
+    const token = sessionStorage.getItem('accessToken');
+    if (token && token !== 'undefined') {
+      if (config.headers && typeof config.headers.set === 'function') {
+        config.headers.set('Authorization', `Bearer ${token}`);
+      } else {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
   }
   return config;
 });
@@ -28,7 +34,10 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401 && !error.config?.url?.includes('/auth/login')) {
-      store.dispatch(logout());
+      if (typeof window !== 'undefined' && sessionStorage.getItem('accessToken')) {
+        // Only dispatch logout if we actually had a token that was rejected
+        store.dispatch(logout());
+      }
     }
     return Promise.reject(error);
   }

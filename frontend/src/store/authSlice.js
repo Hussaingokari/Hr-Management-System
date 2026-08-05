@@ -34,10 +34,14 @@ const authSlice = createSlice({
 
       const token = sessionStorage.getItem('accessToken');
       const user = sessionStorage.getItem('user');
-      if (token && user) {
-        state.token = token;
-        state.user = JSON.parse(user);
-        state.isAuthenticated = true;
+      if (token && user && token !== 'undefined' && user !== 'undefined') {
+        try {
+          state.user = JSON.parse(user);
+          state.token = token;
+          state.isAuthenticated = true;
+        } catch (e) {
+          // invalid JSON in sessionStorage, ignore
+        }
       }
       state.isInitialized = true;
     },
