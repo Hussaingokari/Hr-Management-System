@@ -122,19 +122,13 @@ public class EmployeeService {
     }
 
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
-    public EmployeeDTOs.Response getById(Long id, Employee principal) {
-        if (principal.getRole() == Role.EMPLOYEE && !id.equals(principal.getId())) {
-            throw new org.springframework.security.access.AccessDeniedException("You are not authorized to view this employee's profile.");
-        }
+    public EmployeeDTOs.Response getById(Long id) {
         return toResponse(findById(id));
     }
 
     @Transactional
     @CacheEvict(value = "dashboardData", allEntries = true)
-    public EmployeeDTOs.Response updateEmployee(Long id, EmployeeDTOs.UpdateRequest req, Employee principal) {
-        if (principal.getRole() == Role.EMPLOYEE && !id.equals(principal.getId())) {
-            throw new org.springframework.security.access.AccessDeniedException("You are not authorized to update this employee's profile.");
-        }
+    public EmployeeDTOs.Response updateEmployee(Long id, EmployeeDTOs.UpdateRequest req) {
         Employee emp = findById(id);
         if (req.getFirstName() != null)
             emp.setFirstName(req.getFirstName());
@@ -146,18 +140,15 @@ public class EmployeeService {
             emp.setDepartment(req.getDepartment());
         if (req.getDesignation() != null)
             emp.setDesignation(req.getDesignation());
+        if (req.getBasicSalary() != null)
+            emp.setBasicSalary(req.getBasicSalary());
         if (req.getDateOfBirth() != null)
             emp.setDateOfBirth(req.getDateOfBirth());
-        if (req.getActive() != null && (principal.getRole() == Role.ADMIN || principal.getRole() == Role.HR))
-            emp.setActive(req.getActive());
-        if (req.getBasicSalary() != null && (principal.getRole() == Role.ADMIN || principal.getRole() == Role.HR))
-            emp.setBasicSalary(req.getBasicSalary());
-        if (req.getRole() != null && (principal.getRole() == Role.ADMIN || principal.getRole() == Role.HR))
+        if (req.getRole() != null)
             emp.setRole(req.getRole());
+        if (req.getActive() != null)
+            emp.setActive(req.getActive());
         if (req.getPassword() != null && !req.getPassword().isBlank()) {
-            if (passwordEncoder.matches(req.getPassword(), emp.getPassword())) {
-                throw new IllegalArgumentException("New password cannot be the same as the current password");
-            }
             emp.setPassword(passwordEncoder.encode(req.getPassword()));
         }
         Employee saved = employeeRepository.save(emp);
@@ -204,7 +195,6 @@ public class EmployeeService {
                     .createQuery("UPDATE OnboardingDocument d SET d.reviewedByHr = null WHERE d.reviewedByHr.id = :id")
                     .setParameter("id", id).executeUpdate();
 
-            entityManager.createQuery("DELETE FROM AttendanceBreak ab WHERE ab.attendance.employee.id = :id").setParameter("id", id).executeUpdate();
             entityManager.createQuery("DELETE FROM Attendance a WHERE a.employee.id = :id").setParameter("id", id)
                     .executeUpdate();
             entityManager.createQuery("DELETE FROM LeaveRequest l WHERE l.employee.id = :id").setParameter("id", id)

@@ -131,8 +131,14 @@ export default function EmployeeManagementPage() {
     try {
       const res = await getAllEmployees(page, 10);
       const data = res.data?.data;
-      setEmployees(data?.content || []);
-      setTotalPages(data?.totalPages || 0);
+      const sortedEmployees = [...(data?.content || [])].sort((a, b) => {
+        const empA = parseInt((a.employeeId || "").replace("EMP", ""), 10);
+        const empB = parseInt((b.employeeId || "").replace("EMP", ""), 10);
+
+        return empA - empB;
+      });
+
+      setEmployees(sortedEmployees); setTotalPages(data?.totalPages || 0);
       setTotalElements(data?.totalElements || 0);
     } catch (err) {
       toast.error('Failed to load employees');
@@ -147,8 +153,14 @@ export default function EmployeeManagementPage() {
     try {
       const res = await searchEmployees(search, page, 10);
       const data = res.data?.data;
-      setEmployees(data?.content || []);
-      setTotalPages(data?.totalPages || 0);
+      const sortedEmployees = [...(data?.content || [])].sort((a, b) => {
+        const empA = parseInt((a.employeeId || "").replace("EMP", ""), 10);
+        const empB = parseInt((b.employeeId || "").replace("EMP", ""), 10);
+
+        return empA - empB;
+      });
+
+      setEmployees(sortedEmployees); setTotalPages(data?.totalPages || 0);
       setTotalElements(data?.totalElements || 0);
     } catch (err) {
       toast.error('Search failed');
