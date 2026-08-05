@@ -35,6 +35,14 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401 && !error.config?.url?.includes('/auth/login')) {
       if (typeof window !== 'undefined' && sessionStorage.getItem('accessToken')) {
+        const url = error.config?.url || 'unknown URL';
+        console.error(`[Axios Interceptor] 401 Unauthorized detected on: ${url}`);
+        
+        // Dynamically import toast to avoid SSR issues
+        import('react-hot-toast').then(({ toast }) => {
+           toast.error(`Session expired due to 401 on ${url}`, { duration: 5000 });
+        });
+
         // Only dispatch logout if we actually had a token that was rejected
         store.dispatch(logout());
       }
