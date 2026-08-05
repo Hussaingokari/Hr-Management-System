@@ -165,13 +165,12 @@ public class LeaveService {
             throw new IllegalStateException(
                     "Leave is not awaiting manager approval");
         }
-        
-        if (leave.getManager() == null || !leave.getManager().getId().equals(managerId)) {
+        Employee manager = employeeService.findById(managerId);
+        boolean isOverride = manager.getRole() == Role.ADMIN || manager.getRole() == Role.HR;
+        if (!isOverride && (leave.getManager() == null || !leave.getManager().getId().equals(managerId))) {
             throw new org.springframework.security.access.AccessDeniedException(
                     "You are not the assigned manager for this leave request.");
         }
-
-        Employee manager = employeeService.findById(managerId);
         leave.setManagerRemarks(req.getRemarks());
         leave.setManagerActionAt(LocalDateTime.now());
 
