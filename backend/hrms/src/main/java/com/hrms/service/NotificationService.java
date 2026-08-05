@@ -47,7 +47,9 @@ public class NotificationService {
                 .build();
 
         Notification saved = notificationRepo.save(notification);
-        sendEmailSafe(recipient.getEmail(), title, message);
+        java.util.concurrent.CompletableFuture.runAsync(() -> {
+            sendEmailSafe(recipient.getEmail(), title, message);
+        });
         return saved;
     }
 
