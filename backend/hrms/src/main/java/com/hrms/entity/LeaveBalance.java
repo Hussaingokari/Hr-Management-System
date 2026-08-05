@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "leave_balance",
         uniqueConstraints = @UniqueConstraint(columnNames = {"employee_id", "leave_type", "year"}))
-@Data @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class LeaveBalance {
 
     @Id
