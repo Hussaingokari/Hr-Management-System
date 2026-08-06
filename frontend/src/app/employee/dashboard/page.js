@@ -7,7 +7,7 @@ import {
   getUnreadCount, getMyNotifications
 } from '@/lib/employeeApi';
 import toast from 'react-hot-toast';
- 
+
 function StatCard({ label, value, sub, color, icon }) {
   return (
     <div style={{
@@ -26,7 +26,7 @@ function StatCard({ label, value, sub, color, icon }) {
     </div>
   );
 }
- 
+
 function Badge({ status }) {
   const map = {
     APPROVED: { bg: '#dcfce7', color: '#16a34a' },
@@ -45,7 +45,7 @@ function Badge({ status }) {
     </span>
   );
 }
- 
+
 function Loader() {
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px' }}>
@@ -54,10 +54,40 @@ function Loader() {
     </div>
   );
 }
- 
+
+// Same palette used across the leave pages, so balances look consistent everywhere
+const balanceStyle = {
+  ANNUAL: { color: '#4F46E5', soft: '#EEF0FF', icon: '🌴' },
+  SICK: { color: '#0D9488', soft: '#ECFDF9', icon: '🤒' },
+  CASUAL: { color: '#D97706', soft: '#FFF7ED', icon: '☀️' },
+  PATERNITY: { color: '#8B5CF6', soft: '#F5F3FF', icon: '👨‍🍼' },
+  MATERNITY: { color: '#DB2777', soft: '#FDF2F8', icon: '🤱' },
+  UNPAID: { color: '#64748B', soft: '#F1F5F9', icon: '📋' },
+};
+
+function MiniRing({ pct, color }) {
+  const size = 40;
+  return (
+    <div style={{
+      width: size, height: size, borderRadius: '50%',
+      background: `conic-gradient(${color} ${pct * 3.6}deg, #EEF0F5 0deg)`,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      flexShrink: 0,
+    }}>
+      <div style={{
+        width: size - 8, height: size - 8, borderRadius: '50%',
+        background: 'white', display: 'flex', alignItems: 'center',
+        justifyContent: 'center', fontSize: '9px', fontWeight: 800, color,
+      }}>
+        {Math.round(pct)}%
+      </div>
+    </div>
+  );
+}
+
 export default function EmployeeDashboard() {
   const { user } = useSelector((state) => state.auth);
- 
+
   const [attendance, setAttendance] = useState(null);
   const [todayAtt, setTodayAtt] = useState(null);
   const [leaves, setLeaves] = useState([]);
@@ -67,7 +97,7 @@ export default function EmployeeDashboard() {
   const [loading, setLoading] = useState(true);
   const [checkingIn, setCheckingIn] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
- 
+
   const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
@@ -78,7 +108,7 @@ export default function EmployeeDashboard() {
         getMyNotifications(0, 5),
         getUnreadCount(),
       ]);
- 
+
       if (attRes.status === 'fulfilled') {
         const records = attRes.value.data?.data?.content || [];
         setAttendance(records);
@@ -105,12 +135,12 @@ export default function EmployeeDashboard() {
       setLoading(false);
     }
   }, []);
- 
+
   useEffect(() => {
     const timer = setTimeout(() => { fetchAll(); }, 0);
     return () => clearTimeout(timer);
   }, [fetchAll]);
- 
+
   const handleCheckIn = async () => {
     setCheckingIn(true);
     try {
@@ -123,7 +153,7 @@ export default function EmployeeDashboard() {
       setCheckingIn(false);
     }
   };
- 
+
   const handleCheckOut = async () => {
     setCheckingOut(true);
     try {
@@ -136,13 +166,17 @@ export default function EmployeeDashboard() {
       setCheckingOut(false);
     }
   };
- 
+
   const presentDays = attendance?.filter(a => a.status === 'PRESENT' || a.status === 'HALF_DAY').length || 0;
   const annualBalance = balance.find(b => b.leaveType === 'ANNUAL');
   const pendingLeaves = leaves.filter(l => l.status === 'PENDING').length;
- 
+
   return (
     <div>
+      <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@600;700;800&display=swap');
+      `}</style>
+
       {/* Header */}
       <div style={{ marginBottom: '24px' }}>
         <h1 style={{ fontSize: '22px', fontWeight: '800', color: '#1e293b', marginBottom: '4px' }}>
@@ -152,7 +186,7 @@ export default function EmployeeDashboard() {
           Welcome back, {user?.name}! Here&apos;s your overview for today.
         </p>
       </div>
- 
+
       {loading ? <Loader /> : (
         <>
           {/* Stats Row */}
@@ -182,10 +216,10 @@ export default function EmployeeDashboard() {
               color="#8b5cf6" icon="🔔"
             />
           </div>
- 
+
           {/* Main Grid */}
           <div className="dashboard-main-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
- 
+
             {/* Today Attendance */}
             <div style={{ background: 'white', borderRadius: '12px', padding: '20px', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
               <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b', marginBottom: '16px' }}>
@@ -212,14 +246,14 @@ export default function EmployeeDashboard() {
                   </div>
                 </div>
               </div>
- 
+
               {/* Status badge */}
               {todayAtt && (
                 <div style={{ textAlign: 'center', marginBottom: '14px' }}>
                   <Badge status={todayAtt.status} />
                 </div>
               )}
- 
+
               {/* Action buttons */}
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button
@@ -254,40 +288,47 @@ export default function EmployeeDashboard() {
                 </button>
               </div>
             </div>
- 
-            {/* Leave Balance */}
+
+            {/* Leave Balance — redesigned: icon chips + gradient rounded bars instead of plain bars */}
             <div style={{ background: 'white', borderRadius: '12px', padding: '20px', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-              <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b', marginBottom: '16px' }}>
-                🌴 Leave Balance
+              <h3 style={{ fontFamily: "'Quicksand', sans-serif", fontSize: '15px', fontWeight: '700', color: '#1e293b', marginBottom: '16px' }}>
+                🌿 Leave Balance
               </h3>
               {balance.length === 0 ? (
                 <div style={{ textAlign: 'center', color: '#94a3b8', fontSize: '13px', padding: '20px' }}>
                   No leave balance data found
                 </div>
               ) : (
-                balance.map((b, i) => (
-                  <div key={i} style={{ marginBottom: '14px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                      <span style={{ fontSize: '13px', color: '#374151', fontWeight: '500' }}>{b.leaveType}</span>
-                      <span style={{ fontSize: '12px', color: '#64748b' }}>{b.remaining} / {b.totalAllotted} days</span>
-                    </div>
-                    <div style={{ height: '8px', background: '#f1f5f9', borderRadius: '4px', overflow: 'hidden' }}>
-                      <div style={{
-                        height: '100%', borderRadius: '4px',
-                        background: b.leaveType === 'ANNUAL' ? '#3b82f6' : b.leaveType === 'SICK' ? '#10b981' : b.leaveType === 'CASUAL' ? '#f59e0b' : '#8b5cf6',
-                        width: `${(b.remaining / b.totalAllotted) * 100}%`,
-                        transition: 'width 0.5s',
-                      }} />
-                    </div>
-                  </div>
-                ))
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                  {balance.map((b, i) => {
+                    const c = balanceStyle[b.leaveType] || balanceStyle.UNPAID;
+                    const pct = b.totalAllotted > 0 ? Math.min(100, (b.remaining / b.totalAllotted) * 100) : 0;
+                    return (
+                      <div key={i} style={{
+                        background: c.soft, borderRadius: '14px', padding: '12px',
+                        display: 'flex', alignItems: 'center', gap: '10px',
+                        border: `1px solid ${c.color}22`,
+                      }}>
+                        <MiniRing pct={pct} color={c.color} />
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ fontSize: '10.5px', fontWeight: 700, color: c.color, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <span>{c.icon}</span>{b.leaveType}
+                          </div>
+                          <div style={{ fontSize: '15px', fontWeight: 800, color: '#1e293b', fontFamily: "'Quicksand', sans-serif" }}>
+                            {b.remaining}<span style={{ fontSize: '10.5px', fontWeight: 600, color: '#94a3b8' }}> /{b.totalAllotted}d</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               )}
             </div>
           </div>
- 
+
           {/* Bottom Grid */}
           <div className="dashboard-main-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
- 
+
             {/* Recent Leave Requests */}
             <div style={{ background: 'white', borderRadius: '12px', padding: '20px', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
@@ -312,7 +353,7 @@ export default function EmployeeDashboard() {
                 ))
               )}
             </div>
- 
+
             {/* Recent Notifications */}
             <div style={{ background: 'white', borderRadius: '12px', padding: '20px', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
