@@ -422,11 +422,15 @@ export default function LeavePage() {
                 )}
               </div>
 
-              {/* Reason */}
               <div style={{ marginBottom: '24px' }}>
-                <label style={{ fontSize: '13px', fontWeight: '600', color: '#374151', display: 'block', marginBottom: '6px' }}>
-                  Reason <span style={{ color: '#ef4444' }}>*</span>
-                </label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <label style={{ fontSize: '13px', fontWeight: '600', color: '#374151' }}>
+                    Reason <span style={{ color: '#ef4444' }}>*</span>
+                  </label>
+                  <span style={{ fontSize: '12px', color: form.reason.length === 255 ? '#ef4444' : '#94a3b8' }}>
+                    {form.reason.length}/255
+                  </span>
+                </div>
                 <textarea
                   className="leave-reason-textarea"
                   value={form.reason}

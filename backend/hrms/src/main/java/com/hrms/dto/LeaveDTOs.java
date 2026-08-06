@@ -16,7 +16,9 @@ public class LeaveDTOs {
         @NotBlank private String leaveType;
         @NotNull  private LocalDate startDate;
         @NotNull  private LocalDate endDate;
-        @NotBlank private String reason;
+        @NotBlank 
+        @jakarta.validation.constraints.Size(max = 255, message = "Reason cannot exceed 255 characters")
+        private String reason;
         private String attachmentUrl;
         private String attachmentFileName;
         private Long managerId;       // optional — for two-step approval
