@@ -176,9 +176,9 @@ public class EmployeeService {
             userCacheService.evict(emp.getEmail());
         }
         if (entityManager != null) {
-            entityManager.createQuery("UPDATE LeaveRequest l SET l.manager = null WHERE l.manager.id = :id")
+            entityManager.createQuery("UPDATE LeaveRequest l SET l.reviewedBy = null WHERE l.reviewedBy.id = :id")
                     .setParameter("id", id).executeUpdate();
-            entityManager.createQuery("UPDATE LeaveRequest l SET l.approvedBy = null WHERE l.approvedBy.id = :id")
+            entityManager.createQuery("UPDATE LeaveRequest l SET l.cancellationReviewedBy = null WHERE l.cancellationReviewedBy.id = :id")
                     .setParameter("id", id).executeUpdate();
             entityManager.createQuery("UPDATE Onboarding o SET o.assignedHr = null WHERE o.assignedHr.id = :id")
                     .setParameter("id", id).executeUpdate();
