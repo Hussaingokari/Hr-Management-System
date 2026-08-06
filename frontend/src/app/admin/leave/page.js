@@ -33,9 +33,8 @@ function Badge({ status }) {
 }
 
 export default function AdminLeavePage() {
-  const [tab, setTab]                   = useState('MANAGER_PENDING');
-  const [managerPending, setManagerPending] = useState([]);
-  const [hrPending, setHrPending]       = useState([]);
+  const [tab, setTab] = useState('PENDING');
+  const [pendingLeaves, setPendingLeaves] = useState([]);
   const [cancellations, setCancellations] = useState([]);
   const [loading, setLoading]           = useState(true);
   const [actioning, setActioning]       = useState(null);
@@ -211,7 +210,7 @@ useEffect(() => {
           Leave Approvals
         </h1>
         <p style={{ fontSize: '13px', color: '#94a3b8' }}>
-          Two-stage approval: Manager → HR → Approved
+          Manage employee leave requests and cancellations
         </p>
       </div>
 

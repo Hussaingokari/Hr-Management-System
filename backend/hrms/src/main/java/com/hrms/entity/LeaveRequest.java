@@ -7,17 +7,29 @@ import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * A single leave request.
+ *
+ * Approval model (real-world, no "Manager" role):
+ * Employee applies -> status = PENDING
+ * ANY Admin or HR user can Approve or Reject it (first one wins).
+ * -> status = APPROVED or REJECTED
+ *
+ * There is no forwarding step. Whoever from Admin/HR opens the
+ * queue first and acts on it settles the request; the row simply
+ * disappears from everyone else's pending queue.
+ */
 @Entity
 @Table(name = "leave_requests")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class LeaveRequest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Version
-    private Long version;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "employee_id", nullable = false)
@@ -35,7 +47,7 @@ public class LeaveRequest {
     private int totalDays;
     private String reason;
 
-    // File attachment (ex medical certificate)
+    // File attachment (e.g. medical certificate)
     private String attachmentUrl;
     private String attachmentFileName;
 
@@ -43,41 +55,30 @@ public class LeaveRequest {
     @Builder.Default
     private LeaveStatus status = LeaveStatus.PENDING;
 
-    // Two-step approval: Manager  HR
-
+    // Whoever (Admin or HR) approved/rejected it
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "manager_id")
-    private Employee manager;
+    @JoinColumn(name = "reviewed_by")
+    private Employee reviewedBy;
 
-    @Enumerated(EnumType.STRING)
-    private ApprovalStage approvalStage;   //managerpending,managerapproved,hrpending,hr approved, rejected
-
-    private String managerRemarks;
-    private LocalDateTime managerActionAt;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "approved_by")
-    private Employee approvedBy;          // Final hr approver
-
-    private String remarks;
+    private String remarks; // reviewer's note on approve/reject
     private LocalDateTime appliedAt;
     private LocalDateTime actionAt;
 
-    //  Cancellation request for already-approved leaves
+    // Cancellation request for already-approved leaves
     private String cancellationReason;
     private LocalDateTime cancellationRequestedAt;
-    private String cancellationRemarks;     // HR's note when confirming/denying
+    private String cancellationRemarks; // reviewer's note when confirming/denying
     private LocalDateTime cancellationActionAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cancellation_reviewed_by")
+    private Employee cancellationReviewedBy;
 
     @PrePersist
     protected void onCreate() {
         appliedAt = LocalDateTime.now();
-        if (approvalStage == null) {
-            approvalStage = ApprovalStage.MANAGER_PENDING;
+        if (status == null) {
+            status = LeaveStatus.PENDING;
         }
-    }
-
-    public enum ApprovalStage {
-        MANAGER_PENDING, MANAGER_APPROVED, HR_PENDING, HR_APPROVED, REJECTED
     }
 }

@@ -29,14 +29,8 @@ export const getPendingLeaves = (page = 0, size = 10) =>
 export const getPendingCancellations = (page = 0, size = 100) =>
   api.get(`/api/leaves/pending-cancellations?page=${page}&size=${size}`);
 
-export const managerAction = (id, action, remarks) =>
-  api.put(`/api/leaves/${id}/manager-action`, {
-    action: action,
-    remarks: remarks,
-  });
-
-export const hrAction = (id, action, remarks) =>
-  api.put(`/api/leaves/${id}/hr-action`, {
+export const leaveAction = (id, action, remarks) =>
+  api.put(`/api/leaves/${id}/action`, {
     action: action,
     remarks: remarks,
   });

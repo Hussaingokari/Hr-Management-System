@@ -1,6 +1,5 @@
 package com.hrms.dto;
 
-import com.hrms.entity.LeaveRequest.ApprovalStage;
 import com.hrms.enums.LeaveStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -13,31 +12,35 @@ public class LeaveDTOs {
 
     @Data
     public static class CreateRequest {
-        @NotBlank private String leaveType;
-        @NotNull  private LocalDate startDate;
-        @NotNull  private LocalDate endDate;
-        @NotBlank 
-        @jakarta.validation.constraints.Size(max = 255, message = "Reason cannot exceed 255 characters")
+        @NotBlank
+        private String leaveType;
+        @NotNull
+        private LocalDate startDate;
+        @NotNull
+        private LocalDate endDate;
+        @NotBlank
         private String reason;
         private String attachmentUrl;
         private String attachmentFileName;
-        private Long managerId;       // optional — for two-step approval
+        // no managerId — every request goes straight into the shared Admin/HR queue
     }
 
     @Data
     public static class ActionRequest {
-        @NotNull private LeaveStatus action;  // APPROVED or REJECTED
+        @NotNull
+        private LeaveStatus action; // APPROVED or REJECTED
         private String remarks;
     }
 
     @Data
     public static class CancelRequest {
-        private String reason;   // why the employee wants to cancel (optional)
+        private String reason; // why the employee wants to cancel (optional)
     }
 
     @Data
     public static class CancelActionRequest {
-        @NotNull private Boolean approve;   // true = confirm cancellation, false = deny
+        @NotNull
+        private Boolean approve; // true = confirm cancellation, false = deny
         private String remarks;
     }
 
@@ -55,18 +58,16 @@ public class LeaveDTOs {
         private String attachmentUrl;
         private String attachmentFileName;
         private LeaveStatus status;
-        private ApprovalStage approvalStage;
-        private String managerName;
-        private String managerRemarks;
-        private LocalDateTime managerActionAt;
-        private String approvedByName;
+        private String reviewedByName; // whichever Admin/HR actioned it
         private String remarks;
         private LocalDateTime appliedAt;
+        private LocalDateTime actionAt;
         // Cancellation tracking
         private String cancellationReason;
         private LocalDateTime cancellationRequestedAt;
         private String cancellationRemarks;
         private LocalDateTime cancellationActionAt;
+        private String cancellationReviewedByName;
     }
 
     @Data

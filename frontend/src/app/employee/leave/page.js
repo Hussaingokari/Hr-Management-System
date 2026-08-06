@@ -31,8 +31,7 @@ const LEAVE_TYPES = ['ANNUAL', 'SICK', 'CASUAL', 'PATERNITY', 'MATERNITY', 'UNPA
 export default function LeavePage() {
   const [leaves, setLeaves] = useState([]);
   const [balance, setBalance] = useState([]);
-  const [managers, setManagers] = useState([]);
-  const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [cancelling, setCancelling] = useState(null);
@@ -47,7 +46,7 @@ export default function LeavePage() {
     startDate: '',
     endDate: '',
     reason: '',
-    managerId: '',
+    
   });
 
   const fetchAll = useCallback(async () => {
@@ -73,43 +72,13 @@ export default function LeavePage() {
     }
   }, [page]);
 
-  const fetchManagers = useCallback(async () => {
-    try {
-      const res = await api.get('/api/employees/managers');
-      console.log('Full response:', res);
-      console.log('Response data:', res.data);
-      console.log('Response data.data:', res.data?.data);
-
-      const all =
-        res.data?.data?.content ||   // paginated
-        res.data?.data ||            // list directly
-        res.data?.content ||         // another format
-        res.data ||                  // raw data
-        [];
-
-      console.log('Managers list:', all);
-      console.log('Managers count:', all.length);
-
-      if (Array.isArray(all) && all.length > 0) {
-        setManagers(all);
-        setForm(prev => ({ ...prev, managerId: all[0].id }));
-      } else {
-        console.warn('No managers found in response');
-      }
-    } catch (err) {
-      console.error('fetchManagers status:', err.response?.status);
-      console.error('fetchManagers data:', err.response?.data);
-      console.error('fetchManagers message:', err.message);
-    }
-  }, []);
-
+  
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchAll();
-      fetchManagers();
     }, 0);
     return () => clearTimeout(timer);
-  }, [fetchAll, fetchManagers]);
+  }, [fetchAll]);
 
   const handleApply = async (e) => {
     e.preventDefault();
@@ -129,10 +98,6 @@ export default function LeavePage() {
       toast.error('End date must be after start date');
       return;
     }
-    if (!form.managerId) {
-      toast.error('Please select a manager');
-      return;
-    }
     if (!form.reason || form.reason.trim() === '') {
       toast.error('Please enter a reason for the leave');
       return;
@@ -144,7 +109,6 @@ export default function LeavePage() {
         startDate: form.startDate,
         endDate: form.endDate,
         reason: form.reason,
-        managerId: parseInt(form.managerId),
       });
       toast.success('Leave applied successfully!');
       setShowForm(false);
@@ -153,7 +117,7 @@ export default function LeavePage() {
         startDate: '',
         endDate: '',
         reason: '',
-        managerId: managers.length > 0 ? managers[0].id : '',
+        
       });
       fetchAll();
     } catch (err) {
@@ -386,69 +350,6 @@ export default function LeavePage() {
                     }}
                   />
                 </div>
-              </div>
-
-              {/* Manager Dropdown */}
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ fontSize: '13px', fontWeight: '600', color: '#374151', display: 'block', marginBottom: '6px' }}>
-                  Send To (Manager) <span style={{ color: '#ef4444' }}>*</span>
-                </label>
-                <select
-                  value={form.managerId}
-                  onChange={e => setForm(prev => ({ ...prev, managerId: e.target.value }))}
-                  style={{
-                    width: '100%', padding: '10px 12px',
-                    border: '1.5px solid #e2e8f0', borderRadius: '10px',
-                    fontSize: '13px', outline: 'none',
-                    background: 'white', color: '#1e293b',
-                  }}
-                  onFocus={e => e.target.style.borderColor = '#1e3a5f'}
-                  onBlur={e => e.target.style.borderColor = '#e2e8f0'}
-                >
-                  <option value="" style={{ color: '#1e293b', background: 'white' }}>
-                    Select Manager / HR...
-                  </option>
-                  {managers.map(m => (
-                    <option key={m.id} value={m.id} style={{ color: '#1e293b', background: 'white' }}>
-                      {m.firstName} {m.lastName} — {m.role}
-                      {m.department ? ` (${m.department})` : ''}
-                    </option>
-                  ))}
-                </select>
-                {managers.length === 0 && (
-                  <div style={{ fontSize: '11px', color: '#ef4444', marginTop: '4px' }}>
-                    No managers found. Contact admin.
-                  </div>
-                )}
-              </div>
-
-              <div style={{ marginBottom: '24px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                  <label style={{ fontSize: '13px', fontWeight: '600', color: '#374151' }}>
-                    Reason <span style={{ color: '#ef4444' }}>*</span>
-                  </label>
-                  <span style={{ fontSize: '12px', color: form.reason.length === 255 ? '#ef4444' : '#94a3b8' }}>
-                    {form.reason.length}/255
-                  </span>
-                </div>
-                <textarea
-                  className="leave-reason-textarea"
-                  value={form.reason}
-                  onChange={e => setForm(prev => ({ ...prev, reason: e.target.value }))}
-                  placeholder="Enter reason for leave..."
-                  rows={3}
-                  maxLength={255}
-                  style={{
-                    width: '100%', padding: '10px 12px',
-                    border: '1.5px solid #e2e8f0', borderRadius: '10px',
-                    fontSize: '13px', outline: 'none', resize: 'vertical',
-                    boxSizing: 'border-box', fontFamily: 'inherit',
-                    color: '#1e293b', background: 'white',
-                    colorScheme: 'light',
-                  }}
-                  onFocus={e => e.target.style.borderColor = '#1e3a5f'}
-                  onBlur={e => e.target.style.borderColor = '#e2e8f0'}
-                />
               </div>
 
               {/* Buttons */}
