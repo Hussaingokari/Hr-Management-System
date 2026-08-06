@@ -4,6 +4,7 @@ import {
   getAdminNotifications,
   getAdminUnreadCount,
   markAdminNotificationRead,
+  markAllAdminNotificationsRead,
 } from '@/lib/adminApi';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
@@ -82,8 +83,7 @@ export default function AdminNotificationsPage() {
   const handleMarkAll = async () => {
     setMarkingAll(true);
     try {
-      const unread = notifications.filter(n => !n.isRead);
-      await Promise.all(unread.map(n => markAdminNotificationRead(n.id)));
+      await markAllAdminNotificationsRead();
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
       setUnreadCount(0);
       toast.success('All notifications marked as read!');

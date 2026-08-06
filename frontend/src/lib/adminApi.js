@@ -119,4 +119,4 @@ export const markAdminNotificationRead = (id) =>
   api.put(`/api/notifications/${id}/read`);
 
 export const markAllAdminNotificationsRead = () =>
-  api.put('/api/notifications/read-all');
+  api.put('/api/notifications/mark-all-read');

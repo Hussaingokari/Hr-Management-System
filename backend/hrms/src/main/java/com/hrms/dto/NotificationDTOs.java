@@ -15,6 +15,7 @@ public class NotificationDTOs {
         private NotificationType type;
         private String referenceType;
         private Long referenceId;
+        @com.fasterxml.jackson.annotation.JsonProperty("isRead")
         private boolean isRead;
         private LocalDateTime createdAt;
     }

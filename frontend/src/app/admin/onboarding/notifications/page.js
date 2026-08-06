@@ -47,16 +47,16 @@ export default function NotificationsPage() {
 
     useEffect(() => { fetchData(); }, [fetchData]);
 
-    const unreadCount = useMemo(() => notifications.filter(n => !n.read).length, [notifications]);
+    const unreadCount = useMemo(() => notifications.filter(n => !n.isRead).length, [notifications]);
 
     const visible = useMemo(() => {
-        if (tab === 'UNREAD') return notifications.filter(n => !n.read);
+        if (tab === 'UNREAD') return notifications.filter(n => !n.isRead);
         return notifications;
     }, [notifications, tab]);
 
     const handleOpen = async (n) => {
-        if (!n.read) {
-            setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, read: true } : x));
+        if (!n.isRead) {
+            setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, isRead: true } : x));
             try {
                 await api.put(`/api/notifications/${n.id}/read`);
             } catch (err) {
@@ -76,7 +76,7 @@ export default function NotificationsPage() {
         if (unreadCount === 0) return;
         setMarkingAll(true);
         const prev = notifications;
-        setNotifications(p => p.map(x => ({ ...x, read: true })));
+        setNotifications(p => p.map(x => ({ ...x, isRead: true })));
         try {
             await api.put('/api/notifications/mark-all-read');
             toast.success('All notifications marked as read');
@@ -151,10 +151,10 @@ export default function NotificationsPage() {
                                 style={{
                                     display: 'flex', alignItems: 'flex-start', gap: '14px', padding: '16px 20px',
                                     borderTop: i === 0 ? 'none' : '1px solid #f1f5f9', cursor: 'pointer',
-                                    background: n.read ? 'white' : '#f8faff',
+                                    background: n.isRead ? 'white' : '#f8faff',
                                 }}
                                 onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
-                                onMouseLeave={e => e.currentTarget.style.background = n.read ? 'white' : '#f8faff'}
+                                onMouseLeave={e => e.currentTarget.style.background = n.isRead ? 'white' : '#f8faff'}
                             >
                                 <div style={{
                                     width: '36px', height: '36px', borderRadius: '10px', flexShrink: 0,
@@ -164,7 +164,7 @@ export default function NotificationsPage() {
                                     {meta.icon}
                                 </div>
                                 <div style={{ flex: 1, minWidth: 0 }}>
-                                    <div style={{ fontSize: '13px', fontWeight: n.read ? '600' : '800', color: '#1e293b' }}>
+                                    <div style={{ fontSize: '13px', fontWeight: n.isRead ? '600' : '800', color: '#1e293b' }}>
                                         {n.title}
                                     </div>
                                     {n.message && (
@@ -177,7 +177,7 @@ export default function NotificationsPage() {
                                     <div style={{ fontSize: '11px', color: '#94a3b8', whiteSpace: 'nowrap' }}>
                                         {timeAgo(n.createdAt)}
                                     </div>
-                                    {!n.read && (
+                                    {!n.isRead && (
                                         <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#4f46e5' }} />
                                     )}
                                 </div>

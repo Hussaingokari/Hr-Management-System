@@ -99,7 +99,7 @@ export default function NotificationsPage() {
     setMarkingAll(true);
     try {
       await api.put('/api/notifications/mark-all-read');
-      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
       setUnreadCount(0);
       toast.success('All caught up!');
     } catch (err) {
@@ -204,16 +204,16 @@ export default function NotificationsPage() {
               return (
                 <div
                   key={n.id}
-                  onClick={() => { if (!n.read) handleMarkRead(n.id); }}
+                  onClick={() => { if (!n.isRead) handleMarkRead(n.id); }}
                   style={{
                     display: 'flex', gap: '16px', alignItems: 'flex-start',
-                    padding: '18px 22px', cursor: n.read ? 'default' : 'pointer',
+                    padding: '18px 22px', cursor: n.isRead ? 'default' : 'pointer',
                     borderTop: i === 0 ? 'none' : '1px solid #f1f5f9',
-                    background: n.read ? 'white' : '#f8faff',
+                    background: n.isRead ? 'white' : '#f8faff',
                     transition: 'background 0.15s',
                   }}
-                  onMouseEnter={e => { if (!n.read) e.currentTarget.style.background = '#f0f4ff'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = n.read ? 'white' : '#f8faff'; }}
+                  onMouseEnter={e => { if (!n.isRead) e.currentTarget.style.background = '#f0f4ff'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = n.isRead ? 'white' : '#f8faff'; }}
                 >
                   <div style={{
                     width: '44px', height: '44px', flexShrink: 0, borderRadius: '12px',
@@ -225,10 +225,10 @@ export default function NotificationsPage() {
 
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                      <span style={{ fontSize: '15px', fontWeight: n.read ? '600' : '800', color: '#1e293b' }}>
+                      <span style={{ fontSize: '15px', fontWeight: n.isRead ? '600' : '800', color: '#1e293b' }}>
                         {n.title}
                       </span>
-                      {!n.read && (
+                      {!n.isRead && (
                         <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#4f46e5', flexShrink: 0 }} />
                       )}
                     </div>
@@ -240,7 +240,7 @@ export default function NotificationsPage() {
                     </div>
                   </div>
 
-                  {!n.read && (
+                  {!n.isRead && (
                     <button
                       onClick={e => { e.stopPropagation(); handleMarkRead(n.id); }}
                       style={{
