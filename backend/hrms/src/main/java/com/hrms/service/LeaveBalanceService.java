@@ -30,7 +30,7 @@ public class LeaveBalanceService {
     @Transactional
     public LeaveBalance getOrCreateBalance(Employee employee, String leaveType) {
         int year = Year.now().getValue();
-        return balanceRepo.findByEmployeeAndLeaveTypeAndYear(employee, leaveType, year)
+        LeaveBalance balance = balanceRepo.findByEmployeeAndLeaveTypeAndYear(employee, leaveType, year)
                 .orElseGet(() -> {
                     return LeaveBalance.builder()
                             .employee(employee)
@@ -41,6 +41,19 @@ public class LeaveBalanceService {
                             .remaining(DEFAULT_QUOTA.getOrDefault(leaveType, 12.0))
                             .build();
                 });
+
+        // Sync with policy if it was created with an old default (e.g. 12.0 for MATERNITY)
+        if (DEFAULT_QUOTA.containsKey(leaveType)) {
+            double expected = DEFAULT_QUOTA.get(leaveType);
+            if (balance.getTotalAllotted() != expected) {
+                balance.setTotalAllotted(expected);
+                if (balance.getId() != null) {
+                    balanceRepo.save(balance);
+                }
+            }
+        }
+        
+        return balance;
     }
 
     public boolean hasSufficientBalance(Employee employee, String leaveType, int requestedDays) {
@@ -62,8 +75,16 @@ public class LeaveBalanceService {
         balanceRepo.save(balance);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<LeaveDTOs.BalanceResponse> getAllBalances(Employee employee) {
+        // Force creation and sync for all default quotas so they appear on the dashboard
+        for (String type : DEFAULT_QUOTA.keySet()) {
+            LeaveBalance b = getOrCreateBalance(employee, type);
+            if (b.getId() == null) {
+                balanceRepo.save(b);
+            }
+        }
+        
         return balanceRepo.findByEmployeeAndYear(employee, Year.now().getValue())
                 .stream()
                 .map(this::toResponse)

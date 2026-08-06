@@ -89,7 +89,7 @@ public class LeaveService {
 
         int pendingDays = leaveRepo.sumPendingDaysByEmployeeAndLeaveType(emp, req.getLeaveType());
 
-        if (!leaveBalanceService.hasSufficientBalance(
+        if (!"UNPAID".equalsIgnoreCase(req.getLeaveType()) && !leaveBalanceService.hasSufficientBalance(
                 emp, req.getLeaveType(), days + pendingDays)) {
             throw new IllegalStateException(
                     "Insufficient leave balance for "
