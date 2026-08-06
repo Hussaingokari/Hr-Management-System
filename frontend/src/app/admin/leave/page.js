@@ -224,7 +224,7 @@ export default function AdminLeavePage() {
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontSize: '12px', fontWeight: 700, color: 'white', flexShrink: 0,
                     }}>
-                      {l.employeeName?.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                      {(l.employeeName || '').split(' ').map(n => n[0] || '').join('').slice(0, 2)}
                     </div>
                     <div>
                       <div style={{ fontSize: '13px', fontWeight: 700, color: '#241F47' }}>{l.employeeName}</div>

@@ -312,7 +312,7 @@ export default function AdminDashboard() {
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           fontSize: '11px', fontWeight: '700', color: '#3b82f6',
                         }}>
-                          {a.employeeName?.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                          {(a.employeeName || '').split(' ').map(n => n[0] || '').join('').slice(0, 2)}
                         </div>
                         <div>
                           <div style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>
@@ -438,7 +438,7 @@ export default function AdminDashboard() {
                   background: a.color + '15',
                   borderRadius: '10px',
                   display: 'flex', alignItems: 'center',
-                  justify: 'center', fontSize: '20px', flexShrink: 0,
+                  justifyContent: 'center', fontSize: '20px', flexShrink: 0,
                 }}>
                   {a.icon}
                 </div>
