@@ -85,10 +85,11 @@ export default function NotificationsPage() {
   }, [fetchNotifications]);
 
   const handleMarkRead = async (id) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
     setUnreadCount(prev => Math.max(0, prev - 1));
     try {
       await markNotificationRead(id);
+      window.dispatchEvent(new Event('notificationsUpdated'));
     } catch (err) {
       toast.error('Failed to mark as read');
       fetchNotifications();
@@ -102,6 +103,7 @@ export default function NotificationsPage() {
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
       setUnreadCount(0);
       toast.success('All caught up!');
+      window.dispatchEvent(new Event('notificationsUpdated'));
     } catch (err) {
       toast.error('Failed to mark all as read');
     } finally {

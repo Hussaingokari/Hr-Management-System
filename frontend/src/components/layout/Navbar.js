@@ -300,9 +300,16 @@ export default function Navbar() {
     };
     fetchUnreadCount();
     const interval = setInterval(fetchUnreadCount, 30000);
+    
+    const handleUpdate = () => {
+      fetchUnreadCount();
+    };
+    window.addEventListener('notificationsUpdated', handleUpdate);
+    
     return () => {
       active = false;
       clearInterval(interval);
+      window.removeEventListener('notificationsUpdated', handleUpdate);
     };
   }, []);
  
