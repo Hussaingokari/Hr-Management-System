@@ -3,8 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   getPendingLeaves,
   getPendingCancellations,
-  managerAction,
-  hrAction,
+  leaveAction,
   cancelAction,
 } from '@/lib/adminApi';
 import toast from 'react-hot-toast';
