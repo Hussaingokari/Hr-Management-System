@@ -43,32 +43,13 @@ export default function AdminLeavePage() {
 const fetchData = useCallback(async () => {
   setLoading(true);
   try {
-    // Fetch all pending leaves in one call
-    const res = await api.get(
-      `/api/leaves/pending?page=0&size=100`
-    );
+    const res = await api.get(`/api/leaves/pending?page=0&size=100`);
     const all = res.data?.data?.content || [];
 
-    console.log('All leaves:', all.map(l => ({
-      id: l.id,
-      name: l.employeeName,
-      stage: l.approvalStage || l.status,
-      leaveType: l.leaveType
-    })));
-
-    // Filter by tab on client side
-    if (tab === 'MANAGER_PENDING') {
-      const filtered = all.filter(l =>
-        (l.approvalStage || l.status) === 'MANAGER_PENDING' ||
-        (l.approvalStage || l.status) === 'PENDING'
-      );
-      setManagerPending(filtered);
-    } else if (tab === 'HR_PENDING') {
-      const filtered = all.filter(l =>
-        (l.approvalStage || l.status) === 'HR_PENDING'
-      );
-      setHrPending(filtered);
-    } else if (tab === 'CANCEL_PENDING') {
+    if (tab === 'PENDING') {
+      const filtered = all.filter(l => l.status === 'PENDING');
+      setPendingLeaves(filtered);
+    } else if (tab === 'CANCELLATIONS') {
       try {
         const cancelRes = await getPendingCancellations(page, 10);
         setCancellations(cancelRes.data?.data?.content || []);
@@ -76,8 +57,6 @@ const fetchData = useCallback(async () => {
         console.error('Failed to fetch pending cancellations:', e);
         setCancellations([]);
       }
-    } else {
-      // Handle cases
     }
   } catch (err) {
     toast.error('Failed to load leaves');
@@ -94,67 +73,23 @@ useEffect(() => {
   return () => clearTimeout(timer);
 }, [fetchData]);
 
-  // Manager approves → goes to HR_PENDING
-  const handleManagerAction = async (id, action) => {
+  const handleAction = async (id, action) => {
     setActioning(id + action);
     try {
-      await managerAction(
+      await leaveAction(
         id, action,
-        action === 'APPROVED'
-          ? 'Approved by Manager — forwarded to HR'
-          : 'Rejected by Manager'
+        action === 'APPROVED' ? 'Approved' : 'Rejected'
       );
-      toast.success(
-        action === 'APPROVED'
-          ? '✅ Forwarded to HR for verification!'
-          : '❌ Leave rejected!'
-      );
-      setManagerPending(prev => prev.map(l => {
+      toast.success(action === 'APPROVED' ? '✅ Leave approved!' : '❌ Leave rejected!');
+      setPendingLeaves(prev => prev.map(l => {
         if (l.id === id) {
-          return {
-            ...l,
-            approvalStage: action === 'APPROVED' ? 'HR_PENDING' : 'REJECTED',
-            status: action === 'APPROVED' ? 'MANAGER_PENDING' : 'REJECTED',
-            actionTaken: true
-          };
+          return { ...l, status: action, actionTaken: true };
         }
         return l;
       }));
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Action failed');
-    } finally {
-      setActioning(null);
-    }
-  };
-
-  // HR approves → APPROVED (final)
-  const handleHrAction = async (id, action) => {
-    setActioning(id + action);
-    try {
-      await hrAction(
-        id, action,
-        action === 'APPROVED'
-          ? 'Approved by HR'
-          : 'Rejected by HR'
-      );
-      toast.success(
-        action === 'APPROVED'
-          ? '✅ Leave approved successfully!'
-          : '❌ Leave rejected!'
-      );
-      setHrPending(prev => prev.map(l => {
-        if (l.id === id) {
-          return {
-            ...l,
-            approvalStage: action === 'APPROVED' ? 'APPROVED' : 'REJECTED',
-            status: action === 'APPROVED' ? 'APPROVED' : 'REJECTED',
-            actionTaken: true
-          };
-        }
-        return l;
-      }));
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Action failed');
+      const msg = err.response?.data?.message || 'Action failed';
+      toast.error(msg.includes('already') ? '⚡ Someone already actioned this one' : msg);
     } finally {
       setActioning(null);
     }
@@ -165,21 +100,12 @@ useEffect(() => {
     try {
       await cancelAction(
         id, approve,
-        approve
-          ? 'Cancellation confirmed by HR'
-          : 'Cancellation denied by HR'
+        approve ? 'Cancellation confirmed by HR' : 'Cancellation denied by HR'
       );
-      toast.success(
-        approve ? 'Cancellation approved!' : 'Cancellation denied!'
-      );
+      toast.success(approve ? 'Cancellation approved!' : 'Cancellation denied!');
       setCancellations(prev => prev.map(l => {
         if (l.id === id) {
-          return {
-            ...l,
-            approvalStage: approve ? 'CANCELLED' : 'APPROVED',
-            status: approve ? 'CANCELLED' : 'APPROVED',
-            actionTaken: true
-          };
+          return { ...l, status: approve ? 'CANCELLED' : 'APPROVED', actionTaken: true };
         }
         return l;
       }));
@@ -190,20 +116,15 @@ useEffect(() => {
     }
   };
 
-  const currentData =
-    tab === 'MANAGER_PENDING' ? managerPending :
-    tab === 'HR_PENDING'      ? hrPending :
-    cancellations;
+  const currentData = tab === 'PENDING' ? pendingLeaves : cancellations;
 
   const tabs = [
-    { key: 'MANAGER_PENDING', label: `Manager Approval (${managerPending.length})` },
-    { key: 'HR_PENDING',      label: `HR Verification (${hrPending.length})` },
-    { key: 'CANCELLATIONS',   label: `Cancellations (${cancellations.length})` },
+    { key: 'PENDING',       label: `Pending Approvals (${pendingLeaves.length})` },
+    { key: 'CANCELLATIONS', label: `Cancellations (${cancellations.length})` },
   ];
 
   return (
     <div>
-      {/* Header */}
       <div style={{ marginBottom: '24px' }}>
         <h1 style={{ fontSize: '22px', fontWeight: '800', color: '#1e293b', marginBottom: '4px' }}>
           Leave Approvals
@@ -213,32 +134,6 @@ useEffect(() => {
         </p>
       </div>
 
-      {/* Flow indicator */}
-      <div style={{
-        background: 'white', borderRadius: '12px', padding: '14px 20px',
-        border: '1px solid #e2e8f0', marginBottom: '20px',
-        display: 'flex', alignItems: 'center', gap: '12px',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ background: '#eff6ff', color: '#3b82f6', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '700' }}>
-            1. Employee Applies
-          </span>
-          <span style={{ color: '#94a3b8' }}>→</span>
-          <span style={{ background: '#fff7ed', color: '#f59e0b', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '700' }}>
-            2. Manager Approves
-          </span>
-          <span style={{ color: '#94a3b8' }}>→</span>
-          <span style={{ background: '#fdf4ff', color: '#9333ea', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '700' }}>
-            3. HR Verifies
-          </span>
-          <span style={{ color: '#94a3b8' }}>→</span>
-          <span style={{ background: '#dcfce7', color: '#16a34a', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '700' }}>
-            4. Approved ✅
-          </span>
-        </div>
-      </div>
-
-      {/* Tabs */}
       <div style={{
         display: 'flex', gap: '4px',
         background: '#f1f5f9', borderRadius: '10px',
@@ -265,13 +160,11 @@ useEffect(() => {
         ))}
       </div>
 
-      {/* Table */}
       <div className="table-responsive" style={{
         background: 'white', borderRadius: '12px',
         border: '1px solid #e2e8f0',
         boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
       }}>
-        {/* Table Header */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: '2fr 1.2fr 1fr 1fr 0.5fr 1.5fr 2fr',
@@ -296,9 +189,7 @@ useEffect(() => {
               All clear!
             </div>
             <div style={{ fontSize: '13px', color: '#94a3b8' }}>
-              No {tab === 'MANAGER_PENDING' ? 'leaves awaiting manager approval'
-                : tab === 'HR_PENDING' ? 'leaves awaiting HR verification'
-                : 'pending cancellations'}
+              No {tab === 'PENDING' ? 'leaves awaiting approval' : 'pending cancellations'}
             </div>
           </div>
         ) : (
@@ -310,7 +201,6 @@ useEffect(() => {
                 padding: '14px 20px', borderBottom: '1px solid #f1f5f9',
                 alignItems: 'center',
               }}>
-                {/* Employee */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <div style={{
                     width: '34px', height: '34px', borderRadius: '50%',
@@ -340,12 +230,11 @@ useEffect(() => {
                 </div>
                 <Badge status={l.approvalStage || l.status}/>
 
-                {/* Actions */}
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  {tab === 'MANAGER_PENDING' && (
+                  {tab === 'PENDING' && (
                     <>
                       <button
-                        onClick={() => handleManagerAction(l.id, 'APPROVED')}
+                        onClick={() => handleAction(l.id, 'APPROVED')}
                         disabled={!!actioning || l.actionTaken}
                         style={{
                           padding: '6px 12px', background: l.actionTaken ? '#f1f5f9' : '#dcfce7',
@@ -353,37 +242,10 @@ useEffect(() => {
                           borderRadius: '6px', fontSize: '11px', fontWeight: '700',
                           cursor: l.actionTaken ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap',
                         }}>
-                        {actioning === l.id + 'APPROVED' ? '⏳' : '✓ Forward to HR'}
-                      </button>
-                      <button
-                        onClick={() => handleManagerAction(l.id, 'REJECTED')}
-                        disabled={!!actioning || l.actionTaken}
-                        style={{
-                          padding: '6px 12px', background: l.actionTaken ? '#f1f5f9' : '#fee2e2',
-                          color: l.actionTaken ? '#94a3b8' : '#dc2626', border: '1px solid ' + (l.actionTaken ? '#e2e8f0' : '#fecaca'),
-                          borderRadius: '6px', fontSize: '11px', fontWeight: '700',
-                          cursor: l.actionTaken ? 'not-allowed' : 'pointer',
-                        }}>
-                        {actioning === l.id + 'REJECTED' ? '⏳' : '✗ Reject'}
-                      </button>
-                    </>
-                  )}
-
-                  {tab === 'HR_PENDING' && (
-                    <>
-                      <button
-                        onClick={() => handleHrAction(l.id, 'APPROVED')}
-                        disabled={!!actioning || l.actionTaken}
-                        style={{
-                          padding: '6px 12px', background: l.actionTaken ? '#f1f5f9' : '#dcfce7',
-                          color: l.actionTaken ? '#94a3b8' : '#16a34a', border: '1px solid ' + (l.actionTaken ? '#e2e8f0' : '#bbf7d0'),
-                          borderRadius: '6px', fontSize: '11px', fontWeight: '700',
-                          cursor: l.actionTaken ? 'not-allowed' : 'pointer',
-                        }}>
                         {actioning === l.id + 'APPROVED' ? '⏳' : '✓ Approve'}
                       </button>
                       <button
-                        onClick={() => handleHrAction(l.id, 'REJECTED')}
+                        onClick={() => handleAction(l.id, 'REJECTED')}
                         disabled={!!actioning || l.actionTaken}
                         style={{
                           padding: '6px 12px', background: l.actionTaken ? '#f1f5f9' : '#fee2e2',
@@ -426,7 +288,6 @@ useEffect(() => {
               </div>
             ))}
 
-            {/* Pagination */}
             {totalPages > 1 && (
               <div style={{ padding: '14px 20px', display: 'flex', justifyContent: 'center', gap: '8px', borderTop: '1px solid #e2e8f0' }}>
                 <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}
