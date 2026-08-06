@@ -141,13 +141,7 @@ public class NotificationService {
 
     @Transactional
     public void markAllAsRead(Employee employee) {
-        notificationRepo
-                .findByRecipientAndIsReadFalse(employee,
-                        Pageable.unpaged())
-                .forEach(n -> {
-                    n.setRead(true);
-                    notificationRepo.save(n);
-                });
+        notificationRepo.markAllAsReadByRecipient(employee);
     }
 
     private NotificationDTOs.Response toResponse(Notification n) {
