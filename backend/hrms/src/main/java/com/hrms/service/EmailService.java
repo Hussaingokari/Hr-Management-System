@@ -1,23 +1,27 @@
 package com.hrms.service;
- 
+
 import lombok.RequiredArgsConstructor;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
- 
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.core.io.ByteArrayResource;
+
 @Service
 @RequiredArgsConstructor
 public class EmailService {
- 
+
     private final JavaMailSender mailSender;
     private static final Logger log = LoggerFactory.getLogger(EmailService.class);
     private static final DateTimeFormatter DEADLINE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
- 
+
     /**
      * Send OTP email
      */
@@ -25,20 +29,20 @@ public class EmailService {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
- 
+
             helper.setTo(toEmail);
             helper.setSubject("HRMS — Password Reset OTP");
             helper.setText(buildOtpEmailHtml(employeeName, otp), true);
- 
+
             mailSender.send(message);
             log.info("OTP email sent to: {}", toEmail);
- 
+
         } catch (Exception e) {
             log.error("Failed to send OTP email to {}: {}", toEmail, e.getMessage());
             throw new RuntimeException("Failed to send email: " + e.getMessage());
         }
     }
- 
+
     /**
      * Send greeting email with template
      */
@@ -46,23 +50,23 @@ public class EmailService {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
- 
+
             String emailBody = templateBody.replace("{CANDIDATE_NAME}", candidateName);
             String styledHtmlBody = wrapWithHtmlStyling(candidateName, emailBody);
- 
+
             helper.setTo(toEmail);
             helper.setSubject(templateSubject);
             helper.setText(styledHtmlBody, true);
- 
+
             mailSender.send(message);
             log.info("Greeting email sent to: {} for candidate: {}", toEmail, candidateName);
- 
+
         } catch (Exception e) {
             log.error("Failed to send greeting email to {}: {}", toEmail, e.getMessage());
             throw new RuntimeException("Failed to send email: " + e.getMessage());
         }
     }
- 
+
     /**
      * Send document request email
      */
@@ -73,33 +77,33 @@ public class EmailService {
             LocalDate interviewDate,
             LocalDate deadline,
             String hrEmail) {
- 
+
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
- 
+
             helper.setTo(toEmail);
             helper.setSubject("Submission of Required Documents – SAITEJA INFOTECH PVT LTD");
- 
+
             String formattedInterviewDate = interviewDate != null ? interviewDate.format(DEADLINE_FORMAT) : "N/A";
             String formattedDeadline = deadline != null ? deadline.format(DEADLINE_FORMAT) : "N/A";
- 
+
             String styledHtml = wrapWithHtmlStyling(
                     candidateName,
                     buildDocumentRequestBody(candidateName, jobTitle, formattedInterviewDate, formattedDeadline,
                             hrEmail));
- 
+
             helper.setText(styledHtml, true);
             mailSender.send(message);
- 
+
             log.info("Document request email sent to {}", toEmail);
- 
+
         } catch (Exception e) {
             log.error("Failed to send document request email : {}", e.getMessage());
             throw new RuntimeException("Failed to send document request email", e);
         }
     }
- 
+
     /**
      * Generic send email method
      */
@@ -107,20 +111,52 @@ public class EmailService {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
- 
+
             helper.setTo(toEmail);
             helper.setSubject(subject);
             helper.setText(emailBody, true);
- 
+
             mailSender.send(message);
             log.info("Email sent to: {}", toEmail);
- 
+
         } catch (Exception e) {
             log.error("Failed to send email to {}: {}", toEmail, e.getMessage());
             throw new RuntimeException("Failed to send email: " + e.getMessage());
         }
     }
- 
+
+    /**
+     * Send email with PDF attachment
+     */
+    public void sendEmailWithAttachment(String toEmail, String subject, String emailBody, MultipartFile pdfFile, String attachmentFileName) {
+    try {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+        helper.setTo(toEmail);
+        helper.setSubject(subject);
+        helper.setText(emailBody, true);
+
+        // Add attachment if file is present
+        if (pdfFile != null && !pdfFile.isEmpty()) {
+            String fileName = (attachmentFileName != null && !attachmentFileName.isBlank())
+                    ? attachmentFileName
+                    : pdfFile.getOriginalFilename();
+            byte[] fileBytes = pdfFile.getBytes();
+            ByteArrayResource resource = new ByteArrayResource(fileBytes);
+            helper.addAttachment(fileName, resource);
+            log.info("Attachment added: {} ({} bytes)", fileName, fileBytes.length);
+        }
+
+        mailSender.send(message);
+        log.info("Email with attachment sent to: {}", toEmail);
+
+    } catch (Exception e) {
+        log.error("Failed to send email with attachment to {}: {}", toEmail, e.getMessage());
+        throw new RuntimeException("Failed to send email: " + e.getMessage());
+    }
+}
+
     /**
      * Build HTML for OTP email
      */
@@ -174,7 +210,7 @@ public class EmailService {
                 """
                 .formatted(name, otp);
     }
- 
+
     /**
      * Build document request email body (plain text)
      */
@@ -184,7 +220,7 @@ public class EmailService {
             String interviewDate,
             String deadline,
             String hrEmail) {
- 
+
         return "Dear " + candidateName + ",\n\n" +
                 "Greetings from SAITEJA INFOTECH PVT LTD.\n\n" +
                 "We would like to thank you for attending the interview held on " + interviewDate + " " +
@@ -210,7 +246,7 @@ public class EmailService {
                 "Human Resources Department\n" +
                 "SAITEJA INFOTECH PVT LTD";
     }
- 
+
     /**
      * Wrap email body with HTML styling
      */
@@ -221,7 +257,7 @@ public class EmailService {
                 +
                 "<h1 style=\"color: white; margin: 0; font-size: 28px; font-weight: bold;\">🏢 SAITEJA INFOTECH PRIVATE LIMITED </h1>"
                 +
- 
+
                 "<p style=\"color: #e0e0e0; margin: 8px 0 0 0; font-size: 14px;\">HR Management System</p>" +
                 "</div>" +
                 "<div style=\"background-color: white; padding: 40px; border-radius: 0 0 8px 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);\">"

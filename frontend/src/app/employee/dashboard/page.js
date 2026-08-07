@@ -9,39 +9,62 @@ import {
 import toast from 'react-hot-toast';
 import { Calendar, Coffee, Clock, Bell, Check, Loader2, Palmtree, Thermometer, Sun, Baby, ClipboardList, Leaf } from 'lucide-react';
 
-function StatCard({ label, value, sub, color, icon }) {
+function StatCard({ label, value, sub, color, icon, sparklineId, sparklinePath }) {
   return (
     <div style={{
       background: 'var(--card-bg)', borderRadius: '12px', padding: '20px',
       border: '1px solid var(--card-border)', flex: 1,
-      boxShadow: 'var(--card-shadow)',
+      boxShadow: 'var(--card-shadow)', position: 'relative', overflow: 'hidden'
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', position: 'relative', zIndex: 2 }}>
         <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: '500' }}>{label}</span>
-        <div style={{ width: '36px', height: '36px', background: color + '20', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <span style={{ fontSize: '18px' }}>{icon}</span>
+        <div style={{ 
+          width: '36px', height: '36px', background: color + '15', 
+          borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          border: `1px solid ${color}40`, color: color
+        }}>
+          {icon}
         </div>
       </div>
-      <div style={{ fontSize: '28px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px' }}>{value}</div>
-      <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{sub}</div>
+      <div style={{ fontSize: '28px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px', position: 'relative', zIndex: 2 }}>{value}</div>
+      <div style={{ fontSize: '12px', color: 'var(--text-secondary)', position: 'relative', zIndex: 2 }}>{sub}</div>
+      
+      {sparklinePath && (
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '45px', zIndex: 1, opacity: 0.9 }}>
+          <svg viewBox="0 0 200 45" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
+            <defs>
+              <linearGradient id={`grad-${sparklineId}`} x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stopColor={color} stopOpacity="0.25" />
+                <stop offset="100%" stopColor={color} stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            <path d={`${sparklinePath} L 200 45 L 0 45 Z`} fill={`url(#grad-${sparklineId})`} />
+            <path d={sparklinePath} stroke={color} strokeWidth="2" fill="none" vectorEffect="non-scaling-stroke" />
+          </svg>
+        </div>
+      )}
     </div>
   );
 }
 
 function Badge({ status }) {
   const map = {
-    APPROVED: { bg: 'rgba(22, 163, 74, 0.15)', color: '#16a34a' },
-    PENDING: { bg: 'rgba(202, 138, 4, 0.15)', color: '#ca8a04' },
-    REJECTED: { bg: 'rgba(220, 38, 38, 0.15)', color: '#dc2626' },
-    CANCELLED: { bg: '#1E293B', color: 'var(--text-secondary)' },
-    CANCELLATION_PENDING: { bg: 'rgba(147, 51, 234, 0.15)', color: '#9333ea' },
-    PRESENT: { bg: 'rgba(22, 163, 74, 0.15)', color: '#16a34a' },
-    ABSENT: { bg: 'rgba(220, 38, 38, 0.15)', color: '#dc2626' },
-    HALF_DAY: { bg: 'rgba(217, 119, 6, 0.15)', color: '#f59e0b' },
+    APPROVED: { bg: 'rgba(22, 163, 74, 0.15)', color: '#10b981', border: '#10b981' },
+    PENDING: { bg: 'rgba(202, 138, 4, 0.15)', color: '#f59e0b', border: '#f59e0b' },
+    REJECTED: { bg: 'rgba(220, 38, 38, 0.15)', color: '#ef4444', border: '#ef4444' },
+    CANCELLED: { bg: '#1E293B', color: 'var(--text-secondary)', border: 'var(--text-secondary)' },
+    CANCELLATION_PENDING: { bg: 'rgba(147, 51, 234, 0.15)', color: '#a855f7', border: '#a855f7' },
+    PRESENT: { bg: 'transparent', color: '#10b981', border: '#10b981' },
+    ABSENT: { bg: 'rgba(220, 38, 38, 0.15)', color: '#ef4444', border: '#ef4444' },
+    HALF_DAY: { bg: 'rgba(217, 119, 6, 0.15)', color: '#f59e0b', border: '#f59e0b' },
   };
-  const s = map[status] || { bg: '#1E293B', color: 'var(--text-secondary)' };
+  const s = map[status] || { bg: '#1E293B', color: 'var(--text-secondary)', border: 'transparent' };
   return (
-    <span style={{ background: s.bg, color: s.color, padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '700' }}>
+    <span style={{ 
+      background: s.bg, color: s.color, padding: '3px 10px', 
+      borderRadius: '20px', fontSize: '11px', fontWeight: '700',
+      border: `1px solid ${s.border}`
+    }}>
       {status?.replace(/_/g, ' ')}
     </span>
   );
@@ -58,28 +81,36 @@ function Loader() {
 
 // Same palette used across the leave pages, so balances look consistent everywhere
 const balanceStyle = {
-  ANNUAL: { color: '#4F46E5', soft: 'rgba(79, 70, 229, 0.15)', icon: <Palmtree size={18} /> },
-  SICK: { color: '#0D9488', soft: 'rgba(13, 148, 136, 0.15)', icon: <Thermometer size={18} /> },
-  CASUAL: { color: '#D97706', soft: 'rgba(217, 119, 6, 0.15)', icon: <Sun size={18} /> },
-  PATERNITY: { color: '#8B5CF6', soft: 'rgba(139, 92, 246, 0.15)', icon: <Baby size={18} /> },
-  MATERNITY: { color: '#DB2777', soft: 'rgba(219, 39, 119, 0.15)', icon: <Baby size={18} /> },
-  UNPAID: { color: 'var(--text-secondary)', soft: '#1E293B', icon: <ClipboardList size={18} /> },
+  ANNUAL: { color: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.15)', icon: <Palmtree size={14} /> },
+  SICK: { color: '#10b981', bg: 'rgba(16, 185, 129, 0.15)', icon: <Thermometer size={14} /> },
+  CASUAL: { color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.15)', icon: <Sun size={14} /> },
+  PATERNITY: { color: '#c084fc', bg: 'rgba(192, 132, 252, 0.15)', icon: <Baby size={14} /> },
+  MATERNITY: { color: '#ec4899', bg: 'rgba(236, 72, 153, 0.15)', icon: <Baby size={14} /> },
+  UNPAID: { color: '#94a3b8', bg: 'rgba(148, 163, 184, 0.15)', icon: <ClipboardList size={14} /> },
 };
 
 function MiniRing({ pct, color }) {
-  const size = 40;
+  const size = 42;
+  const strokeWidth = 3;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const dashoffset = circumference - (pct / 100) * circumference;
+
   return (
     <div style={{
       width: size, height: size, borderRadius: '50%',
-      background: `conic-gradient(${color} ${pct * 3.6}deg, #EEF0F5 0deg)`,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      flexShrink: 0,
+      flexShrink: 0, position: 'relative'
     }}>
-      <div style={{
-        width: size - 8, height: size - 8, borderRadius: '50%',
-        background: 'var(--card-bg)', display: 'flex', alignItems: 'center',
-        justifyContent: 'center', fontSize: '9px', fontWeight: 800, color,
-      }}>
+      <svg width={size} height={size} style={{ transform: 'rotate(-90deg)', position: 'absolute' }}>
+        <circle cx={size / 2} cy={size / 2} r={radius} stroke="var(--card-border)" strokeWidth={strokeWidth} fill="none" />
+        <circle
+          cx={size / 2} cy={size / 2} r={radius}
+          stroke={color} strokeWidth={strokeWidth} fill="none"
+          strokeDasharray={circumference} strokeDashoffset={dashoffset} strokeLinecap="round"
+        />
+      </svg>
+      <div style={{ fontSize: '9px', fontWeight: 800, color: 'var(--text-primary)', zIndex: 2 }}>
         {Math.round(pct)}%
       </div>
     </div>
@@ -179,13 +210,32 @@ export default function EmployeeDashboard() {
       `}</style>
 
       {/* Header */}
-      <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px' }}>
-          Dashboard
+      <div style={{ marginBottom: '24px', position: 'relative' }}>
+        <h1 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px', display: 'flex', alignItems: 'center' }}>
+          Welcome back, {user?.name}! <span style={{ fontSize: '24px', marginLeft: '8px' }}>👋</span>
         </h1>
         <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-          Welcome back, {user?.name}! Here&apos;s your overview for today.
+          Here&apos;s your overview for today.
         </p>
+
+        {/* Decorative Mountain Graphic Top Right */}
+        <div style={{ position: 'absolute', top: -20, right: -20, width: '300px', height: '100px', pointerEvents: 'none', opacity: 0.8 }}>
+          <svg viewBox="0 0 300 100" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
+            <defs>
+              <linearGradient id="mntHdr1" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stopColor="#0d9488" stopOpacity="0.8" />
+                <stop offset="100%" stopColor="var(--bg-primary)" stopOpacity="0" />
+              </linearGradient>
+              <linearGradient id="mntHdr2" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.6" />
+                <stop offset="100%" stopColor="var(--bg-primary)" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            <circle cx="240" cy="40" r="16" fill="#34d399" opacity="0.6" />
+            <path d="M50 100 L120 40 L160 60 L220 20 L300 80 L300 100 Z" fill="url(#mntHdr1)" />
+            <path d="M0 100 L70 50 L130 80 L190 30 L250 70 L300 40 L300 100 Z" fill="url(#mntHdr2)" />
+          </svg>
+        </div>
       </div>
 
       {loading ? <Loader /> : (
@@ -196,25 +246,29 @@ export default function EmployeeDashboard() {
               label="Present Days"
               value={presentDays}
               sub="This month"
-              color="#3b82f6" icon={<Calendar size={22} color="#3b82f6" />}
+              color="#10b981" icon={<Calendar size={20} />}
+              sparklineId="present" sparklinePath="M 0 35 Q 20 20 40 30 T 80 25 T 120 30 T 160 20 T 200 25"
             />
             <StatCard
               label="Leave Balance"
               value={annualBalance ? `${annualBalance.remaining} days` : '—'}
               sub="Annual remaining"
-              color="#16a34a" icon={<Coffee size={22} color="#16a34a" />}
+              color="#8b5cf6" icon={<Coffee size={20} />}
+              sparklineId="leave" sparklinePath="M 0 25 Q 30 35 60 20 T 120 30 T 180 15 T 200 20"
             />
             <StatCard
               label="Pending Leaves"
               value={pendingLeaves}
               sub="Awaiting approval"
-              color="#f59e0b" icon={<Clock size={22} color="#f59e0b" />}
+              color="#f59e0b" icon={<Clock size={20} />}
+              sparklineId="pending" sparklinePath="M 0 30 Q 40 10 80 25 T 150 15 T 200 25"
             />
             <StatCard
               label="Notifications"
               value={unreadCount}
               sub="Unread messages"
-              color="#8b5cf6" icon={<Bell size={22} color="#8b5cf6" />}
+              color="#3b82f6" icon={<Bell size={20} />}
+              sparklineId="notif" sparklinePath="M 0 20 Q 25 35 50 25 T 100 20 T 150 30 T 200 15"
             />
           </div>
 
@@ -222,14 +276,26 @@ export default function EmployeeDashboard() {
           <div className="dashboard-main-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
 
             {/* Today Attendance */}
-            <div style={{ background: 'var(--card-bg)', borderRadius: '12px', padding: '20px', border: '1px solid var(--card-border)', boxShadow: 'var(--card-shadow)' }}>
-              <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '16px', display: 'flex', alignItems: 'center' }}>
-                <Calendar size={16} style={{ marginRight: '6px' }} /> Today&apos;s Attendance
+            <div style={{ 
+              background: 'var(--card-bg)', borderRadius: '12px', padding: '20px', 
+              border: '1px solid var(--card-border)', boxShadow: 'var(--card-shadow)',
+              position: 'relative', overflow: 'hidden'
+            }}>
+              {/* Subtle dot pattern background on top right */}
+              <div style={{ position: 'absolute', top: 10, right: 10, opacity: 0.05, pointerEvents: 'none' }}>
+                <svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+                  <defs><pattern id="dots" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="2" fill="currentColor"/></pattern></defs>
+                  <rect width="60" height="60" fill="url(#dots)"/>
+                </svg>
+              </div>
+
+              <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '24px', display: 'flex', alignItems: 'center' }}>
+                <Calendar size={16} style={{ marginRight: '6px', color: '#10b981' }} /> Today&apos;s Attendance
               </h3>
               <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: '20px' }}>
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>Check In</div>
-                  <div style={{ fontSize: '22px', fontWeight: '800', color: todayAtt?.checkIn ? '#16a34a' : '#475569' }}>
+                  <div style={{ fontSize: '24px', fontWeight: '800', color: todayAtt?.checkIn ? '#10b981' : '#475569', letterSpacing: '0.5px' }}>
                     {todayAtt?.checkIn ? todayAtt.checkIn.substring(0, 5) : '--:--'}
                   </div>
                   <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
@@ -262,13 +328,16 @@ export default function EmployeeDashboard() {
                   disabled={!!todayAtt?.checkIn || checkingIn}
                   style={{
                     flex: 1, padding: '10px',
-                    background: todayAtt?.checkIn ? '#1E293B' : 'rgba(22, 163, 74, 0.15)',
-                    color: todayAtt?.checkIn ? '#64748B' : '#16a34a',
-                    border: `1px solid ${todayAtt?.checkIn ? 'var(--card-border)' : '#bbf7d0'}`,
+                    background: 'transparent',
+                    color: todayAtt?.checkIn ? '#10b981' : 'var(--text-primary)',
+                    border: todayAtt?.checkIn ? '1px solid #10b981' : '1px solid var(--card-border)',
                     borderRadius: '8px', fontSize: '13px', fontWeight: '700',
                     cursor: todayAtt?.checkIn ? 'not-allowed' : 'pointer',
                     transition: 'all 0.2s',
+                    opacity: todayAtt?.checkIn ? 1 : 0.8
                   }}
+                  onMouseEnter={e => { if(!todayAtt?.checkIn) e.currentTarget.style.borderColor = '#10b981'; }}
+                  onMouseLeave={e => { if(!todayAtt?.checkIn) e.currentTarget.style.borderColor = 'var(--card-border)'; }}
                 >
                   {checkingIn ? <Loader2 size={13} className="animate-spin" /> : todayAtt?.checkIn ? <><Check size={13} style={{ display: 'inline', marginRight: '4px' }} /> Checked In</> : 'Check In'}
                 </button>
@@ -277,13 +346,16 @@ export default function EmployeeDashboard() {
                   disabled={!todayAtt?.checkIn || !!todayAtt?.checkOut || checkingOut}
                   style={{
                     flex: 1, padding: '10px',
-                    background: todayAtt?.checkOut ? '#1E293B' : (!todayAtt?.checkIn ? '#1E293B' : 'rgba(217, 119, 6, 0.15)'),
-                    color: (todayAtt?.checkOut || !todayAtt?.checkIn) ? '#64748B' : '#f59e0b',
-                    border: `1px solid ${(todayAtt?.checkOut || !todayAtt?.checkIn) ? 'var(--card-border)' : '#fed7aa'}`,
+                    background: 'transparent',
+                    color: todayAtt?.checkOut ? '#f59e0b' : 'var(--text-primary)',
+                    border: todayAtt?.checkOut ? '1px solid #f59e0b' : '1px solid var(--card-border)',
                     borderRadius: '8px', fontSize: '13px', fontWeight: '700',
                     cursor: (!todayAtt?.checkIn || todayAtt?.checkOut) ? 'not-allowed' : 'pointer',
                     transition: 'all 0.2s',
+                    opacity: (!todayAtt?.checkIn || todayAtt?.checkOut) ? 0.5 : 0.8
                   }}
+                  onMouseEnter={e => { if(todayAtt?.checkIn && !todayAtt?.checkOut) e.currentTarget.style.borderColor = '#f59e0b'; }}
+                  onMouseLeave={e => { if(todayAtt?.checkIn && !todayAtt?.checkOut) e.currentTarget.style.borderColor = 'var(--card-border)'; }}
                 >
                   {checkingOut ? <Loader2 size={13} className="animate-spin" /> : todayAtt?.checkOut ? <><Check size={13} style={{ display: 'inline', marginRight: '4px' }} /> Checked Out</> : 'Check Out'}
                 </button>
@@ -292,9 +364,15 @@ export default function EmployeeDashboard() {
 
             {/* Leave Balance — redesigned: icon chips + gradient rounded bars instead of plain bars */}
             <div style={{ background: 'var(--card-bg)', borderRadius: '12px', padding: '20px', border: '1px solid var(--card-border)', boxShadow: 'var(--card-shadow)' }}>
-              <h3 style={{ fontFamily: "'Quicksand', sans-serif", fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '16px', display: 'flex', alignItems: 'center' }}>
-                <Leaf size={16} style={{ marginRight: '6px', color: '#16a34a' }} /> Leave Balance
-              </h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <h3 style={{ fontFamily: "'Quicksand', sans-serif", fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center' }}>
+                  <Leaf size={16} style={{ marginRight: '6px', color: '#10b981' }} /> Leave Balance
+                </h3>
+                <button style={{ 
+                  background: 'transparent', border: '1px solid var(--card-border)', color: 'var(--text-secondary)',
+                  padding: '4px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: '600', cursor: 'pointer'
+                }}>View all</button>
+              </div>
               {balance.length === 0 ? (
                 <div style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '13px', padding: '20px' }}>
                   No leave balance data found
@@ -306,17 +384,17 @@ export default function EmployeeDashboard() {
                     const pct = b.totalAllotted > 0 ? Math.min(100, (b.remaining / b.totalAllotted) * 100) : 0;
                     return (
                       <div key={i} style={{
-                        background: c.soft, borderRadius: '14px', padding: '12px',
-                        display: 'flex', alignItems: 'center', gap: '10px',
-                        border: `1px solid ${c.color}22`,
+                        background: c.bg, borderRadius: '10px', padding: '12px',
+                        display: 'flex', alignItems: 'center', gap: '12px',
+                        border: `1px solid ${c.color}30`,
                       }}>
                         <MiniRing pct={pct} color={c.color} />
                         <div style={{ minWidth: 0 }}>
-                          <div style={{ fontSize: '10.5px', fontWeight: 700, color: c.color, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <div style={{ fontSize: '10px', fontWeight: 800, color: c.color, display: 'flex', alignItems: 'center', gap: '4px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                             <span>{c.icon}</span>{b.leaveType}
                           </div>
-                          <div style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-primary)', fontFamily: "'Quicksand', sans-serif" }}>
-                            {b.remaining}<span style={{ fontSize: '10.5px', fontWeight: 600, color: 'var(--text-secondary)' }}> /{b.totalAllotted}d</span>
+                          <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)', fontFamily: "'Quicksand', sans-serif", marginTop: '2px' }}>
+                            {b.remaining}<span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-secondary)' }}> /{b.totalAllotted}d</span>
                           </div>
                         </div>
                       </div>
@@ -336,6 +414,10 @@ export default function EmployeeDashboard() {
                 <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center' }}>
                   <ClipboardList size={16} style={{ marginRight: '6px' }} /> Recent Leave Requests
                 </h3>
+                <button style={{ 
+                  background: 'transparent', border: '1px solid var(--card-border)', color: 'var(--text-secondary)',
+                  padding: '4px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: '600', cursor: 'pointer'
+                }}>View all</button>
               </div>
               {leaves.length === 0 ? (
                 <div style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '13px', padding: '20px' }}>
@@ -360,14 +442,20 @@ export default function EmployeeDashboard() {
             {/* Recent Notifications */}
             <div style={{ background: 'var(--card-bg)', borderRadius: '12px', padding: '20px', border: '1px solid var(--card-border)', boxShadow: 'var(--card-shadow)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center' }}>
-                  <Bell size={16} style={{ marginRight: '6px' }} /> Recent Notifications
-                </h3>
-                {unreadCount > 0 && (
-                  <span style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '700' }}>
-                    {unreadCount} unread
-                  </span>
-                )}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center' }}>
+                    <Bell size={16} style={{ marginRight: '6px', color: '#f59e0b' }} /> Recent Notifications
+                  </h3>
+                  {unreadCount > 0 && (
+                    <span style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '700' }}>
+                      {unreadCount} unread
+                    </span>
+                  )}
+                </div>
+                <button style={{ 
+                  background: 'transparent', border: '1px solid var(--card-border)', color: 'var(--text-secondary)',
+                  padding: '4px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: '600', cursor: 'pointer'
+                }}>View all</button>
               </div>
               {notifications.length === 0 ? (
                 <div style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '13px', padding: '20px' }}>

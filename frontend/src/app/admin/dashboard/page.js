@@ -11,21 +11,40 @@ import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import { Users, CheckCircle, Clock, Bell, PartyPopper, XCircle, Loader2, Check, X, Calendar, UserPlus, Banknote, Briefcase } from 'lucide-react';
 
-function StatCard({ label, value, sub, color, bg, icon }) {
+function StatCard({ label, value, sub, color, bg, icon, sparklineId, sparklinePath }) {
   return (
     <div style={{
       background: 'var(--card-bg)', borderRadius: '12px', padding: '20px',
       border: '1px solid var(--card-border)', flex: 1,
-      boxShadow: 'var(--card-shadow)',
+      boxShadow: 'var(--card-shadow)', position: 'relative', overflow: 'hidden'
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', position: 'relative', zIndex: 2 }}>
         <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: '500' }}>{label}</span>
-        <div style={{ width: '40px', height: '40px', background: bg, borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>
+        <div style={{ 
+          width: '36px', height: '36px', background: color + '15', 
+          borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          border: `1px solid ${color}40`, color: color
+        }}>
           {icon}
         </div>
       </div>
-      <div style={{ fontSize: '32px', fontWeight: '900', color, marginBottom: '4px' }}>{value}</div>
-      <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{sub}</div>
+      <div style={{ fontSize: '28px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px', position: 'relative', zIndex: 2 }}>{value}</div>
+      <div style={{ fontSize: '12px', color: 'var(--text-secondary)', position: 'relative', zIndex: 2 }}>{sub}</div>
+      
+      {sparklinePath && (
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '45px', zIndex: 1, opacity: 0.9 }}>
+          <svg viewBox="0 0 200 45" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
+            <defs>
+              <linearGradient id={`grad-${sparklineId}`} x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stopColor={color} stopOpacity="0.25" />
+                <stop offset="100%" stopColor={color} stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            <path d={`${sparklinePath} L 200 45 L 0 45 Z`} fill={`url(#grad-${sparklineId})`} />
+            <path d={sparklinePath} stroke={color} strokeWidth="2" fill="none" vectorEffect="non-scaling-stroke" />
+          </svg>
+        </div>
+      )}
     </div>
   );
 }
@@ -124,13 +143,32 @@ export default function AdminDashboard() {
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)', padding: '24px', margin: '-24px', borderRadius: '16px' }}>
       {/* Header */}
-      <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px' }}>
-          Dashboard
+      <div style={{ marginBottom: '24px', position: 'relative' }}>
+        <h1 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px', display: 'flex', alignItems: 'center' }}>
+          Welcome back, {user?.name}! <span style={{ fontSize: '24px', marginLeft: '8px' }}>👋</span>
         </h1>
         <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-          Welcome back, {user?.name}! Here&apos;s your system overview.
+          Here&apos;s your system overview.
         </p>
+
+        {/* Decorative Mountain Graphic Top Right */}
+        <div style={{ position: 'absolute', top: -20, right: -20, width: '300px', height: '100px', pointerEvents: 'none', opacity: 0.8 }}>
+          <svg viewBox="0 0 300 100" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
+            <defs>
+              <linearGradient id="mntHdr3" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stopColor="#1e3a8a" stopOpacity="0.8" />
+                <stop offset="100%" stopColor="var(--bg-primary)" stopOpacity="0" />
+              </linearGradient>
+              <linearGradient id="mntHdr4" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.6" />
+                <stop offset="100%" stopColor="var(--bg-primary)" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            <circle cx="240" cy="40" r="16" fill="#c084fc" opacity="0.6" />
+            <path d="M50 100 L120 40 L160 60 L220 20 L300 80 L300 100 Z" fill="url(#mntHdr3)" />
+            <path d="M0 100 L70 50 L130 80 L190 30 L250 70 L300 40 L300 100 Z" fill="url(#mntHdr4)" />
+          </svg>
+        </div>
       </div>
 
       {loading ? (
@@ -143,25 +181,29 @@ export default function AdminDashboard() {
               label="Total Employees"
               value={employees.length}
               sub={`${activeEmployees.length} active`}
-              color="#1e3a5f" bg="#eff6ff" icon={<Users size={22} color="#1e3a5f" />}
+              color="#3b82f6" icon={<Users size={20} />}
+              sparklineId="emp" sparklinePath="M 0 35 Q 20 20 40 30 T 80 25 T 120 30 T 160 20 T 200 25"
             />
             <StatCard
               label="Present Today"
               value={presentToday}
               sub={`of ${todayAttendance.length} checked in`}
-              color="#16a34a" bg="#dcfce7" icon={<CheckCircle size={22} color="#16a34a" />}
+              color="#10b981" icon={<CheckCircle size={20} />}
+              sparklineId="present" sparklinePath="M 0 25 Q 30 35 60 20 T 120 30 T 180 15 T 200 20"
             />
             <StatCard
               label="Pending Leaves"
               value={pendingLeaves.filter(l => l.status === 'PENDING').length}
               sub="Awaiting approval"
-              color="#f59e0b" bg="#fff7ed" icon={<Clock size={22} color="#f59e0b" />}
+              color="#f59e0b" icon={<Clock size={20} />}
+              sparklineId="pending" sparklinePath="M 0 30 Q 40 10 80 25 T 150 15 T 200 25"
             />
             <StatCard
               label="Notifications"
               value={unreadCount}
               sub="Unread messages"
-              color="#3b82f6" bg="#dbeafe" icon={<Bell size={22} color="#3b82f6" />}
+              color="#8b5cf6" icon={<Bell size={20} />}
+              sparklineId="notif" sparklinePath="M 0 20 Q 25 35 50 25 T 100 20 T 150 30 T 200 15"
             />
           </div>
 

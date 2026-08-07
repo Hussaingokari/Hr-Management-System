@@ -1,5 +1,5 @@
 package com.hrms.service;
- 
+
 import com.hrms.dto.*;
 import com.hrms.entity.EmailHistory;
 import com.hrms.entity.EmailTemplate;
@@ -11,22 +11,22 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
- 
+
 import java.util.List;
- 
+
 @Service
 @Slf4j
 public class GreetingService {
- 
+
     @Autowired
     private EmailService emailService;
- 
+
     @Autowired
     private EmailTemplateRepository emailTemplateRepository;
- 
+
     @Autowired
     private EmailHistoryRepository emailHistoryRepository;
- 
+
     /**
      * Send greeting to candidate
      */
@@ -35,11 +35,11 @@ public class GreetingService {
             if (request.getCandidateName() == null || request.getCandidateName().trim().isEmpty()) {
                 return new SendGreetingResponse(false, "Candidate name is required");
             }
- 
+
             if (request.getRecipientEmail() == null || request.getRecipientEmail().trim().isEmpty()) {
                 return new SendGreetingResponse(false, "Email address is required");
             }
- 
+
             EmailTemplate template;
             if (request.getTemplateId() != null) {
                 template = emailTemplateRepository.findById(request.getTemplateId())
@@ -48,30 +48,30 @@ public class GreetingService {
                 template = emailTemplateRepository.findByTemplateName("Admission Greeting")
                         .orElseThrow(() -> new RuntimeException("Admission Greeting template not found"));
             }
- 
+
             boolean emailSent = false;
             String errorMessage = null;
- 
+
             try {
                 String emailBody = template.getTemplateBody()
                         .replace("{CANDIDATE_NAME}", request.getCandidateName());
                 String styledHtmlBody = wrapWithHtmlStyling(request.getCandidateName(), emailBody);
- 
+
                 emailService.sendEmail(
                         request.getRecipientEmail(),
                         template.getTemplateSubject(),
                         styledHtmlBody);
                 emailSent = true;
                 log.info("Greeting email sent successfully to: {}", request.getRecipientEmail());
- 
+
             } catch (Exception e) {
                 emailSent = false;
                 errorMessage = e.getMessage();
                 log.error("Email sending failed: {}", e.getMessage());
             }
- 
+
             saveEmailHistory(request, template, emailSent, errorMessage);
- 
+
             if (emailSent) {
                 return new SendGreetingResponse(
                         true,
@@ -81,13 +81,13 @@ public class GreetingService {
                         false,
                         "Failed to send email: " + errorMessage);
             }
- 
+
         } catch (Exception e) {
             log.error("Error in sendGreeting: {}", e.getMessage());
             return new SendGreetingResponse(false, "Error: " + e.getMessage());
         }
     }
- 
+
     /**
      * Save email history - separate transaction for safety
      */
@@ -104,22 +104,22 @@ public class GreetingService {
             history.setStatus(emailSent ? EmailStatus.SENT : EmailStatus.FAILED);
             history.setErrorMessage(errorMessage);
             history.setIsRead(false);
- 
+
             emailHistoryRepository.save(history);
             log.info("Email history saved - Status: {}", emailSent ? "SENT" : "FAILED");
- 
+
         } catch (Exception e) {
             log.error("Error saving email history: {}", e.getMessage());
         }
     }
- 
+
     /**
      * Get all email templates
      */
     public List<EmailTemplate> getAllTemplates() {
         return emailTemplateRepository.findByIsActiveTrue();
     }
- 
+
     /**
      * Get email history for admin
      */
@@ -129,21 +129,21 @@ public class GreetingService {
         }
         return emailHistoryRepository.findAll();
     }
- 
+
     /**
      * Get email history by status
      */
     public List<EmailHistory> getEmailHistoryByStatus(String status) {
         return emailHistoryRepository.findByStatus(status);
     }
- 
+
     /**
      * Get recent emails (last 10)
      */
     public List<EmailHistory> getRecentEmails() {
         return emailHistoryRepository.findRecentEmails(10);
     }
- 
+
     /**
      * Send online interview email
      */
@@ -151,27 +151,28 @@ public class GreetingService {
         try {
             EmailTemplate template = emailTemplateRepository.findByTemplateName("Online Interview Invitation")
                     .orElseThrow(() -> new RuntimeException("Online Interview template not found"));
- 
+
             String emailBody = template.getTemplateBody()
-                    .replace("{CANDIDATE_NAME}", request.getCandidateName())
-                    .replace("{JOB_TITLE}", request.getJobTitle())
-                    .replace("{INTERVIEW_DATE}", request.getInterviewDate())
-                    .replace("{INTERVIEW_TIME}", request.getInterviewTime())
-                    .replace("{PLATFORM}", request.getPlatform())
-                    .replace("{MEETING_LINK}", request.getMeetingLink())
-                    .replace("{MEETING_ID}", request.getMeetingId())
-                    .replace("{PASSCODE}", request.getPasscode());
- 
+                    .replace("{CANDIDATE_NAME}", orEmpty(request.getCandidateName()))
+                    .replace("{JOB_TITLE}", orEmpty(request.getJobTitle()))
+                    .replace("{INTERVIEW_DATE}", orEmpty(request.getInterviewDate()))
+                    .replace("{INTERVIEW_TIME}", orEmpty(request.getInterviewTime()))
+                    .replace("{PLATFORM}", orEmpty(request.getPlatform()))
+                    .replace("{MEETING_LINK}", orEmpty(request.getMeetingLink()))
+                    .replace("{MEETING_ID}", orEmpty(request.getMeetingId()))
+                    .replace("{PASSCODE}", orEmpty(request.getPasscode()));
+
             String styledHtmlBody = wrapWithHtmlStyling(request.getCandidateName(), emailBody);
- 
+
             emailService.sendEmail(request.getRecipientEmail(), template.getTemplateSubject(), styledHtmlBody);
- 
+
             return new InterviewEmailResponse(true, "Online interview email sent successfully");
         } catch (Exception e) {
+            log.error("Error in sendOnlineInterviewEmail: {}", e.getMessage());
             return new InterviewEmailResponse(false, "Error: " + e.getMessage());
         }
     }
- 
+
     /**
      * Send offline interview email
      */
@@ -179,50 +180,107 @@ public class GreetingService {
         try {
             EmailTemplate template = emailTemplateRepository.findByTemplateName("Offline Interview Invitation")
                     .orElseThrow(() -> new RuntimeException("Offline Interview template not found"));
- 
+
             String emailBody = template.getTemplateBody()
-                    .replace("{CANDIDATE_NAME}", request.getCandidateName())
-                    .replace("{JOB_TITLE}", request.getJobTitle())
-                    .replace("{INTERVIEW_DATE}", request.getInterviewDate())
-                    .replace("{INTERVIEW_TIME}", request.getInterviewTime())
-                    .replace("{VENUE_ADDRESS}", request.getVenueAddress());
- 
+                    .replace("{CANDIDATE_NAME}", orEmpty(request.getCandidateName()))
+                    .replace("{JOB_TITLE}", orEmpty(request.getJobTitle()))
+                    .replace("{INTERVIEW_DATE}", orEmpty(request.getInterviewDate()))
+                    .replace("{INTERVIEW_TIME}", orEmpty(request.getInterviewTime()))
+                    .replace("{VENUE_ADDRESS}", orEmpty(request.getVenueAddress()));
+
             String styledHtmlBody = wrapWithHtmlStyling(request.getCandidateName(), emailBody);
- 
+
             emailService.sendEmail(request.getRecipientEmail(), template.getTemplateSubject(), styledHtmlBody);
- 
+
             return new InterviewEmailResponse(true, "Offline interview email sent successfully");
         } catch (Exception e) {
+            log.error("Error in sendOfflineInterviewEmail: {}", e.getMessage());
             return new InterviewEmailResponse(false, "Error: " + e.getMessage());
         }
     }
- 
+
     /**
-     * Send offer letter email
+     * Send offer letter email with PDF attachment
+     *
+     * FIX: previously request.getJobTitle(), getSalary(), getJoiningDate(),
+     * getReportingTo() and getAcceptanceDeadline() were passed straight into
+     * String.replace(...) with no null check. String.replace() calls
+     * .toString() on its arguments internally, so a single null field threw
+     * a NullPointerException. That NPE was silently caught by the outer
+     * try/catch and turned into a "success=false" response, which the
+     * controller then converted into an HTTP 400 - even though nothing was
+     * actually wrong with the request other than a missing optional field.
+     *
+     * Now every field is validated (if required) or defaulted to "" via
+     * orEmpty() (if optional) before it touches replace().
      */
     public OfferLetterResponse sendOfferLetter(OfferLetterRequest request) {
         try {
+            // Validate required fields
+            if (request.getCandidateName() == null || request.getCandidateName().trim().isEmpty()) {
+                return new OfferLetterResponse(false, "Candidate name is required");
+            }
+            if (request.getRecipientEmail() == null || request.getRecipientEmail().trim().isEmpty()) {
+                return new OfferLetterResponse(false, "Email address is required");
+            }
+            if (request.getPdfFile() == null || request.getPdfFile().isEmpty()) {
+                return new OfferLetterResponse(false, "PDF file is required");
+            }
+            if (request.getJobTitle() == null || request.getJobTitle().trim().isEmpty()) {
+                return new OfferLetterResponse(false, "Job title is required");
+            }
+            if (request.getSalary() == null || request.getSalary().trim().isEmpty()) {
+                return new OfferLetterResponse(false, "Salary is required");
+            }
+            if (request.getJoiningDate() == null || request.getJoiningDate().trim().isEmpty()) {
+                return new OfferLetterResponse(false, "Joining date is required");
+            }
+
+            // Fetch template
             EmailTemplate template = emailTemplateRepository.findByTemplateName("Offer Letter")
                     .orElseThrow(() -> new RuntimeException("Offer Letter template not found"));
- 
+
+            // Replace all placeholders with form data - every value is null-safe now
             String emailBody = template.getTemplateBody()
                     .replace("{CANDIDATE_NAME}", request.getCandidateName())
-                    .replace("{JOB_TITLE}", request.getJobTitle())
-                    .replace("{SALARY}", request.getSalary())
-                    .replace("{JOINING_DATE}", request.getJoiningDate())
-                    .replace("{REPORTING_PERSON}", request.getReportingTo())
-                    .replace("{ACCEPTANCE_DEADLINE}", request.getAcceptanceDeadline());
- 
+                    .replace("{JOB_TITLE}", orEmpty(request.getJobTitle()))
+                    // .replace("{DEPARTMENT}", "")  // Add if needed
+                    // .replace("{LOCATION}", "")    // Add if needed
+                    .replace("{SALARY}", orEmpty(request.getSalary()))
+                    .replace("{JOINING_DATE}", orEmpty(request.getJoiningDate()))
+                    .replace("{REPORTING_PERSON}", orEmpty(request.getReportingTo()))
+                    .replace("{ACCEPTANCE_DEADLINE}", orEmpty(request.getAcceptanceDeadline()));
+
             String styledHtmlBody = wrapWithHtmlStyling(request.getCandidateName(), emailBody);
- 
-            emailService.sendEmail(request.getRecipientEmail(), template.getTemplateSubject(), styledHtmlBody);
- 
+
+            // Send email with attachment
+          String cleanFileName = request.getCandidateName().replaceAll("\\s+", "_") + "_Offer_Letter.pdf";
+
+emailService.sendEmailWithAttachment(
+        request.getRecipientEmail(),
+        template.getTemplateSubject(),
+        styledHtmlBody,
+        request.getPdfFile(),
+        cleanFileName
+);
+
+            log.info("Offer letter email with attachment sent to: {}", request.getRecipientEmail());
             return new OfferLetterResponse(true, "Offer letter sent successfully");
+
         } catch (Exception e) {
+            log.error("Error in sendOfferLetter: {}", e.getMessage(), e);
             return new OfferLetterResponse(false, "Error: " + e.getMessage());
         }
     }
- 
+
+    /**
+     * Null-safety helper - returns "" instead of null so String.replace()
+     * never throws a NullPointerException on an optional field.
+     */
+    private String orEmpty(String value) {
+        return value == null ? "" : value;
+    }
+
     /**
      * Wrap email body with HTML styling
      */
@@ -247,6 +305,5 @@ public class GreetingService {
                 "</div>" +
                 "</div>";
     }
- 
+
 }
- 

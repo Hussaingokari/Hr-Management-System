@@ -91,8 +91,9 @@ export default function Sidebar({ role }) {
       display: 'flex', alignItems: 'center', gap: '10px',
       padding: '10px 12px', borderRadius: '8px',
       cursor: 'pointer', marginBottom: '2px',
-      background: active ? accentColor : 'transparent',
-      color: active ? activeTextColor : 'var(--text-secondary)',
+      background: active ? (isDark ? 'rgba(16, 185, 129, 0.15)' : accentColor) : 'transparent',
+      color: active ? (isDark ? '#34d399' : activeTextColor) : 'var(--text-secondary)',
+      border: active && isDark ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid transparent',
       fontSize: '13px', fontWeight: active ? '600' : '500',
       transition: 'all 0.15s',
     };
@@ -195,6 +196,43 @@ export default function Sidebar({ role }) {
             Logout
           </div>
         </div>
+
+        {/* Decorative Mountain Vector for Dark Mode */}
+        {isDark && (
+          <div style={{ position: 'relative', height: '120px', marginTop: 'auto', flexShrink: 0, overflow: 'hidden' }}>
+            {/* Fade overlay so mountains blend into the background */}
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '40px', background: 'linear-gradient(to bottom, var(--card-bg), transparent)', zIndex: 1 }} />
+            <svg viewBox="0 0 240 120" style={{ position: 'absolute', bottom: 0, width: '100%', height: '100%', opacity: 0.8 }} preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="bgGrad" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%" stopColor="#1e1b4b" />
+                  <stop offset="100%" stopColor="#312e81" />
+                </linearGradient>
+                <linearGradient id="mnt1" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%" stopColor="#4c1d95" />
+                  <stop offset="100%" stopColor="#1e1b4b" />
+                </linearGradient>
+                <linearGradient id="mnt2" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%" stopColor="#be185d" />
+                  <stop offset="100%" stopColor="#4c1d95" />
+                </linearGradient>
+                <linearGradient id="sun" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%" stopColor="#f43f5e" />
+                  <stop offset="100%" stopColor="#fb923c" />
+                </linearGradient>
+              </defs>
+              <rect width="240" height="120" fill="url(#bgGrad)" />
+              {/* Sun/Moon */}
+              <circle cx="50" cy="60" r="20" fill="url(#sun)" opacity="0.9" />
+              {/* Mountains Back */}
+              <path d="M0 120 L0 70 L40 40 L90 80 L150 20 L240 90 L240 120 Z" fill="url(#mnt1)" />
+              {/* Mountains Front */}
+              <path d="M0 120 L0 100 L60 60 L120 90 L180 50 L240 100 L240 120 Z" fill="url(#mnt2)" />
+              {/* Trees silhouette */}
+              <path d="M10 120 L15 100 L20 120 M30 120 L35 90 L40 120 M180 120 L185 105 L190 120 M210 120 L215 95 L220 120" stroke="#1e1b4b" strokeWidth="2" fill="none" />
+            </svg>
+          </div>
+        )}
       </div>
     </>
   );

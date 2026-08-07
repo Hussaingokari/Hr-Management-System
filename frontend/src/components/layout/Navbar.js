@@ -415,19 +415,19 @@ export default function Navbar() {
             placeholder="Search pages..."
             style={{
               width: '100%', paddingLeft: '36px', paddingRight: '12px',
-              height: '38px', border: isDark ? '1.5px solid #1E293B' : '1.5px solid #e2e8f0',
-              borderRadius: '10px', fontSize: '13px', outline: 'none',
+              height: '38px', border: isDark ? '1px solid #1E293B' : '1.5px solid #e2e8f0',
+              borderRadius: '8px', fontSize: '13px', outline: 'none',
               boxSizing: 'border-box', transition: 'border 0.2s',
-              background: isDark ? '#0B1120' : '#f8fafc', 
+              background: isDark ? '#111827' : '#f8fafc', 
               color: isDark ? '#f8fafc' : '#1e293b',
             }}
             onFocusCapture={e => {
               e.target.style.borderColor = isDark ? '#334155' : '#10b981';
-              e.target.style.background = isDark ? '#111827' : 'white';
+              e.target.style.background = isDark ? '#1A1D24' : 'white';
             }}
             onBlurCapture={e => {
               e.target.style.borderColor = isDark ? '#1E293B' : '#e2e8f0';
-              e.target.style.background = isDark ? '#0B1120' : '#f8fafc';
+              e.target.style.background = isDark ? '#111827' : '#f8fafc';
             }}
           />
  
@@ -557,10 +557,10 @@ export default function Navbar() {
         {/* Role Badge */}
         <span className="nav-role-badge" style={{
           background: isDark 
-            ? (user?.role === 'ADMIN' ? '#1e3a8a' : user?.role === 'HR' ? '#701a75' : '#14532d')
+            ? (user?.role === 'ADMIN' ? 'rgba(59, 130, 246, 0.15)' : user?.role === 'HR' ? 'rgba(168, 85, 247, 0.15)' : 'rgba(16, 185, 129, 0.15)')
             : (user?.role === 'ADMIN' ? '#dbeafe' : user?.role === 'HR' ? '#fdf4ff' : '#f0fdf4'),
           color: isDark
-            ? (user?.role === 'ADMIN' ? '#bfdbfe' : user?.role === 'HR' ? '#f5d0fe' : '#bbf7d0')
+            ? (user?.role === 'ADMIN' ? '#60a5fa' : user?.role === 'HR' ? '#c084fc' : '#34d399')
             : (user?.role === 'ADMIN' ? '#1d4ed8' : user?.role === 'HR' ? '#9333ea' : '#16a34a'),
           padding: '4px 10px', borderRadius: '20px',
           fontSize: '11px', fontWeight: '700',

@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.List;
@@ -185,21 +186,68 @@ public class GreetingController {
     @PostMapping("/send-online-interview")
     @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<?> sendOnlineInterviewEmail(@RequestBody InterviewEmailRequest request) {
-        InterviewEmailResponse response = greetingService.sendOnlineInterviewEmail(request);
-        return ResponseEntity.ok(response);
+        try {
+            InterviewEmailResponse response = greetingService.sendOnlineInterviewEmail(request);
+            if (response.getSuccess()) {
+                return ResponseEntity.ok(response);
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            }
+        } catch (Exception e) {
+            log.error("Error in sendOnlineInterviewEmail: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new InterviewEmailResponse(false, "Server error: " + e.getMessage()));
+        }
     }
 
     @PostMapping("/send-offline-interview")
     @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<?> sendOfflineInterviewEmail(@RequestBody InterviewEmailRequest request) {
-        InterviewEmailResponse response = greetingService.sendOfflineInterviewEmail(request);
-        return ResponseEntity.ok(response);
+        try {
+            InterviewEmailResponse response = greetingService.sendOfflineInterviewEmail(request);
+            if (response.getSuccess()) {
+                return ResponseEntity.ok(response);
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            }
+        } catch (Exception e) {
+            log.error("Error in sendOfflineInterviewEmail: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new InterviewEmailResponse(false, "Server error: " + e.getMessage()));
+        }
     }
 
+    /**
+     * POST /api/greeting/send-offer-letter
+     * Send offer letter with a PDF attachment (multipart/form-data)
+     * Access: ADMIN, HR only
+     *
+     * NOTE ON 400 ERRORS: @ModelAttribute binds multipart form fields by
+     * NAME. Every form field name from the frontend must match a field name
+     * in OfferLetterRequest exactly (candidateName, recipientEmail,
+     * jobTitle, salary, joiningDate, reportingTo, acceptanceDeadline,
+     * pdfFile). Also make sure the frontend does NOT manually set the
+     * "Content-Type" header on the request - let the browser/axios/fetch
+     * set it automatically so the multipart boundary is included, otherwise
+     * Spring's multipart resolver itself will reject the request with a 400
+     * before this method is even entered.
+     */
     @PostMapping("/send-offer-letter")
     @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
-    public ResponseEntity<?> sendOfferLetter(@RequestBody OfferLetterRequest request) {
-        OfferLetterResponse response = greetingService.sendOfferLetter(request);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> sendOfferLetter(@ModelAttribute OfferLetterRequest request) {
+        try {
+            log.info("Sending offer letter to: {}", request.getRecipientEmail());
+            OfferLetterResponse response = greetingService.sendOfferLetter(request);
+
+            if (response.getSuccess()) {
+                return ResponseEntity.ok(response);
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            }
+        } catch (Exception e) {
+            log.error("Error in sendOfferLetter: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new OfferLetterResponse(false, "Server error: " + e.getMessage()));
+        }
     }
 }

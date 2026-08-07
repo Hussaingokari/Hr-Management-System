@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useInterview } from '@/lib/InterviewForm';
-import { Mail, Loader, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Mail, Loader } from 'lucide-react';
 
 export default function SendOfferLetterForm() {
   const { sendOfferLetter } = useInterview();
@@ -17,6 +17,9 @@ export default function SendOfferLetterForm() {
     acceptanceDeadline: '',
   });
 
+  const [pdfFile, setPdfFile] = useState(null);
+  const [fileName, setFileName] = useState('');
+  const [fileSize, setFileSize] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
@@ -27,6 +30,33 @@ export default function SendOfferLetterForm() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setOfferData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.includes('pdf')) {
+        setError('Only PDF files are allowed');
+        return;
+      }
+      setPdfFile(file);
+      setFileName(file.name);
+      setFileSize(Math.round(file.size / 1024)); // KB
+      setError(null);
+    }
+  };
+
+  const handleViewPDF = () => {
+    if (pdfFile) {
+      const fileURL = URL.createObjectURL(pdfFile);
+      window.open(fileURL, '_blank');
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setPdfFile(null);
+    setFileName('');
+    setFileSize(null);
   };
 
   const handleSubmit = async (e) => {
@@ -50,10 +80,26 @@ export default function SendOfferLetterForm() {
       setError('Please enter salary');
       return;
     }
+    if (!offerData.joiningDate.trim()) {
+      setError('Please enter joining date');
+      return;
+    }
+    if (!offerData.reportingTo.trim()) {
+      setError('Please enter reporting person');
+      return;
+    }
+    if (!offerData.acceptanceDeadline.trim()) {
+      setError('Please enter acceptance deadline');
+      return;
+    }
+    if (!pdfFile) {
+      setError('Please upload a PDF file');
+      return;
+    }
 
     setLoading(true);
     try {
-      const response = await sendOfferLetter(offerData);
+      const response = await sendOfferLetter(offerData, pdfFile);
       setSuccess(response?.message || 'Offer letter sent successfully');
       setShowSuccess(true);
       setOfferData({
@@ -65,6 +111,9 @@ export default function SendOfferLetterForm() {
         reportingTo: '',
         acceptanceDeadline: '',
       });
+      setPdfFile(null);
+      setFileName('');
+      setFileSize(null);
       setTimeout(() => setShowSuccess(false), 5000);
     } catch (err) {
       setError(err.message || 'Failed to send offer letter');
@@ -83,6 +132,9 @@ export default function SendOfferLetterForm() {
       reportingTo: '',
       acceptanceDeadline: '',
     });
+    setPdfFile(null);
+    setFileName('');
+    setFileSize(null);
     setShowSuccess(false);
     setError(null);
   };
@@ -93,9 +145,9 @@ export default function SendOfferLetterForm() {
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-2">
             <Mail size={24} className="text-blue-500" />
-            <h2 className="text-lg font-medium text-gray-900 ">Send Offer Letter</h2>
+            <h2 className="text-lg font-medium text-gray-900">Send Offer Letter</h2>
           </div>
-          <p className="text-sm text-gray-600 ">Send employment offer letter to selected candidate</p>
+          <p className="text-sm text-gray-600">Send employment offer letter to selected candidate</p>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -191,10 +243,66 @@ export default function SendOfferLetterForm() {
             />
           </div>
 
-          {error && <div className="p-3 bg-red-100 border border-red-300 rounded-lg"><p className="text-sm text-red-800 flex items-center gap-1"><AlertTriangle size={14} /> {error}</p></div>}
-          {showSuccess && success && <div className="p-3 bg-green-100 border border-green-300 rounded-lg"><p className="text-sm text-green-800 flex items-center gap-1"><CheckCircle size={14} /> {success}</p></div>}
+          {/* Attachment Section */}
+          <div className="border-t border-gray-300 pt-4 mt-2">
+            <label className="block text-sm font-medium text-gray-900 mb-3">Attachment</label>
 
-          <div className="flex gap-3 justify-end pt-4 border-t border-gray-300 ">
+            {/* File Upload Area */}
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center bg-gray-50 hover:bg-gray-100 transition cursor-pointer mb-3">
+              <svg className="mx-auto h-8 w-8 text-blue-500 mb-2" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                <path d="M28 8H12a4 4 0 00-4 4v20a4 4 0 004 4h24a4 4 0 004-4V20m-14-12l6 6m0 0l-6 6m6-6H8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <p className="text-sm font-medium text-gray-900 mb-1">Upload PDF file</p>
+              <p className="text-xs text-gray-600 mb-4">Drag and drop or click to browse</p>
+              <input
+                type="file"
+                accept=".pdf"
+                onChange={handleFileChange}
+                disabled={loading}
+                className="hidden"
+                id="pdf-input"
+              />
+              <label htmlFor="pdf-input" className="cursor-pointer">
+                <span className="text-xs text-blue-500 hover:text-blue-600 font-medium">Select file</span>
+              </label>
+            </div>
+
+            {/* Selected File Display */}
+            {fileName && (
+              <div className="bg-gray-50 border border-gray-300 rounded-lg p-3 flex items-center justify-between">
+                <div className="flex items-center gap-3 flex-1">
+                  <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
+                  </svg>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-gray-900 truncate">{fileName}</p>
+                    <p className="text-xs text-gray-600">{fileSize} KB</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleViewPDF}
+                  disabled={loading}
+                  className="text-xs text-blue-500 hover:text-blue-600 font-medium whitespace-nowrap ml-2 disabled:opacity-60"
+                >
+                  View
+                </button>
+                <button
+                  type="button"
+                  onClick={handleRemoveFile}
+                  disabled={loading}
+                  className="text-xs text-red-500 hover:text-red-600 font-medium whitespace-nowrap ml-2 disabled:opacity-60"
+                >
+                  Remove
+                </button>
+              </div>
+            )}
+          </div>
+
+          {error && <div className="p-3 bg-red-100 border border-red-300 rounded-lg"><p className="text-sm text-red-800">❌ {error}</p></div>}
+          {showSuccess && success && <div className="p-3 bg-green-100 border border-green-300 rounded-lg"><p className="text-sm text-green-800">✓ {success}</p></div>}
+
+          <div className="flex gap-3 justify-end pt-4 border-t border-gray-300">
             <button
               type="button"
               onClick={handleCancel}

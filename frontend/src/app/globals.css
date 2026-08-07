@@ -14,14 +14,14 @@
 }
 
 html.dark {
-  --bg-primary: #0B1120;
-  --bg-secondary: #020617;
-  --card-bg: #1E293B;
-  --card-border: #334155;
+  --bg-primary: #0F1219;
+  --bg-secondary: #0F1219;
+  --card-bg: #1A1D24;
+  --card-border: #2A2F3A;
   --text-primary: #F8FAFC;
-  --text-secondary: #cbd5e1;
-  --text-muted: #94a3b8;
-  --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 /* =========================================================
