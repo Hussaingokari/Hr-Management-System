@@ -7,6 +7,7 @@ import {
   getUnreadCount, getMyNotifications
 } from '@/lib/employeeApi';
 import toast from 'react-hot-toast';
+import { Calendar, Coffee, Clock, Bell } from 'lucide-react';
 
 function StatCard({ label, value, sub, color, icon }) {
   return (
@@ -195,25 +196,25 @@ export default function EmployeeDashboard() {
               label="Present Days"
               value={presentDays}
               sub="This month"
-              color="#3b82f6" icon="📅"
+              color="#3b82f6" icon={<Calendar size={22} color="#3b82f6" />}
             />
             <StatCard
               label="Leave Balance"
               value={annualBalance ? `${annualBalance.remaining} days` : '—'}
               sub="Annual remaining"
-              color="#16a34a" icon="🌴"
+              color="#16a34a" icon={<Coffee size={22} color="#16a34a" />}
             />
             <StatCard
               label="Pending Leaves"
               value={pendingLeaves}
               sub="Awaiting approval"
-              color="#f59e0b" icon="⏳"
+              color="#f59e0b" icon={<Clock size={22} color="#f59e0b" />}
             />
             <StatCard
               label="Notifications"
               value={unreadCount}
-              sub="Unread alerts"
-              color="#8b5cf6" icon="🔔"
+              sub="Unread messages"
+              color="#8b5cf6" icon={<Bell size={22} color="#8b5cf6" />}
             />
           </div>
 

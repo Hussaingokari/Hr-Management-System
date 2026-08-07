@@ -9,6 +9,7 @@ import {
 import { getUnreadCount } from '@/lib/employeeApi';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
+import { Users, CheckCircle, Clock, Bell } from 'lucide-react';
 
 function StatCard({ label, value, sub, color, bg, icon }) {
   return (
@@ -142,25 +143,25 @@ export default function AdminDashboard() {
               label="Total Employees"
               value={employees.length}
               sub={`${activeEmployees.length} active`}
-              color="#1e3a5f" bg="#eff6ff" icon="👥"
+              color="#1e3a5f" bg="#eff6ff" icon={<Users size={22} color="#1e3a5f" />}
             />
             <StatCard
               label="Present Today"
               value={presentToday}
               sub={`of ${todayAttendance.length} checked in`}
-              color="#16a34a" bg="#dcfce7" icon="✅"
+              color="#16a34a" bg="#dcfce7" icon={<CheckCircle size={22} color="#16a34a" />}
             />
             <StatCard
               label="Pending Leaves"
               value={pendingLeaves.filter(l => l.status === 'PENDING').length}
               sub="Awaiting approval"
-              color="#f59e0b" bg="#fff7ed" icon="⏳"
+              color="#f59e0b" bg="#fff7ed" icon={<Clock size={22} color="#f59e0b" />}
             />
             <StatCard
               label="Notifications"
               value={unreadCount}
-              sub="Unread alerts"
-              color="#8b5cf6" bg="#fdf4ff" icon="🔔"
+              sub="Unread messages"
+              color="#3b82f6" bg="#dbeafe" icon={<Bell size={22} color="#3b82f6" />}
             />
           </div>
 
