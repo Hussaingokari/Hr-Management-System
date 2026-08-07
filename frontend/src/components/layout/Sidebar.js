@@ -16,7 +16,7 @@ const EMP_MENU = [
   { key: '/employee/payslips', label: 'Payslips', icon: <CircleDollarSign size={18} strokeWidth={2} /> },
   { key: '/employee/performance', label: 'Performance', icon: <Star size={18} strokeWidth={2} /> },
   { key: '/employee/onboarding', label: 'Onboarding', icon: <BadgeCheck size={18} strokeWidth={2} /> },
-  { key: '/employee/notifications', label: 'Notifications', icon: <Bell size={18} strokeWidth={2} />, badge: 2 },
+  { key: '/employee/notifications', label: 'Notifications', icon: <Bell size={18} strokeWidth={2} /> },
 ];
 
 const ADMIN_MENU = [
@@ -32,7 +32,7 @@ const ADMIN_MENU = [
   { key: '/admin/onboarding/offerletter', label: 'Send Offer Letter', icon: <Send size={18} strokeWidth={2} /> },
   { key: '/admin/onboarding/interview', label: 'Send Interview', icon: <Send size={18} strokeWidth={2} /> },
   { key: '/admin/onboarding/document-request', label: 'Document Request', icon: <FileText size={18} strokeWidth={2} /> },
-  { key: '/admin/notifications', label: 'Notifications', icon: <Bell size={18} strokeWidth={2} />, badge: 5 },
+  { key: '/admin/notifications', label: 'Notifications', icon: <Bell size={18} strokeWidth={2} /> },
 ];
 
 export default function Sidebar({ role }) {
@@ -121,7 +121,7 @@ export default function Sidebar({ role }) {
         </div>
 
         {/* Main Menu */}
-        <div style={{ padding: '16px 16px 0', flex: 1 }}>
+        <div style={{ padding: '16px 16px 0', flexShrink: 0 }}>
           {menu.map((item) => (
             <div
               key={item.key}
@@ -160,9 +160,9 @@ export default function Sidebar({ role }) {
 
         {/* Decorative Mountain Vector exactly matching the user's image */}
         {isDark && (
-          <div style={{ position: 'relative', height: '200px', flexShrink: 0, overflow: 'hidden', marginTop: '10px' }}>
+          <div style={{ position: 'relative', flex: 1, minHeight: '100px', overflow: 'hidden', marginTop: '10px' }}>
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '60px', background: 'linear-gradient(to bottom, #0A0E17, transparent)', zIndex: 1 }} />
-            <svg viewBox="0 0 240 200" style={{ position: 'absolute', bottom: 0, width: '100%', height: '100%', opacity: 1 }} preserveAspectRatio="xMidYMax slice">
+            <svg width="100%" height="100%" viewBox="0 0 240 200" style={{ position: 'absolute', bottom: 0, opacity: 1 }} preserveAspectRatio="xMidYMax slice">
               <defs>
                 <linearGradient id="skyGrad" x1="0" x2="0" y1="0" y2="1">
                   <stop offset="0%" stopColor="#0A0E17" />
@@ -227,7 +227,7 @@ export default function Sidebar({ role }) {
         )}
 
         {/* Bottom — Settings + Logout exactly like the image */}
-        <div style={{ padding: '16px 16px 24px', borderTop: `1px solid ${borderColor}`, background: sidebarBg, zIndex: 2 }}>
+        <div style={{ padding: '16px 16px 24px', borderTop: `1px solid ${borderColor}`, background: sidebarBg, zIndex: 2, flexShrink: 0 }}>
 
           {/* Settings */}
           <div
