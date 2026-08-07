@@ -135,11 +135,11 @@ export default function Sidebar({ role }) {
               onClick={() => { setIsMobileOpen(false); router.push(item.key); }}
               style={navItemStyle(item.key)}
               onMouseEnter={e => {
-                if (pathname !== item.key)
+                if (!isItemActive(item.key))
                   e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)';
               }}
               onMouseLeave={e => {
-                if (pathname !== item.key)
+                if (!isItemActive(item.key))
                   e.currentTarget.style.background = 'transparent';
               }}
             >
@@ -160,11 +160,11 @@ export default function Sidebar({ role }) {
               marginBottom: '4px',
             }}
             onMouseEnter={e => {
-              if (pathname !== settingsRoute)
+              if (!isItemActive(settingsRoute))
                 e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)';
             }}
             onMouseLeave={e => {
-              if (pathname !== settingsRoute)
+              if (!isItemActive(settingsRoute))
                 e.currentTarget.style.background = 'transparent';
             }}
           >

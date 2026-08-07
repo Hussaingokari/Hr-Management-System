@@ -23,7 +23,9 @@ public class Payroll {
     @JoinColumn(name = "employee_id", nullable = false)
     private Employee employee;
 
+    @Column(name = "\"month\"")
     private int month; // 1-12
+    @Column(name = "\"year\"")
     private int year;
 
     // Earnings

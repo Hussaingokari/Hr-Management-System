@@ -27,7 +27,9 @@ public class Payslip {
     @JoinColumn(name = "employee_id", nullable = false)
     private Employee employee;
 
+    @Column(name = "\"month\"")
     private int month;
+    @Column(name = "\"year\"")
     private int year;
 
     @Column(unique = true, nullable = false)
