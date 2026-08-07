@@ -436,8 +436,6 @@ div[style*="1.5fr 1fr"]>div {
 }
 
 html.dark .glow-cycle-text {
-  color: #fff;
-  text-shadow: 0 0 8px rgba(0, 240, 255, 0.8), 0 0 16px rgba(0, 240, 255, 0.4);
   overflow: hidden;
 }
 
