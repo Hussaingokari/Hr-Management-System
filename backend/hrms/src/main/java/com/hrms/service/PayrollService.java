@@ -26,7 +26,7 @@ public class PayrollService {
     private static final BigDecimal HRA_RATE = new BigDecimal("0.40");
     private static final BigDecimal DA_RATE = new BigDecimal("0.10");
     private static final BigDecimal ESI_RATE = new BigDecimal("0.0075");
-    private static final BigDecimal ESI_GROSS_LIMIT = new BigDecimal("21000");
+    private static final BigDecimal ESI_GROSS_LIMIT = new BigDecimal("000");
 
     @Transactional
     public PayrollDTOs.Response generatePayroll(PayrollDTOs.GenerateRequest request) {
