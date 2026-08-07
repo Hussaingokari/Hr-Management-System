@@ -19,7 +19,7 @@ function StatusPill({ status }) {
         APPROVED: { bg: '#dcfce7', color: '#16a34a', label: 'Approved' },
         REJECTED: { bg: '#fee2e2', color: '#dc2626', label: 'Rejected' },
     };
-    const s = map[status] || { bg: '#f1f5f9', color: '#64748b', label: 'Not Submitted' };
+    const s = map[status] || { bg: '#f1f5f9', color: 'var(--text-secondary)', label: 'Not Submitted' };
     return (
         <span style={{
             background: s.bg, color: s.color, padding: '6px 16px', borderRadius: '20px',
@@ -40,19 +40,19 @@ function DocumentRow({ documentKey, doc, onUpload, isUploading }) {
 
     return (
         <div style={{
-            background: 'white', borderRadius: '14px',
+            background: 'var(--card-bg)', borderRadius: '14px',
             border: isRejected ? '1.5px solid #fecaca' : '1px solid #e2e8f0',
             padding: '18px 20px', marginBottom: '12px',
         }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <div style={{
-                    width: '46px', height: '46px', borderRadius: '12px', background: '#f1f5f9',
+                    width: '46px', height: '46px', borderRadius: '12px', background: 'var(--card-border)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0,
                 }}>
                     📄
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: '16px', fontWeight: '700', color: '#1e293b' }}>
+                    <div style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-primary)' }}>
                         {DOC_KEY_LABELS[documentKey]}
                     </div>
                     {doc?.fileName && (
@@ -152,13 +152,13 @@ export default function EmployeeOnboardingDocumentsPage() {
     const docsByKey = documents.reduce((acc, d) => { acc[d.documentKey] = d; return acc; }, {});
 
     if (loading) {
-        return <div style={{ padding: '60px', textAlign: 'center', color: '#94a3b8' }}>Loading...</div>;
+        return <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</div>;
     }
 
     if (!onboarding) {
         return (
-            <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '60px', textAlign: 'center' }}>
-                <div style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b' }}>No onboarding checklist yet</div>
+            <div style={{ background: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--card-border)', padding: '60px', textAlign: 'center' }}>
+                <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-primary)' }}>No onboarding checklist yet</div>
             </div>
         );
     }
@@ -166,10 +166,10 @@ export default function EmployeeOnboardingDocumentsPage() {
     return (
         <div>
             <div style={{ marginBottom: '24px' }}>
-                <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#1e293b', marginBottom: '4px' }}>
+                <h1 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px' }}>
                     My Documents
                 </h1>
-                <p style={{ fontSize: '14px', color: '#94a3b8' }}>
+                <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>
                     Upload your onboarding documents for HR review.
                 </p>
             </div>

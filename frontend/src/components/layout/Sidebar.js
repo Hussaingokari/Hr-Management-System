@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
+import { useTheme } from 'next-themes';
 import { logout } from '@/store/authSlice';
 
 const EMP_MENU = [
@@ -46,6 +47,11 @@ export default function Sidebar({ role }) {
   const dispatch = useDispatch();
   const { user } = useSelector((s) => s.auth);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
+  const isAdmin = role === 'ADMIN' || role === 'HR';
+  const accentColor = isDark ? (isAdmin ? '#c084fc' : '#ccf000') : '#10b981';
+  const activeTextColor = isDark ? '#000000' : 'white';
 
   useEffect(() => {
     const handleToggle = () => setIsMobileOpen((prev) => !prev);
@@ -85,9 +91,9 @@ export default function Sidebar({ role }) {
       display: 'flex', alignItems: 'center', gap: '10px',
       padding: '10px 12px', borderRadius: '8px',
       cursor: 'pointer', marginBottom: '2px',
-      background: active ? '#3b82f6' : 'transparent',
-      color: active ? 'white' : '#93c5fd',
-      fontSize: '13px', fontWeight: active ? '600' : '400',
+      background: active ? accentColor : 'transparent',
+      color: active ? activeTextColor : 'var(--text-secondary)',
+      fontSize: '13px', fontWeight: active ? '600' : '500',
       transition: 'all 0.15s',
     };
   };
@@ -104,19 +110,19 @@ export default function Sidebar({ role }) {
         {/* Logo */}
         <div style={{
           padding: '20px 20px 16px',
-          borderBottom: '1px solid rgba(255,255,255,0.08)',
+          borderBottom: '1px solid var(--card-border)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{
               width: '36px', height: '36px',
-              background: '#3b82f6', borderRadius: '10px',
+              background: accentColor, borderRadius: '10px',
               display: 'flex', alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '16px', fontWeight: '800', color: 'white',
+              fontSize: '16px', fontWeight: '800', color: isDark ? '#000000' : 'white',
             }}>H</div>
             <div>
-              <div style={{ color: 'white', fontSize: '16px', fontWeight: '800', lineHeight: 1 }}>HRMS</div>
-              <div style={{ color: '#93c5fd', fontSize: '9px', letterSpacing: '1px', marginTop: '2px' }}>HR MANAGEMENT</div>
+              <div style={{ color: 'var(--text-primary)', fontSize: '16px', fontWeight: '800', lineHeight: 1 }}>HRMS</div>
+              <div style={{ color: 'var(--text-muted)', fontSize: '9px', letterSpacing: '1px', marginTop: '2px' }}>HR MANAGEMENT</div>
             </div>
           </div>
         </div>
@@ -130,7 +136,7 @@ export default function Sidebar({ role }) {
               style={navItemStyle(item.key)}
               onMouseEnter={e => {
                 if (pathname !== item.key)
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
+                  e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)';
               }}
               onMouseLeave={e => {
                 if (pathname !== item.key)
@@ -144,7 +150,7 @@ export default function Sidebar({ role }) {
         </div>
 
         {/* Bottom — Settings + Logout */}
-        <div style={{ padding: '10px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+        <div style={{ padding: '10px', borderTop: '1px solid var(--card-border)' }}>
 
           {/* Settings */}
           <div
@@ -155,7 +161,7 @@ export default function Sidebar({ role }) {
             }}
             onMouseEnter={e => {
               if (pathname !== settingsRoute)
-                e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
+                e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)';
             }}
             onMouseLeave={e => {
               if (pathname !== settingsRoute)
@@ -176,7 +182,7 @@ export default function Sidebar({ role }) {
             style={{
               display: 'flex', alignItems: 'center', gap: '10px',
               padding: '10px 12px', borderRadius: '8px',
-              cursor: 'pointer', color: '#fca5a5',
+              cursor: 'pointer', color: '#ef4444',
               fontSize: '13px', transition: 'all 0.15s',
             }}
             onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.15)'}

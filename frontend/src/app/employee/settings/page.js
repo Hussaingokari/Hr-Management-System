@@ -80,8 +80,8 @@ export default function SettingsPage() {
     outline: 'none',
     boxSizing: 'border-box',
     fontFamily: 'inherit',
-    color: '#1e293b',
-    background: 'white',
+    color: 'var(--text-primary)',
+    background: 'var(--card-bg)',
   };
 
 
@@ -93,22 +93,22 @@ export default function SettingsPage() {
     <div>
       {/* Header */}
       <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '22px', fontWeight: '800', color: '#1e293b', marginBottom: '4px' }}>
+        <h1 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px' }}>
           Settings
         </h1>
-        <p style={{ fontSize: '13px', color: '#94a3b8' }}>Manage your account settings</p>
+        <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Manage your account settings</p>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
 
         {/* Profile Info */}
         <div style={{
-          background: 'white', borderRadius: '14px',
-          border: '1px solid #e2e8f0',
+          background: 'var(--card-bg)', borderRadius: '14px',
+          border: '1px solid var(--card-border)',
           boxShadow: '0 1px 4px rgba(0,0,0,0.04)', overflow: 'hidden',
         }}>
           <div style={{
-            padding: '16px 20px', borderBottom: '1px solid #e2e8f0',
+            padding: '16px 20px', borderBottom: '1px solid var(--card-border)',
             background: 'linear-gradient(135deg, #1e3a5f, #2563eb)', color: 'white',
           }}>
             <h3 style={{ fontSize: '15px', fontWeight: '700' }}>👤 Profile Information</h3>
@@ -118,7 +118,7 @@ export default function SettingsPage() {
             <div style={{
               display: 'flex', alignItems: 'center', gap: '16px',
               marginBottom: '24px', padding: '16px',
-              background: '#f8fafc', borderRadius: '12px',
+              background: 'var(--bg-primary)', borderRadius: '12px',
             }}>
               <div style={{
                 width: '64px', height: '64px',
@@ -130,11 +130,11 @@ export default function SettingsPage() {
                 {user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
               </div>
               <div>
-                <div style={{ fontSize: '18px', fontWeight: '800', color: '#1e293b' }}>
+                <div style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-primary)' }}>
                   {user?.name}
                 </div>
-                <div style={{ fontSize: '13px', color: '#64748b' }}>{user?.email}</div>
-                <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>
+                <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{user?.email}</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
                   {user?.employeeCode} · {user?.role}
                 </div>
               </div>
@@ -151,8 +151,8 @@ export default function SettingsPage() {
                 display: 'flex', justifyContent: 'space-between',
                 padding: '10px 0', borderBottom: '1px solid #f1f5f9',
               }}>
-                <span style={{ fontSize: '13px', color: '#64748b' }}>{item.label}</span>
-                <span style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>
+                <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{item.label}</span>
+                <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)' }}>
                   {item.value || '—'}
                 </span>
               </div>
@@ -172,12 +172,12 @@ export default function SettingsPage() {
 
         {/* Change Password */}
         <div style={{
-          background: 'white', borderRadius: '14px',
-          border: '1px solid #e2e8f0',
+          background: 'var(--card-bg)', borderRadius: '14px',
+          border: '1px solid var(--card-border)',
           boxShadow: '0 1px 4px rgba(0,0,0,0.04)', overflow: 'hidden',
         }}>
           <div style={{
-            padding: '16px 20px', borderBottom: '1px solid #e2e8f0',
+            padding: '16px 20px', borderBottom: '1px solid var(--card-border)',
             background: 'linear-gradient(135deg, #1e3a5f, #2563eb)', color: 'white',
           }}>
             <h3 style={{ fontSize: '15px', fontWeight: '700' }}>🔒 Change Password</h3>
@@ -247,9 +247,9 @@ export default function SettingsPage() {
 
               {/* Password Rules */}
               <div style={{
-                background: '#f8fafc', borderRadius: '10px',
+                background: 'var(--bg-primary)', borderRadius: '10px',
                 padding: '14px', marginBottom: '20px',
-                border: '1px solid #e2e8f0',
+                border: '1px solid var(--card-border)',
               }}>
                 <div style={{ fontSize: '12px', fontWeight: '700', color: '#374151', marginBottom: '8px' }}>
                   Password Requirements:

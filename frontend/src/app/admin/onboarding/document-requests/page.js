@@ -42,11 +42,11 @@ function RejectModal({ doc, onClose, onConfirm, submitting }) {
     const [remarks, setRemarks] = useState('');
     return (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-            <div style={{ background: 'white', borderRadius: '12px', padding: '24px', width: '420px', maxWidth: '90%' }}>
-                <div style={{ fontSize: '16px', fontWeight: '700', color: '#1e293b', marginBottom: '6px' }}>
+            <div style={{ background: 'var(--card-bg)', borderRadius: '12px', padding: '24px', width: '420px', maxWidth: '90%' }}>
+                <div style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '6px' }}>
                     Reject {DOC_KEY_LABELS[doc.documentKey] || doc.documentKey}?
                 </div>
-                <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '14px' }}>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '14px' }}>
                     {doc.employeeName} · {doc.employeeCode}
                 </div>
                 <label style={{ fontSize: '12px', fontWeight: '600', color: '#374151', display: 'block', marginBottom: '6px' }}>
@@ -61,7 +61,7 @@ function RejectModal({ doc, onClose, onConfirm, submitting }) {
                 />
                 <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
                     <button onClick={onClose} disabled={submitting}
-                        style={{ padding: '9px 16px', background: '#f1f5f9', color: '#64748b', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
+                        style={{ padding: '9px 16px', background: 'var(--card-border)', color: 'var(--text-secondary)', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
                         Cancel
                     </button>
                     <button
@@ -79,14 +79,14 @@ function RejectModal({ doc, onClose, onConfirm, submitting }) {
 function DocumentCard({ doc, tab, onApprove, onReject, actingId }) {
     const isActing = actingId === doc.id;
     return (
-        <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '18px 20px', marginBottom: '12px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+        <div style={{ background: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--card-border)', padding: '18px 20px', marginBottom: '12px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
             <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
                 <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
                     📄
                 </div>
                 <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
-                        <span style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b' }}>
+                        <span style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)' }}>
                             {DOC_KEY_LABELS[doc.documentKey] || doc.documentKey}
                         </span>
                         <StatusPill status={doc.status} />
@@ -99,7 +99,7 @@ function DocumentCard({ doc, tab, onApprove, onReject, actingId }) {
                             Remarks: {doc.rejectionRemarks}
                         </div>
                     )}
-                    <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '4px' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
                         Uploaded {timeAgo(doc.uploadedAt)}
                         {doc.fileUrl && (
                             <> · <a href={doc.fileUrl?.startsWith('/') ? `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'}${doc.fileUrl}` : doc.fileUrl} target="_blank" rel="noreferrer" style={{ color: '#3b82f6' }}>View file</a></>
@@ -197,15 +197,15 @@ export default function DocumentRequestsPage() {
     return (
         <div>
             <div style={{ marginBottom: '24px' }}>
-                <h1 style={{ fontSize: '22px', fontWeight: '800', color: '#1e293b', marginBottom: '4px' }}>
+                <h1 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px' }}>
                     Document Requests
                 </h1>
-                <p style={{ fontSize: '13px', color: '#94a3b8' }}>
+                <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
                     Review, approve, or reject employee documents.
                 </p>
             </div>
 
-            <div style={{ display: 'flex', background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '6px', marginBottom: '20px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+            <div style={{ display: 'flex', background: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--card-border)', padding: '6px', marginBottom: '20px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
                 {TABS.map(t => (
                     <button
                         key={t.key}
@@ -231,14 +231,14 @@ export default function DocumentRequestsPage() {
             </div>
 
             {loading ? (
-                <div style={{ padding: '60px', textAlign: 'center', color: '#94a3b8' }}>Loading...</div>
+                <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</div>
             ) : docs.length === 0 ? (
-                <div style={{ background: 'white', borderRadius: '12px', border: '1px dashed #e2e8f0', padding: '60px', textAlign: 'center' }}>
+                <div style={{ background: 'var(--card-bg)', borderRadius: '12px', border: '1px dashed #e2e8f0', padding: '60px', textAlign: 'center' }}>
                     <div style={{ fontSize: '40px', marginBottom: '12px' }}>📄</div>
-                    <div style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b', marginBottom: '4px' }}>
+                    <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '4px' }}>
                         No {tab.toLowerCase()} documents
                     </div>
-                    <div style={{ fontSize: '12px', color: '#94a3b8' }}>
+                    <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                         {tab === 'PENDING' ? "All caught up — no documents awaiting review." : `Nothing in ${tab.toLowerCase()} yet.`}
                     </div>
                 </div>

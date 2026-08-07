@@ -10,19 +10,19 @@ function StarRating({ value }) {
       {[1,2,3,4,5].map(s => (
         <span key={s} style={{ fontSize: '14px', color: s <= Math.round(value) ? '#f59e0b' : '#e2e8f0' }}>★</span>
       ))}
-      <span style={{ fontSize: '12px', color: '#64748b', marginLeft: '4px' }}>{value}/5</span>
+      <span style={{ fontSize: '12px', color: 'var(--text-secondary)', marginLeft: '4px' }}>{value}/5</span>
     </div>
   );
 }
 
 function Badge({ status }) {
   const map = {
-    DRAFT:        { bg: '#f1f5f9', color: '#64748b' },
+    DRAFT:        { bg: '#f1f5f9', color: 'var(--text-secondary)' },
     SUBMITTED:    { bg: '#eff6ff', color: '#3b82f6' },
     ACKNOWLEDGED: { bg: '#dcfce7', color: '#16a34a' },
     IN_PROGRESS:  { bg: '#fff7ed', color: '#f59e0b' },
   };
-  const s = map[status] || { bg: '#f1f5f9', color: '#64748b' };
+  const s = map[status] || { bg: '#f1f5f9', color: 'var(--text-secondary)' };
   return (
     <span style={{ background: s.bg, color: s.color, padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '700' }}>
       {status}
@@ -111,8 +111,8 @@ export default function PerformancePage() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <div>
-          <h1 style={{ fontSize: '22px', fontWeight: '800', color: '#1e293b', marginBottom: '4px' }}>Performance Reviews</h1>
-          <p style={{ fontSize: '13px', color: '#94a3b8' }}>Create and manage employee performance reviews</p>
+          <h1 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px' }}>Performance Reviews</h1>
+          <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Create and manage employee performance reviews</p>
         </div>
         <button onClick={() => setShowForm(true)}
           style={{ padding: '10px 20px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '10px', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>
@@ -121,20 +121,20 @@ export default function PerformancePage() {
       </div>
 
       {/* Reviews Table */}
-      <div className="table-responsive" style={{ background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+      <div className="table-responsive" style={{ background: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--card-border)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
         <div className="admin-data-table" style={{ minWidth: '760px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', padding: '10px 20px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', padding: '10px 20px', background: 'var(--bg-primary)', borderBottom: '1px solid var(--card-border)' }}>
             {['Employee', 'Review Period', 'Overall Rating', 'Status', 'Review Date'].map(h => (
-              <div key={h} style={{ fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</div>
+              <div key={h} style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</div>
             ))}
           </div>
 
         {loading ? (
-          <div style={{ padding: '60px', textAlign: 'center', color: '#94a3b8' }}>Loading...</div>
+          <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</div>
         ) : reviews.length === 0 ? (
           <div style={{ padding: '80px', textAlign: 'center' }}>
             <div style={{ fontSize: '48px', marginBottom: '16px' }}>⭐</div>
-            <div style={{ fontSize: '16px', fontWeight: '600', color: '#1e293b', marginBottom: '8px' }}>No reviews yet</div>
+            <div style={{ fontSize: '16px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '8px' }}>No reviews yet</div>
             <button onClick={() => setShowForm(true)}
               style={{ padding: '10px 20px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>
               + Create First Review
@@ -158,19 +158,19 @@ export default function PerformancePage() {
                     {r.employeeName?.split(' ').map(n => n[0]).join('').slice(0, 2)}
                   </div>
                   <div>
-                    <div style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>{r.employeeName}</div>
-                    <div style={{ fontSize: '11px', color: '#94a3b8' }}>{r.employeeCode}</div>
+                    <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)' }}>{r.employeeName}</div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{r.employeeCode}</div>
                   </div>
                 </div>
-                <div style={{ fontSize: '13px', color: '#64748b' }}>{r.reviewPeriod}</div>
+                <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{r.reviewPeriod}</div>
                 <StarRating value={r.overallRating}/>
                 <Badge status={r.status}/>
-                <div style={{ fontSize: '13px', color: '#64748b' }}>{r.reviewDate}</div>
+                <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{r.reviewDate}</div>
               </div>
 
               {/* Expanded Detail */}
               {selected?.id === r.id && (
-                <div style={{ padding: '16px 20px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                <div style={{ padding: '16px 20px', background: 'var(--bg-primary)', borderBottom: '1px solid var(--card-border)' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px', marginBottom: '16px' }}>
                     {[
                       { label: 'Technical', value: r.technicalSkills },
@@ -179,10 +179,10 @@ export default function PerformancePage() {
                       { label: 'Productivity', value: r.productivity },
                       { label: 'Leadership', value: r.leadership },
                     ].map(s => (
-                      <div key={s.label} style={{ background: 'white', borderRadius: '8px', padding: '10px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
-                        <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '4px' }}>{s.label}</div>
+                      <div key={s.label} style={{ background: 'var(--card-bg)', borderRadius: '8px', padding: '10px', border: '1px solid var(--card-border)', textAlign: 'center' }}>
+                        <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>{s.label}</div>
                         <div style={{ fontSize: '20px', fontWeight: '800', color: '#1e3a5f' }}>{s.value}</div>
-                        <div style={{ fontSize: '10px', color: '#94a3b8' }}>/ 5</div>
+                        <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>/ 5</div>
                       </div>
                     ))}
                   </div>
@@ -193,8 +193,8 @@ export default function PerformancePage() {
                       { label: '📈 Improvements', value: r.improvements },
                       { label: '🎯 Goals', value: r.goals },
                     ].map(d => d.value && (
-                      <div key={d.label} style={{ background: 'white', borderRadius: '8px', padding: '12px', border: '1px solid #e2e8f0' }}>
-                        <div style={{ fontSize: '11px', fontWeight: '700', color: '#64748b', marginBottom: '6px' }}>{d.label}</div>
+                      <div key={d.label} style={{ background: 'var(--card-bg)', borderRadius: '8px', padding: '12px', border: '1px solid var(--card-border)' }}>
+                        <div style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-secondary)', marginBottom: '6px' }}>{d.label}</div>
                         <div style={{ fontSize: '13px', color: '#374151', lineHeight: 1.5 }}>{d.value}</div>
                       </div>
                     ))}
@@ -214,21 +214,21 @@ export default function PerformancePage() {
         </div>
         {/* Pagination controls */}
         {!loading && reviews.length > 0 && (
-          <div style={{ padding: '16px 20px', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'white', borderBottomLeftRadius: '12px', borderBottomRightRadius: '12px' }}>
-            <div style={{ fontSize: '13px', color: '#64748b', fontWeight: '500' }}>
+          <div style={{ padding: '16px 20px', borderTop: '1px solid var(--card-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--card-bg)', borderBottomLeftRadius: '12px', borderBottomRightRadius: '12px' }}>
+            <div style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: '500' }}>
               Page {page + 1} of {totalPages || 1}
             </div>
             <div style={{ display: 'flex', gap: '8px' }}>
               <button 
                 onClick={() => setPage(p => Math.max(0, p - 1))}
                 disabled={page === 0}
-                style={{ padding: '6px 12px', border: '1px solid #e2e8f0', borderRadius: '6px', background: page === 0 ? '#f8fafc' : 'white', color: page === 0 ? '#94a3b8' : '#374151', cursor: page === 0 ? 'not-allowed' : 'pointer', fontSize: '13px', fontWeight: '600', transition: 'all 0.2s' }}>
+                style={{ padding: '6px 12px', border: '1px solid var(--card-border)', borderRadius: '6px', background: page === 0 ? '#f8fafc' : 'white', color: page === 0 ? '#94a3b8' : '#374151', cursor: page === 0 ? 'not-allowed' : 'pointer', fontSize: '13px', fontWeight: '600', transition: 'all 0.2s' }}>
                 Previous
               </button>
               <button 
                 onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
                 disabled={page >= totalPages - 1}
-                style={{ padding: '6px 12px', border: '1px solid #e2e8f0', borderRadius: '6px', background: page >= totalPages - 1 ? '#f8fafc' : 'white', color: page >= totalPages - 1 ? '#94a3b8' : '#374151', cursor: page >= totalPages - 1 ? 'not-allowed' : 'pointer', fontSize: '13px', fontWeight: '600', transition: 'all 0.2s' }}>
+                style={{ padding: '6px 12px', border: '1px solid var(--card-border)', borderRadius: '6px', background: page >= totalPages - 1 ? '#f8fafc' : 'white', color: page >= totalPages - 1 ? '#94a3b8' : '#374151', cursor: page >= totalPages - 1 ? 'not-allowed' : 'pointer', fontSize: '13px', fontWeight: '600', transition: 'all 0.2s' }}>
                 Next
               </button>
             </div>
@@ -239,10 +239,10 @@ export default function PerformancePage() {
       {/* Create Review Modal */}
       {showForm && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '20px' }}>
-          <div style={{ background: 'white', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '580px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
+          <div style={{ background: 'var(--card-bg)', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '580px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h2 style={{ fontSize: '18px', fontWeight: '800', color: '#1e293b' }}>Create Performance Review</h2>
-              <button onClick={() => setShowForm(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#94a3b8' }}>✕</button>
+              <h2 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-primary)' }}>Create Performance Review</h2>
+              <button onClick={() => setShowForm(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: 'var(--text-muted)' }}>✕</button>
             </div>
 
             <form onSubmit={handleCreate}>
@@ -253,7 +253,7 @@ export default function PerformancePage() {
                     Employee <span style={{ color: '#ef4444' }}>*</span>
                   </label>
                   <select value={form.employeeId} onChange={e => setForm({ ...form, employeeId: e.target.value })} required
-                    style={{ width: '100%', padding: '9px 12px', border: '1.5px solid #e2e8f0', borderRadius: '8px', fontSize: '13px', outline: 'none', background: 'white' }}>
+                    style={{ width: '100%', padding: '9px 12px', border: '1.5px solid #e2e8f0', borderRadius: '8px', fontSize: '13px', outline: 'none', background: 'var(--card-bg)' }}>
                     <option value="">Select employee...</option>
                     {employees.map(e => (
                       <option key={e.id} value={e.id}>{e.firstName} {e.lastName} — {e.employeeCode}</option>
@@ -270,8 +270,8 @@ export default function PerformancePage() {
               </div>
 
               {/* Ratings */}
-              <div style={{ background: '#f8fafc', borderRadius: '10px', padding: '16px', marginBottom: '16px' }}>
-                <div style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b', marginBottom: '14px' }}>Ratings (1–5)</div>
+              <div style={{ background: 'var(--bg-primary)', borderRadius: '10px', padding: '16px', marginBottom: '16px' }}>
+                <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '14px' }}>Ratings (1–5)</div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                   <RatingInput label="Technical Skills"   name="technicalSkills" value={form.technicalSkills} onChange={handleRatingChange}/>
                   <RatingInput label="Communication"      name="communication" value={form.communication} onChange={handleRatingChange}/>
@@ -298,7 +298,7 @@ export default function PerformancePage() {
 
               <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
                 <button type="button" onClick={() => setShowForm(false)}
-                  style={{ flex: 1, padding: '12px', background: 'white', color: '#374151', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
+                  style={{ flex: 1, padding: '12px', background: 'var(--card-bg)', color: '#374151', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
                   Cancel
                 </button>
                 <button type="submit" disabled={submitting}
@@ -325,7 +325,7 @@ function RatingInput({ label, name, value, onChange }) {
         onChange={e => onChange(name, e.target.value)}
         style={{ width: '100%' }}
       />
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#94a3b8' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: 'var(--text-muted)' }}>
         <span>Poor</span><span>Average</span><span>Excellent</span>
       </div>
     </div>

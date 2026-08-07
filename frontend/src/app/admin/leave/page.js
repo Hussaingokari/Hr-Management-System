@@ -5,11 +5,11 @@ import toast from 'react-hot-toast';
 
 function StatusPill({ status }) {
   const map = {
-    APPROVED: { bg: '#DCFCE7', color: '#15803D', icon: '✅' },
-    PENDING: { bg: '#FEF3C7', color: '#B45309', icon: '⏳' },
-    REJECTED: { bg: '#FEE2E2', color: '#B91C1C', icon: '✕' },
-    CANCELLATION_PENDING: { bg: '#F3E8FF', color: '#7E22CE', icon: '↩️' },
-    CANCELLED: { bg: '#F1F5F9', color: '#64748B', icon: '·' },
+    APPROVED: { bg: 'rgba(22, 163, 74, 0.15)', color: '#15803D', icon: '✅' },
+    PENDING: { bg: 'rgba(180, 83, 9, 0.2)', color: '#B45309', icon: '⏳' },
+    REJECTED: { bg: 'rgba(220, 38, 38, 0.15)', color: '#B91C1C', icon: '✕' },
+    CANCELLATION_PENDING: { bg: 'rgba(126, 34, 206, 0.2)', color: '#7E22CE', icon: '↩️' },
+    CANCELLED: { bg: '#1E293B', color: 'var(--text-secondary)', icon: '·' },
   };
   const s = map[status] || map.PENDING;
   return (
@@ -28,7 +28,7 @@ const typeMeta = {
   CASUAL: { icon: '☀️', color: '#D97706' },
   PATERNITY: { icon: '👨‍🍼', color: '#8B5CF6' },
   MATERNITY: { icon: '🤱', color: '#DB2777' },
-  UNPAID: { icon: '📋', color: '#64748B' },
+  UNPAID: { icon: '📋', color: 'var(--text-secondary)' },
 };
 
 export default function AdminLeavePage() {
@@ -138,29 +138,29 @@ export default function AdminLeavePage() {
 
       {/* Header */}
       <div style={{ marginBottom: '22px' }}>
-        <h1 style={{ fontFamily: "'Quicksand', sans-serif", fontSize: '26px', fontWeight: 800, color: '#241F47', marginBottom: '4px' }}>
+        <h1 style={{ fontFamily: "'Quicksand', sans-serif", fontSize: '26px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '4px' }}>
           🗂️ Leave Requests
         </h1>
-        <p style={{ fontSize: '13.5px', color: '#8B86AA' }}>
+        <p style={{ fontSize: '13.5px', color: 'var(--text-muted)' }}>
           Shared queue — any Admin or HR teammate can approve or decline. First one in settles it.
         </p>
       </div>
 
       {/* Flow indicator */}
       <div style={{
-        background: 'white', borderRadius: '16px', padding: '14px 20px',
+        background: 'var(--card-bg)', borderRadius: '16px', padding: '14px 20px',
         border: '1px solid #EEF0F5', marginBottom: '20px',
         display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap',
       }}>
-        <span style={{ background: '#EEF0FF', color: '#4F46E5', padding: '5px 14px', borderRadius: '999px', fontSize: '12px', fontWeight: 700 }}>
+        <span style={{ background: 'rgba(79, 70, 229, 0.15)', color: '#4F46E5', padding: '5px 14px', borderRadius: '999px', fontSize: '12px', fontWeight: 700 }}>
           1. Employee applies
         </span>
-        <span style={{ color: '#C7C3DE' }}>→</span>
-        <span style={{ background: '#FEF3C7', color: '#B45309', padding: '5px 14px', borderRadius: '999px', fontSize: '12px', fontWeight: 700 }}>
+        <span style={{ color: 'var(--text-secondary)' }}>→</span>
+        <span style={{ background: 'rgba(180, 83, 9, 0.2)', color: '#B45309', padding: '5px 14px', borderRadius: '999px', fontSize: '12px', fontWeight: 700 }}>
           2. Admin or HR reviews
         </span>
-        <span style={{ color: '#C7C3DE' }}>→</span>
-        <span style={{ background: '#DCFCE7', color: '#15803D', padding: '5px 14px', borderRadius: '999px', fontSize: '12px', fontWeight: 700 }}>
+        <span style={{ color: 'var(--text-secondary)' }}>→</span>
+        <span style={{ background: 'rgba(22, 163, 74, 0.15)', color: '#15803D', padding: '5px 14px', borderRadius: '999px', fontSize: '12px', fontWeight: 700 }}>
           3. Approved ✅ / Rejected
         </span>
       </div>
@@ -173,10 +173,10 @@ export default function AdminLeavePage() {
             style={{
               padding: '9px 18px',
               background: tab === t.key ? 'white' : 'transparent',
-              color: tab === t.key ? '#241F47' : '#8B86AA',
+              color: tab === t.key ? '#1E293B' : '#94A3B8',
               border: 'none', borderRadius: '11px', fontSize: '13px',
               fontWeight: tab === t.key ? 700 : 500, cursor: 'pointer',
-              boxShadow: tab === t.key ? '0 2px 8px rgba(36,31,71,0.08)' : 'none',
+              boxShadow: tab === t.key ? '0 2px 8px rgba(0,0,0,0.4)' : 'none',
               transition: 'all 0.15s', whiteSpace: 'nowrap',
             }}>
             {t.icon} {t.label}
@@ -185,23 +185,23 @@ export default function AdminLeavePage() {
       </div>
 
       {/* Table */}
-      <div style={{ background: 'white', borderRadius: '18px', border: '1px solid #EEF0F5', boxShadow: '0 2px 10px rgba(36,31,71,0.04)' }}>
+      <div style={{ background: 'var(--card-bg)', borderRadius: '18px', border: '1px solid #EEF0F5', boxShadow: '0 2px 10px rgba(0,0,0,0.3)' }}>
         <div style={{
           display: 'grid', gridTemplateColumns: '2fr 1.1fr 1fr 1fr 0.5fr 1.3fr 2fr',
-          padding: '10px 22px', background: '#FAFAFF', borderBottom: '1px solid #F1F5F9',
+          padding: '10px 22px', background: 'var(--card-bg)', borderBottom: '1px solid #F1F5F9',
         }}>
           {['Employee', 'Type', 'From', 'To', 'Days', 'Status', lastColumnLabel].map(h => (
-            <div key={h} style={{ fontSize: '10.5px', fontWeight: 700, color: '#8B86AA', textTransform: 'uppercase', letterSpacing: '0.4px' }}>{h}</div>
+            <div key={h} style={{ fontSize: '10.5px', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.4px' }}>{h}</div>
           ))}
         </div>
 
         {loading ? (
-          <div style={{ padding: '60px', textAlign: 'center', color: '#8B86AA' }}>Loading...</div>
+          <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</div>
         ) : currentData.length === 0 ? (
           <div style={{ padding: '80px', textAlign: 'center' }}>
             <div style={{ fontSize: '48px', marginBottom: '16px' }}>🎉</div>
-            <div style={{ fontSize: '16px', fontWeight: 700, color: '#241F47', marginBottom: '8px' }}>All clear!</div>
-            <div style={{ fontSize: '13px', color: '#8B86AA' }}>
+            <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '8px' }}>All clear!</div>
+            <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
               No {tab === 'PENDING' ? 'leaves waiting on a decision'
                 : tab === 'APPROVED' ? 'approved leaves yet'
                   : tab === 'REJECTED' ? 'rejected leaves'
@@ -222,24 +222,24 @@ export default function AdminLeavePage() {
                       width: '36px', height: '36px', borderRadius: '50%',
                       background: `linear-gradient(135deg, ${m.color}, ${m.color}CC)`,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: '12px', fontWeight: 700, color: 'white', flexShrink: 0,
+                      fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)', flexShrink: 0,
                     }}>
                       {(l.employeeName || '').split(' ').map(n => n[0] || '').join('').slice(0, 2)}
                     </div>
                     <div>
-                      <div style={{ fontSize: '13px', fontWeight: 700, color: '#241F47' }}>{l.employeeName}</div>
-                      <div style={{ fontSize: '11px', color: '#94A3B8', fontStyle: 'italic' }}>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>{l.employeeName}</div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
                         &quot;{l.reason?.substring(0, 25)}{l.reason?.length > 25 ? '...' : ''}&quot;
                       </div>
                     </div>
                   </div>
 
-                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#374151', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <span>{m.icon}</span>{l.leaveType}
                   </div>
-                  <div style={{ fontSize: '12.5px', color: '#64748B' }}>{l.startDate}</div>
-                  <div style={{ fontSize: '12.5px', color: '#64748B' }}>{l.endDate}</div>
-                  <div style={{ fontSize: '14px', fontWeight: 800, color: '#241F47' }}>{l.totalDays}</div>
+                  <div style={{ fontSize: '12.5px', color: 'var(--text-secondary)' }}>{l.startDate}</div>
+                  <div style={{ fontSize: '12.5px', color: 'var(--text-secondary)' }}>{l.endDate}</div>
+                  <div style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-primary)' }}>{l.totalDays}</div>
                   <StatusPill status={l.status} />
 
                   <div>
@@ -249,7 +249,7 @@ export default function AdminLeavePage() {
                           onClick={() => handleAction(l.id, 'APPROVED')}
                           disabled={!!actioning}
                           style={{
-                            padding: '7px 14px', background: '#DCFCE7', color: '#15803D',
+                            padding: '7px 14px', background: 'rgba(22, 163, 74, 0.15)', color: '#15803D',
                             border: 'none', borderRadius: '9px', fontSize: '11px', fontWeight: 700,
                             cursor: 'pointer', whiteSpace: 'nowrap',
                           }}>
@@ -259,7 +259,7 @@ export default function AdminLeavePage() {
                           onClick={() => handleAction(l.id, 'REJECTED')}
                           disabled={!!actioning}
                           style={{
-                            padding: '7px 14px', background: '#FEE2E2', color: '#DC2626',
+                            padding: '7px 14px', background: 'rgba(220, 38, 38, 0.15)', color: '#DC2626',
                             border: 'none', borderRadius: '9px', fontSize: '11px', fontWeight: 700, cursor: 'pointer',
                           }}>
                           {actioning === l.id + 'REJECTED' ? '⏳' : '✗ Reject'}
@@ -273,7 +273,7 @@ export default function AdminLeavePage() {
                           onClick={() => handleCancelAction(l.id, true)}
                           disabled={!!actioning}
                           style={{
-                            padding: '7px 14px', background: '#DCFCE7', color: '#15803D',
+                            padding: '7px 14px', background: 'rgba(22, 163, 74, 0.15)', color: '#15803D',
                             border: 'none', borderRadius: '9px', fontSize: '11px', fontWeight: 700, cursor: 'pointer',
                           }}>
                           {actioning === l.id + 'true' ? '⏳' : '✓ Confirm'}
@@ -282,7 +282,7 @@ export default function AdminLeavePage() {
                           onClick={() => handleCancelAction(l.id, false)}
                           disabled={!!actioning}
                           style={{
-                            padding: '7px 14px', background: '#FEE2E2', color: '#DC2626',
+                            padding: '7px 14px', background: 'rgba(220, 38, 38, 0.15)', color: '#DC2626',
                             border: 'none', borderRadius: '9px', fontSize: '11px', fontWeight: 700, cursor: 'pointer',
                           }}>
                           {actioning === l.id + 'false' ? '⏳' : '✗ Deny'}
@@ -292,11 +292,11 @@ export default function AdminLeavePage() {
 
                     {(tab === 'APPROVED' || tab === 'REJECTED') && (
                       <div>
-                        <div style={{ fontSize: '12px', fontWeight: 700, color: '#241F47' }}>
+                        <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-primary)' }}>
                           {l.reviewedByName || '—'}
                         </div>
                         {l.remarks && (
-                          <div style={{ fontSize: '11px', color: '#94A3B8', fontStyle: 'italic' }}>
+                          <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
                             &quot;{l.remarks}&quot;
                           </div>
                         )}
@@ -310,12 +310,12 @@ export default function AdminLeavePage() {
             {(tab === 'PENDING' || tab === 'CANCELLATIONS') && totalPages > 1 && (
               <div style={{ padding: '14px 20px', display: 'flex', justifyContent: 'center', gap: '8px', borderTop: '1px solid #F1F5F9' }}>
                 <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}
-                  style={{ padding: '6px 14px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '12px', fontWeight: 700, color: page === 0 ? '#CBD5E1' : '#374151', background: 'white', cursor: page === 0 ? 'not-allowed' : 'pointer' }}>
+                  style={{ padding: '6px 14px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '12px', fontWeight: 700, color: page === 0 ? '#475569' : '#1E293B', background: 'var(--card-bg)', cursor: page === 0 ? 'not-allowed' : 'pointer' }}>
                   ← Prev
                 </button>
-                <span style={{ padding: '6px 14px', fontSize: '12px', color: '#8B86AA' }}>{page + 1} / {totalPages}</span>
+                <span style={{ padding: '6px 14px', fontSize: '12px', color: 'var(--text-muted)' }}>{page + 1} / {totalPages}</span>
                 <button onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page >= totalPages - 1}
-                  style={{ padding: '6px 14px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '12px', fontWeight: 700, color: page >= totalPages - 1 ? '#CBD5E1' : '#374151', background: 'white', cursor: page >= totalPages - 1 ? 'not-allowed' : 'pointer' }}>
+                  style={{ padding: '6px 14px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '12px', fontWeight: 700, color: page >= totalPages - 1 ? '#475569' : '#1E293B', background: 'var(--card-bg)', cursor: page >= totalPages - 1 ? 'not-allowed' : 'pointer' }}>
                   Next →
                 </button>
               </div>

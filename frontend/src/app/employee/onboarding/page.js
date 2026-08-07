@@ -25,11 +25,11 @@ const DOC_KEY_LABELS = {
 
 function StatusPill({ status }) {
     const map = {
-        UNDER_REVIEW: { bg: '#f1f5f9', color: '#64748b', label: 'Pending' },
+        UNDER_REVIEW: { bg: '#f1f5f9', color: 'var(--text-secondary)', label: 'Pending' },
         APPROVED: { bg: '#dcfce7', color: '#16a34a', label: 'Approved' },
         REJECTED: { bg: '#fee2e2', color: '#dc2626', label: 'Rejected' },
     };
-    const s = map[status] || { bg: '#f1f5f9', color: '#64748b', label: 'Pending' };
+    const s = map[status] || { bg: '#f1f5f9', color: 'var(--text-secondary)', label: 'Pending' };
     return (
         <span style={{ background: s.bg, color: s.color, padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
             <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: s.color }} />
@@ -64,15 +64,15 @@ export default function EmployeeOnboardingDashboardPage() {
     useEffect(() => { fetchData(); }, [fetchData]);
 
     if (loading) {
-        return <div style={{ padding: '60px', textAlign: 'center', color: '#94a3b8' }}>Loading...</div>;
+        return <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</div>;
     }
 
     if (!onboarding) {
         return (
-            <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '60px', textAlign: 'center', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+            <div style={{ background: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--card-border)', padding: '60px', textAlign: 'center', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
                 <div style={{ fontSize: '40px', marginBottom: '12px' }}>📋</div>
-                <div style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', marginBottom: '4px' }}>No onboarding checklist yet</div>
-                <div style={{ fontSize: '12px', color: '#94a3b8' }}>Your HR team hasn't set this up for you yet.</div>
+                <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '4px' }}>No onboarding checklist yet</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Your HR team hasn't set this up for you yet.</div>
             </div>
         );
     }
@@ -113,29 +113,29 @@ export default function EmployeeOnboardingDashboardPage() {
                     </div>
                 </div>
                 <div style={{ marginTop: '16px', height: '8px', background: 'rgba(255,255,255,0.25)', borderRadius: '4px', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', background: 'white', width: `${onboarding.completionPercent}%`, borderRadius: '4px', transition: 'width 0.5s' }} />
+                    <div style={{ height: '100%', background: 'var(--card-bg)', width: `${onboarding.completionPercent}%`, borderRadius: '4px', transition: 'width 0.5s' }} />
                 </div>
             </div>
 
             {/* Stat cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '14px', marginBottom: '20px' }}>
                 {STATS.map((s, i) => (
-                    <div key={i} style={{ background: 'white', borderRadius: '12px', padding: '18px', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+                    <div key={i} style={{ background: 'var(--card-bg)', borderRadius: '12px', padding: '18px', border: '1px solid var(--card-border)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                            <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '500' }}>{s.label}</span>
+                            <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: '500' }}>{s.label}</span>
                             <div style={{ width: '30px', height: '30px', background: s.bg, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px' }}>{s.icon}</div>
                         </div>
-                        <div style={{ fontSize: '28px', fontWeight: '800', color: '#1e293b', marginBottom: '4px' }}>{s.value}</div>
-                        <div style={{ fontSize: '12px', color: '#94a3b8' }}>{s.sub}</div>
+                        <div style={{ fontSize: '28px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px' }}>{s.value}</div>
+                        <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{s.sub}</div>
                     </div>
                 ))}
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                 {/* Onboarding Checklist preview */}
-                <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '20px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+                <div style={{ background: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--card-border)', padding: '20px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                        <div style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b' }}>Onboarding Checklist</div>
+                        <div style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)' }}>Onboarding Checklist</div>
                         <button
                             onClick={() => router.push('/employee/onboarding/checklist')}
                             style={{ background: 'none', border: 'none', color: '#4f46e5', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
@@ -146,18 +146,18 @@ export default function EmployeeOnboardingDashboardPage() {
                         <div key={item.key} style={{
                             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                             padding: '13px 14px', marginBottom: '8px', borderRadius: '10px',
-                            background: '#f8fafc', border: '1px solid #e2e8f0',
+                            background: 'var(--bg-primary)', border: '1px solid var(--card-border)',
                         }}>
-                            <span style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>{item.label}</span>
+                            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)' }}>{item.label}</span>
                             <StatusPill status={onboarding[item.key] ? 'APPROVED' : 'UNDER_REVIEW'} />
                         </div>
                     ))}
                 </div>
 
                 {/* Recent Documents preview */}
-                <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '20px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+                <div style={{ background: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--card-border)', padding: '20px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                        <div style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b' }}>Recent Documents</div>
+                        <div style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)' }}>Recent Documents</div>
                         <button
                             onClick={() => router.push('/employee/onboarding/documents')}
                             style={{ background: 'none', border: 'none', color: '#4f46e5', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
@@ -165,7 +165,7 @@ export default function EmployeeOnboardingDashboardPage() {
                         </button>
                     </div>
                     {documents.length === 0 ? (
-                        <div style={{ padding: '30px', textAlign: 'center', color: '#94a3b8', fontSize: '13px' }}>
+                        <div style={{ padding: '30px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
                             No documents uploaded yet.
                         </div>
                     ) : (
@@ -173,12 +173,12 @@ export default function EmployeeOnboardingDashboardPage() {
                             <div key={doc.id} style={{
                                 display: 'flex', alignItems: 'center', gap: '12px',
                                 padding: '13px 14px', marginBottom: '8px', borderRadius: '10px',
-                                background: '#f8fafc', border: '1px solid #e2e8f0',
+                                background: 'var(--bg-primary)', border: '1px solid var(--card-border)',
                             }}>
                                 <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px', flexShrink: 0 }}>
                                     📄
                                 </div>
-                                <span style={{ flex: 1, fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>
+                                <span style={{ flex: 1, fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)' }}>
                                     {DOC_KEY_LABELS[doc.documentKey] || doc.documentKey}
                                 </span>
                                 <StatusPill status={doc.status} />

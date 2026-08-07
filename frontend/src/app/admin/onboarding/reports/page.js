@@ -24,7 +24,7 @@ export default function OnboardingReportsPage() {
     useEffect(() => { fetchReports(); }, [fetchReports]);
 
     if (loading || !data) {
-        return <div style={{ padding: '60px', textAlign: 'center', color: '#94a3b8' }}>Loading...</div>;
+        return <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</div>;
     }
 
     const STATS = [
@@ -39,7 +39,7 @@ export default function OnboardingReportsPage() {
 
     const statusTotal = data.notStarted + data.inProgress + data.completed || 1;
     const statusSegments = [
-        { label: 'Not Started', value: data.notStarted, color: '#cbd5e1' },
+        { label: 'Not Started', value: data.notStarted, color: 'var(--text-muted)' },
         { label: 'In Progress', value: data.inProgress, color: '#4f46e5' },
         { label: 'Completed', value: data.completed, color: '#16a34a' },
     ];
@@ -56,10 +56,10 @@ export default function OnboardingReportsPage() {
     return (
         <div>
             <div style={{ marginBottom: '24px' }}>
-                <h1 style={{ fontSize: '22px', fontWeight: '800', color: '#1e293b', marginBottom: '4px' }}>
+                <h1 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px' }}>
                     Reports & Analytics
                 </h1>
-                <p style={{ fontSize: '13px', color: '#94a3b8' }}>
+                <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
                     Insights into your onboarding pipeline.
                 </p>
             </div>
@@ -67,26 +67,26 @@ export default function OnboardingReportsPage() {
             {/* Stat cards */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '20px' }}>
                 {STATS.map((s, i) => (
-                    <div key={i} style={{ background: 'white', borderRadius: '12px', padding: '18px', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+                    <div key={i} style={{ background: 'var(--card-bg)', borderRadius: '12px', padding: '18px', border: '1px solid var(--card-border)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                            <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '500' }}>{s.label}</span>
+                            <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: '500' }}>{s.label}</span>
                             <div style={{ width: '30px', height: '30px', background: s.bg, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px' }}>{s.icon}</div>
                         </div>
-                        <div style={{ fontSize: '28px', fontWeight: '800', color: '#1e293b' }}>{s.value}</div>
+                        <div style={{ fontSize: '28px', fontWeight: '800', color: 'var(--text-primary)' }}>{s.value}</div>
                     </div>
                 ))}
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                 {/* Employees by department */}
-                <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '20px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-                    <div style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b', marginBottom: '18px' }}>
+                <div style={{ background: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--card-border)', padding: '20px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+                    <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '18px' }}>
                         Employees by Department
                     </div>
                     <div style={{ display: 'flex', alignItems: 'flex-end', gap: '10px', height: '160px', paddingBottom: '4px' }}>
                         {deptEntries.map(([dept, count], i) => (
                             <div key={dept} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', height: '100%', justifyContent: 'flex-end' }}>
-                                <span style={{ fontSize: '12px', fontWeight: '700', color: '#1e293b' }}>{count}</span>
+                                <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-primary)' }}>{count}</span>
                                 <div style={{
                                     width: '100%', maxWidth: '48px',
                                     height: `${(count / maxDeptCount) * 100}%`,
@@ -99,14 +99,14 @@ export default function OnboardingReportsPage() {
                     </div>
                     <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                         {deptEntries.map(([dept]) => (
-                            <div key={dept} style={{ flex: 1, fontSize: '11px', color: '#64748b', textAlign: 'center', wordBreak: 'break-word' }}>{dept}</div>
+                            <div key={dept} style={{ flex: 1, fontSize: '11px', color: 'var(--text-secondary)', textAlign: 'center', wordBreak: 'break-word' }}>{dept}</div>
                         ))}
                     </div>
                 </div>
 
                 {/* Onboarding status donut */}
-                <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '20px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-                    <div style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b', marginBottom: '18px' }}>
+                <div style={{ background: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--card-border)', padding: '20px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+                    <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '18px' }}>
                         Onboarding Status
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '18px' }}>
@@ -115,14 +115,14 @@ export default function OnboardingReportsPage() {
                             background: `conic-gradient(${gradientStops})`,
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                         }}>
-                            <div style={{ width: '90px', height: '90px', borderRadius: '50%', background: 'white' }} />
+                            <div style={{ width: '90px', height: '90px', borderRadius: '50%', background: 'var(--card-bg)' }} />
                         </div>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'center', gap: '16px' }}>
                         {statusSegments.map(seg => (
                             <div key={seg.label} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                 <span style={{ width: '10px', height: '10px', borderRadius: '2px', background: seg.color }} />
-                                <span style={{ fontSize: '12px', color: '#64748b' }}>{seg.label}</span>
+                                <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{seg.label}</span>
                             </div>
                         ))}
                     </div>

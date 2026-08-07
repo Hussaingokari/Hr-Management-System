@@ -11,34 +11,34 @@ import toast from 'react-hot-toast';
 function StatCard({ label, value, sub, color, icon }) {
   return (
     <div style={{
-      background: 'white', borderRadius: '12px', padding: '20px',
-      border: '1px solid #e2e8f0', flex: 1,
-      boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+      background: 'var(--card-bg)', borderRadius: '12px', padding: '20px',
+      border: '1px solid var(--card-border)', flex: 1,
+      boxShadow: 'var(--card-shadow)',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-        <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '500' }}>{label}</span>
+        <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: '500' }}>{label}</span>
         <div style={{ width: '36px', height: '36px', background: color + '20', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <span style={{ fontSize: '18px' }}>{icon}</span>
         </div>
       </div>
-      <div style={{ fontSize: '28px', fontWeight: '800', color: '#1e293b', marginBottom: '4px' }}>{value}</div>
-      <div style={{ fontSize: '12px', color: '#94a3b8' }}>{sub}</div>
+      <div style={{ fontSize: '28px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px' }}>{value}</div>
+      <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{sub}</div>
     </div>
   );
 }
 
 function Badge({ status }) {
   const map = {
-    APPROVED: { bg: '#dcfce7', color: '#16a34a' },
-    PENDING: { bg: '#fef9c3', color: '#ca8a04' },
-    REJECTED: { bg: '#fee2e2', color: '#dc2626' },
-    CANCELLED: { bg: '#f1f5f9', color: '#64748b' },
-    CANCELLATION_PENDING: { bg: '#fdf4ff', color: '#9333ea' },
-    PRESENT: { bg: '#dcfce7', color: '#16a34a' },
-    ABSENT: { bg: '#fee2e2', color: '#dc2626' },
-    HALF_DAY: { bg: '#fff7ed', color: '#f59e0b' },
+    APPROVED: { bg: 'rgba(22, 163, 74, 0.15)', color: '#16a34a' },
+    PENDING: { bg: 'rgba(202, 138, 4, 0.15)', color: '#ca8a04' },
+    REJECTED: { bg: 'rgba(220, 38, 38, 0.15)', color: '#dc2626' },
+    CANCELLED: { bg: '#1E293B', color: 'var(--text-secondary)' },
+    CANCELLATION_PENDING: { bg: 'rgba(147, 51, 234, 0.15)', color: '#9333ea' },
+    PRESENT: { bg: 'rgba(22, 163, 74, 0.15)', color: '#16a34a' },
+    ABSENT: { bg: 'rgba(220, 38, 38, 0.15)', color: '#dc2626' },
+    HALF_DAY: { bg: 'rgba(217, 119, 6, 0.15)', color: '#f59e0b' },
   };
-  const s = map[status] || { bg: '#f1f5f9', color: '#64748b' };
+  const s = map[status] || { bg: '#1E293B', color: 'var(--text-secondary)' };
   return (
     <span style={{ background: s.bg, color: s.color, padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '700' }}>
       {status?.replace(/_/g, ' ')}
@@ -57,12 +57,12 @@ function Loader() {
 
 // Same palette used across the leave pages, so balances look consistent everywhere
 const balanceStyle = {
-  ANNUAL: { color: '#4F46E5', soft: '#EEF0FF', icon: '🌴' },
-  SICK: { color: '#0D9488', soft: '#ECFDF9', icon: '🤒' },
-  CASUAL: { color: '#D97706', soft: '#FFF7ED', icon: '☀️' },
-  PATERNITY: { color: '#8B5CF6', soft: '#F5F3FF', icon: '👨‍🍼' },
-  MATERNITY: { color: '#DB2777', soft: '#FDF2F8', icon: '🤱' },
-  UNPAID: { color: '#64748B', soft: '#F1F5F9', icon: '📋' },
+  ANNUAL: { color: '#4F46E5', soft: 'rgba(79, 70, 229, 0.15)', icon: '🌴' },
+  SICK: { color: '#0D9488', soft: 'rgba(13, 148, 136, 0.15)', icon: '🤒' },
+  CASUAL: { color: '#D97706', soft: 'rgba(217, 119, 6, 0.15)', icon: '☀️' },
+  PATERNITY: { color: '#8B5CF6', soft: 'rgba(139, 92, 246, 0.15)', icon: '👨‍🍼' },
+  MATERNITY: { color: '#DB2777', soft: 'rgba(219, 39, 119, 0.15)', icon: '🤱' },
+  UNPAID: { color: 'var(--text-secondary)', soft: '#1E293B', icon: '📋' },
 };
 
 function MiniRing({ pct, color }) {
@@ -76,7 +76,7 @@ function MiniRing({ pct, color }) {
     }}>
       <div style={{
         width: size - 8, height: size - 8, borderRadius: '50%',
-        background: 'white', display: 'flex', alignItems: 'center',
+        background: 'var(--card-bg)', display: 'flex', alignItems: 'center',
         justifyContent: 'center', fontSize: '9px', fontWeight: 800, color,
       }}>
         {Math.round(pct)}%
@@ -172,17 +172,17 @@ export default function EmployeeDashboard() {
   const pendingLeaves = leaves.filter(l => l.status === 'PENDING').length;
 
   return (
-    <div>
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)', padding: '24px', margin: '-24px', borderRadius: '16px' }}>
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@600;700;800&display=swap');
       `}</style>
 
       {/* Header */}
       <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '22px', fontWeight: '800', color: '#1e293b', marginBottom: '4px' }}>
+        <h1 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px' }}>
           Dashboard
         </h1>
-        <p style={{ fontSize: '13px', color: '#94a3b8' }}>
+        <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
           Welcome back, {user?.name}! Here&apos;s your overview for today.
         </p>
       </div>
@@ -221,27 +221,27 @@ export default function EmployeeDashboard() {
           <div className="dashboard-main-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
 
             {/* Today Attendance */}
-            <div style={{ background: 'white', borderRadius: '12px', padding: '20px', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-              <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b', marginBottom: '16px' }}>
+            <div style={{ background: 'var(--card-bg)', borderRadius: '12px', padding: '20px', border: '1px solid var(--card-border)', boxShadow: 'var(--card-shadow)' }}>
+              <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '16px' }}>
                 📅 Today&apos;s Attendance
               </h3>
               <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: '20px' }}>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '11px', color: '#94a3b8', marginBottom: '4px' }}>Check In</div>
-                  <div style={{ fontSize: '22px', fontWeight: '800', color: todayAtt?.checkIn ? '#16a34a' : '#cbd5e1' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>Check In</div>
+                  <div style={{ fontSize: '22px', fontWeight: '800', color: todayAtt?.checkIn ? '#16a34a' : '#475569' }}>
                     {todayAtt?.checkIn ? todayAtt.checkIn.substring(0, 5) : '--:--'}
                   </div>
-                  <div style={{ fontSize: '10px', color: '#94a3b8' }}>
+                  <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
                     {new Date().toLocaleDateString('en-IN')}
                   </div>
                 </div>
-                <div style={{ width: '1px', background: '#e2e8f0' }} />
+                <div style={{ width: '1px', background: 'var(--card-border)' }} />
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '11px', color: '#94a3b8', marginBottom: '4px' }}>Check Out</div>
-                  <div style={{ fontSize: '22px', fontWeight: '800', color: todayAtt?.checkOut ? '#f59e0b' : '#cbd5e1' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>Check Out</div>
+                  <div style={{ fontSize: '22px', fontWeight: '800', color: todayAtt?.checkOut ? '#f59e0b' : '#475569' }}>
                     {todayAtt?.checkOut ? todayAtt.checkOut.substring(0, 5) : '--:--'}
                   </div>
-                  <div style={{ fontSize: '10px', color: '#94a3b8' }}>
+                  <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
                     {todayAtt?.workHours ? `${todayAtt.workHours}h worked` : 'Not yet'}
                   </div>
                 </div>
@@ -261,9 +261,9 @@ export default function EmployeeDashboard() {
                   disabled={!!todayAtt?.checkIn || checkingIn}
                   style={{
                     flex: 1, padding: '10px',
-                    background: todayAtt?.checkIn ? '#f1f5f9' : '#dcfce7',
-                    color: todayAtt?.checkIn ? '#94a3b8' : '#16a34a',
-                    border: `1px solid ${todayAtt?.checkIn ? '#e2e8f0' : '#bbf7d0'}`,
+                    background: todayAtt?.checkIn ? '#1E293B' : 'rgba(22, 163, 74, 0.15)',
+                    color: todayAtt?.checkIn ? '#64748B' : '#16a34a',
+                    border: `1px solid ${todayAtt?.checkIn ? 'var(--card-border)' : '#bbf7d0'}`,
                     borderRadius: '8px', fontSize: '13px', fontWeight: '700',
                     cursor: todayAtt?.checkIn ? 'not-allowed' : 'pointer',
                     transition: 'all 0.2s',
@@ -276,9 +276,9 @@ export default function EmployeeDashboard() {
                   disabled={!todayAtt?.checkIn || !!todayAtt?.checkOut || checkingOut}
                   style={{
                     flex: 1, padding: '10px',
-                    background: todayAtt?.checkOut ? '#f1f5f9' : (!todayAtt?.checkIn ? '#f1f5f9' : '#fff7ed'),
-                    color: (todayAtt?.checkOut || !todayAtt?.checkIn) ? '#94a3b8' : '#f59e0b',
-                    border: `1px solid ${(todayAtt?.checkOut || !todayAtt?.checkIn) ? '#e2e8f0' : '#fed7aa'}`,
+                    background: todayAtt?.checkOut ? '#1E293B' : (!todayAtt?.checkIn ? '#1E293B' : 'rgba(217, 119, 6, 0.15)'),
+                    color: (todayAtt?.checkOut || !todayAtt?.checkIn) ? '#64748B' : '#f59e0b',
+                    border: `1px solid ${(todayAtt?.checkOut || !todayAtt?.checkIn) ? 'var(--card-border)' : '#fed7aa'}`,
                     borderRadius: '8px', fontSize: '13px', fontWeight: '700',
                     cursor: (!todayAtt?.checkIn || todayAtt?.checkOut) ? 'not-allowed' : 'pointer',
                     transition: 'all 0.2s',
@@ -290,12 +290,12 @@ export default function EmployeeDashboard() {
             </div>
 
             {/* Leave Balance — redesigned: icon chips + gradient rounded bars instead of plain bars */}
-            <div style={{ background: 'white', borderRadius: '12px', padding: '20px', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-              <h3 style={{ fontFamily: "'Quicksand', sans-serif", fontSize: '15px', fontWeight: '700', color: '#1e293b', marginBottom: '16px' }}>
+            <div style={{ background: 'var(--card-bg)', borderRadius: '12px', padding: '20px', border: '1px solid var(--card-border)', boxShadow: 'var(--card-shadow)' }}>
+              <h3 style={{ fontFamily: "'Quicksand', sans-serif", fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '16px' }}>
                 🌿 Leave Balance
               </h3>
               {balance.length === 0 ? (
-                <div style={{ textAlign: 'center', color: '#94a3b8', fontSize: '13px', padding: '20px' }}>
+                <div style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '13px', padding: '20px' }}>
                   No leave balance data found
                 </div>
               ) : (
@@ -314,8 +314,8 @@ export default function EmployeeDashboard() {
                           <div style={{ fontSize: '10.5px', fontWeight: 700, color: c.color, display: 'flex', alignItems: 'center', gap: '4px' }}>
                             <span>{c.icon}</span>{b.leaveType}
                           </div>
-                          <div style={{ fontSize: '15px', fontWeight: 800, color: '#1e293b', fontFamily: "'Quicksand', sans-serif" }}>
-                            {b.remaining}<span style={{ fontSize: '10.5px', fontWeight: 600, color: '#94a3b8' }}> /{b.totalAllotted}d</span>
+                          <div style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-primary)', fontFamily: "'Quicksand', sans-serif" }}>
+                            {b.remaining}<span style={{ fontSize: '10.5px', fontWeight: 600, color: 'var(--text-secondary)' }}> /{b.totalAllotted}d</span>
                           </div>
                         </div>
                       </div>
@@ -330,12 +330,12 @@ export default function EmployeeDashboard() {
           <div className="dashboard-main-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
 
             {/* Recent Leave Requests */}
-            <div style={{ background: 'white', borderRadius: '12px', padding: '20px', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+            <div style={{ background: 'var(--card-bg)', borderRadius: '12px', padding: '20px', border: '1px solid var(--card-border)', boxShadow: 'var(--card-shadow)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b' }}>📋 Recent Leave Requests</h3>
+                <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)' }}>📋 Recent Leave Requests</h3>
               </div>
               {leaves.length === 0 ? (
-                <div style={{ textAlign: 'center', color: '#94a3b8', fontSize: '13px', padding: '20px' }}>
+                <div style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '13px', padding: '20px' }}>
                   No leave requests found
                 </div>
               ) : (
@@ -345,8 +345,8 @@ export default function EmployeeDashboard() {
                     padding: '10px 0', borderBottom: i < leaves.length - 1 ? '1px solid #f1f5f9' : 'none',
                   }}>
                     <div>
-                      <div style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>{l.leaveType} Leave</div>
-                      <div style={{ fontSize: '11px', color: '#94a3b8' }}>{l.startDate} – {l.endDate} · {l.totalDays} day(s)</div>
+                      <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)' }}>{l.leaveType} Leave</div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{l.startDate} – {l.endDate} · {l.totalDays} day(s)</div>
                     </div>
                     <Badge status={l.status} />
                   </div>
@@ -355,17 +355,17 @@ export default function EmployeeDashboard() {
             </div>
 
             {/* Recent Notifications */}
-            <div style={{ background: 'white', borderRadius: '12px', padding: '20px', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+            <div style={{ background: 'var(--card-bg)', borderRadius: '12px', padding: '20px', border: '1px solid var(--card-border)', boxShadow: 'var(--card-shadow)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b' }}>🔔 Recent Notifications</h3>
+                <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)' }}>🔔 Recent Notifications</h3>
                 {unreadCount > 0 && (
-                  <span style={{ background: '#eff6ff', color: '#3b82f6', padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '700' }}>
+                  <span style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '700' }}>
                     {unreadCount} unread
                   </span>
                 )}
               </div>
               {notifications.length === 0 ? (
-                <div style={{ textAlign: 'center', color: '#94a3b8', fontSize: '13px', padding: '20px' }}>
+                <div style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '13px', padding: '20px' }}>
                   No notifications found
                 </div>
               ) : (
@@ -376,13 +376,13 @@ export default function EmployeeDashboard() {
                   }}>
                     <div style={{
                       width: '8px', height: '8px', borderRadius: '50%',
-                      background: n.isRead ? '#cbd5e1' : '#3b82f6',
+                      background: n.isRead ? '#475569' : '#3b82f6',
                       flexShrink: 0, marginTop: '5px',
                     }} />
                     <div>
-                      <div style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b', marginBottom: '2px' }}>{n.title}</div>
-                      <div style={{ fontSize: '11px', color: '#64748b' }}>{n.message?.substring(0, 60)}...</div>
-                      <div style={{ fontSize: '10px', color: '#94a3b8', marginTop: '3px' }}>
+                      <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '2px' }}>{n.title}</div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{n.message?.substring(0, 60)}...</div>
+                      <div style={{ fontSize: '10px', color: 'var(--text-secondary)', marginTop: '3px' }}>
                         {new Date(n.createdAt).toLocaleDateString('en-IN')}
                       </div>
                     </div>

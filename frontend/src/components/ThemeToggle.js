@@ -1,36 +1,32 @@
 'use client';
+import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 
-export default function ThemeToggle() {
-  const [isDark, setIsDark] = useState(false);
+export default function ThemeToggle({ className = '' }) {
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
-    if (localStorage.getItem('theme') === 'dark' || 
-       (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      document.documentElement.classList.add('dark');
-      setIsDark(true);
-    } else {
-      document.documentElement.classList.remove('dark');
-      setIsDark(false);
-    }
+    setMounted(true);
   }, []);
 
-  const toggleTheme = () => {
-    if (isDark) {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-      setIsDark(false);
-    } else {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-      setIsDark(true);
-    }
-  };
+  if (!mounted) {
+    return <div className={`fixed bottom-8 right-8 w-12 h-12 ${className}`} />;
+  }
+
+  // Hide the floating toggle on dashboard routes as they have their own pill switcher in the Navbar
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/employee')) {
+    return null;
+  }
+
+  const isDark = resolvedTheme === 'dark';
 
   return (
     <button 
-      onClick={toggleTheme}
-      className="absolute bottom-6 right-6 w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-lg border border-slate-100 text-slate-500 hover:text-[#10b981] transition-all z-50 hover:scale-110"
+      onClick={() => setTheme(isDark ? 'light' : 'dark')}
+      className={`fixed bottom-8 right-8 w-12 h-12 rounded-full bg-white dark:bg-[#1E293B] flex items-center justify-center shadow-lg border border-slate-100 dark:border-[#334155] text-slate-500 dark:text-slate-400 hover:text-[#10b981] dark:hover:text-[#ccf000] transition-all z-50 hover:scale-110 ${className}`}
       aria-label="Toggle Dark Mode"
     >
       {isDark ? (

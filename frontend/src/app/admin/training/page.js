@@ -14,7 +14,7 @@ function Badge({ status }) {
     OFFLINE: { bg: '#f0fdf4', color: '#16a34a' },
     HYBRID: { bg: '#fff7ed', color: '#f59e0b' },
   };
-  const s = map[status] || { bg: '#f1f5f9', color: '#64748b' };
+  const s = map[status] || { bg: '#f1f5f9', color: 'var(--text-secondary)' };
   return (
     <span style={{
       background: s.bg, color: s.color,
@@ -136,10 +136,10 @@ export default function TrainingPage() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <div>
-          <h1 style={{ fontSize: '22px', fontWeight: '800', color: '#1e293b', marginBottom: '4px' }}>
+          <h1 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px' }}>
             Training Management
           </h1>
-          <p style={{ fontSize: '13px', color: '#94a3b8' }}>
+          <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
             Create training programs and manage enrollments
           </p>
         </div>
@@ -152,19 +152,19 @@ export default function TrainingPage() {
       <div style={{ display: 'grid', gridTemplateColumns: selected ? '1fr 1.3fr' : '1fr', gap: '20px' }}>
 
         {/* Training List */}
-        <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', overflow: 'hidden' }}>
-          <div style={{ padding: '16px 20px', borderBottom: '1px solid #e2e8f0' }}>
-            <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b' }}>
+        <div style={{ background: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--card-border)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', overflow: 'hidden' }}>
+          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--card-border)' }}>
+            <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)' }}>
               Training Programs ({trainings.length})
             </h3>
           </div>
 
           {loading ? (
-            <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>Loading...</div>
+            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</div>
           ) : trainings.length === 0 ? (
             <div style={{ padding: '60px', textAlign: 'center' }}>
               <div style={{ fontSize: '40px', marginBottom: '12px' }}>📚</div>
-              <div style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', marginBottom: '8px' }}>No trainings yet</div>
+              <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '8px' }}>No trainings yet</div>
               <button onClick={() => setShowForm(true)}
                 style={{ padding: '8px 18px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>
                 + Create First Training
@@ -183,16 +183,16 @@ export default function TrainingPage() {
                 onMouseLeave={e => { if (selected?.id !== t.id) e.currentTarget.style.background = 'white'; }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                  <div style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b' }}>{t.title}</div>
+                  <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)' }}>{t.title}</div>
                   <Badge status={t.status} />
                 </div>
-                <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>
+                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
                   👨‍🏫 {t.trainer} · <Badge status={t.mode} />
                 </div>
-                <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '4px' }}>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>
                   📅 {t.startDate} → {t.endDate} · ⏱ {t.durationHours}h
                 </div>
-                <div style={{ fontSize: '12px', color: '#94a3b8' }}>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                   👥 Max: {t.maxParticipants} · 📍 {t.venue || 'No venue'}
                 </div>
               </div>
@@ -202,18 +202,18 @@ export default function TrainingPage() {
 
         {/* Enrollments Panel */}
         {selected && (
-          <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', overflow: 'hidden' }}>
-            <div style={{ padding: '16px 20px', borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }}>
-              <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b', marginBottom: '2px' }}>
+          <div style={{ background: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--card-border)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', overflow: 'hidden' }}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--card-border)', background: 'var(--bg-primary)' }}>
+              <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '2px' }}>
                 {selected.title}
               </h3>
-              <p style={{ fontSize: '12px', color: '#94a3b8' }}>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                 {enrollments.length} enrolled · {selected.category}
               </p>
             </div>
 
             {selected.description && (
-              <div style={{ padding: '14px 20px', borderBottom: '1px solid #f1f5f9', fontSize: '13px', color: '#64748b', lineHeight: 1.6 }}>
+              <div style={{ padding: '14px 20px', borderBottom: '1px solid #f1f5f9', fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
                 {selected.description}
               </div>
             )}
@@ -227,28 +227,28 @@ export default function TrainingPage() {
             )}
 
             <div style={{ padding: '14px 20px' }}>
-              <div style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b', marginBottom: '12px' }}>
+              <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '12px' }}>
                 Enrollments
               </div>
 
               {loadingEnroll ? (
-                <div style={{ textAlign: 'center', color: '#94a3b8', padding: '20px' }}>Loading...</div>
+                <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '20px' }}>Loading...</div>
               ) : enrollments.length === 0 ? (
-                <div style={{ textAlign: 'center', color: '#94a3b8', padding: '20px' }}>
+                <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '20px' }}>
                   <div style={{ fontSize: '28px', marginBottom: '8px' }}>📭</div>
                   No enrollments yet
                 </div>
               ) : (
                 enrollments.map(enr => (
-                  <div key={enr.id} style={{ background: '#f8fafc', borderRadius: '10px', padding: '12px', marginBottom: '8px', border: '1px solid #e2e8f0' }}>
+                  <div key={enr.id} style={{ background: 'var(--bg-primary)', borderRadius: '10px', padding: '12px', marginBottom: '8px', border: '1px solid var(--card-border)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'linear-gradient(135deg, #1e3a5f, #3b82f6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: '700', color: 'white' }}>
                           {enr.employeeName?.split(' ').map(n => n[0]).join('').slice(0, 2)}
                         </div>
                         <div>
-                          <div style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>{enr.employeeName}</div>
-                          <div style={{ fontSize: '11px', color: '#94a3b8' }}>
+                          <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)' }}>{enr.employeeName}</div>
+                          <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
                             Enrolled: {new Date(enr.enrolledAt).toLocaleDateString('en-IN')}
                           </div>
                         </div>
@@ -257,7 +257,7 @@ export default function TrainingPage() {
                     </div>
 
                     {enr.score && (
-                      <div style={{ fontSize: '12px', color: '#64748b' }}>
+                      <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
                         Score: <strong style={{ color: '#16a34a' }}>{enr.score}/100</strong>
                         {enr.feedback && ` · "${enr.feedback}"`}
                       </div>
@@ -284,7 +284,7 @@ export default function TrainingPage() {
                             {completing === enr.id ? '⏳' : '✓ Complete'}
                           </button>
                           <button onClick={() => setCompletingId(null)}
-                            style={{ padding: '7px 12px', background: '#f1f5f9', color: '#64748b', border: 'none', borderRadius: '7px', fontSize: '12px', cursor: 'pointer' }}>
+                            style={{ padding: '7px 12px', background: 'var(--card-border)', color: 'var(--text-secondary)', border: 'none', borderRadius: '7px', fontSize: '12px', cursor: 'pointer' }}>
                             Cancel
                           </button>
                         </div>
@@ -306,11 +306,11 @@ export default function TrainingPage() {
       {/* Create Training Modal */}
       {showForm && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '20px' }}>
-          <div style={{ background: 'white', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '580px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
+          <div style={{ background: 'var(--card-bg)', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '580px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h2 style={{ fontSize: '18px', fontWeight: '800', color: '#1e293b' }}>Create Training Program</h2>
+              <h2 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-primary)' }}>Create Training Program</h2>
               <button onClick={() => setShowForm(false)}
-                style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#94a3b8' }}>✕</button>
+                style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: 'var(--text-muted)' }}>✕</button>
             </div>
 
             <form onSubmit={handleCreate}>
@@ -355,7 +355,7 @@ export default function TrainingPage() {
                   <label style={labelStyle}>Category</label>
                   <select value={form.category}
                     onChange={e => setForm(prev => ({ ...prev, category: e.target.value }))}
-                    style={{ ...inputStyle, background: 'white' }}>
+                    style={{ ...inputStyle, background: 'var(--card-bg)' }}>
                     {['TECHNICAL', 'SOFT_SKILLS', 'COMPLIANCE', 'LEADERSHIP', 'SAFETY'].map(c => (
                       <option key={c} value={c}>{c.replace('_', ' ')}</option>
                     ))}
@@ -367,7 +367,7 @@ export default function TrainingPage() {
                   <label style={labelStyle}>Mode</label>
                   <select value={form.mode}
                     onChange={e => setForm(prev => ({ ...prev, mode: e.target.value }))}
-                    style={{ ...inputStyle, background: 'white' }}>
+                    style={{ ...inputStyle, background: 'var(--card-bg)' }}>
                     {['ONLINE', 'OFFLINE', 'HYBRID'].map(m => (
                       <option key={m} value={m}>{m}</option>
                     ))}
@@ -494,7 +494,7 @@ export default function TrainingPage() {
 
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button type="button" onClick={() => setShowForm(false)}
-                  style={{ flex: 1, padding: '12px', background: 'white', color: '#374151', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
+                  style={{ flex: 1, padding: '12px', background: 'var(--card-bg)', color: '#374151', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
                   Cancel
                 </button>
                 <button type="submit" disabled={submitting}

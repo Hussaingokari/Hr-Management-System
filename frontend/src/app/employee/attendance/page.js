@@ -10,7 +10,7 @@ function Badge({ status }) {
     HALF_DAY: { bg: '#fff7ed', color: '#f59e0b' },
     LATE: { bg: '#fdf4ff', color: '#9333ea' },
   };
-  const s = map[status] || { bg: '#f1f5f9', color: '#64748b' };
+  const s = map[status] || { bg: '#f1f5f9', color: 'var(--text-secondary)' };
   return (
     <span style={{
       background: s.bg, color: s.color,
@@ -133,10 +133,10 @@ export default function AttendancePage() {
     <div>
       {/* Header */}
       <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '22px', fontWeight: '800', color: '#1e293b', marginBottom: '4px' }}>
+        <h1 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px' }}>
           Attendance
         </h1>
-        <p style={{ fontSize: '13px', color: '#94a3b8' }}>
+        <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
           Track your daily attendance and work hours
         </p>
       </div>
@@ -263,7 +263,7 @@ export default function AttendancePage() {
                   onClick={handleCheckOut}
                   disabled={checkingOut}
                   style={{
-                    padding: '10px 18px', background: 'white',
+                    padding: '10px 18px', background: 'var(--card-bg)',
                     color: '#1e3a5f', border: 'none',
                     borderRadius: '8px', fontSize: '13px',
                     fontWeight: '700', cursor: 'pointer',
@@ -333,12 +333,12 @@ export default function AttendancePage() {
           { label: 'Total Records', value: records.length, color: '#3b82f6', bg: '#eff6ff', icon: '📊' },
         ].map((s, i) => (
           <div key={i} style={{
-            flex: 1, background: 'white', borderRadius: '12px',
-            padding: '16px', border: '1px solid #e2e8f0',
+            flex: 1, background: 'var(--card-bg)', borderRadius: '12px',
+            padding: '16px', border: '1px solid var(--card-border)',
             boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-              <span style={{ fontSize: '12px', color: '#64748b', fontWeight: '500' }}>{s.label}</span>
+              <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: '500' }}>{s.label}</span>
               <div style={{ width: '32px', height: '32px', background: s.bg, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px' }}>
                 {s.icon}
               </div>
@@ -350,20 +350,20 @@ export default function AttendancePage() {
 
       {/* Attendance History Table */}
       <div style={{
-        background: 'white', borderRadius: '12px',
-        border: '1px solid #e2e8f0',
+        background: 'var(--card-bg)', borderRadius: '12px',
+        border: '1px solid var(--card-border)',
         boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
         overflow: 'hidden',
       }}>
-        <div style={{ padding: '16px 20px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b' }}>Attendance History</h3>
-          <span style={{ fontSize: '12px', color: '#94a3b8' }}>{records.length} records</span>
+        <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--card-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)' }}>Attendance History</h3>
+          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{records.length} records</span>
         </div>
 
         {loading ? (
-          <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>Loading...</div>
+          <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</div>
         ) : records.length === 0 ? (
-          <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>
+          <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
             No attendance records found
           </div>
         ) : (
@@ -372,11 +372,11 @@ export default function AttendancePage() {
               {/* Table Header */}
               <div style={{
                 display: 'grid', gridTemplateColumns: '1.3fr 0.9fr 0.9fr 0.9fr 0.9fr 0.9fr 1.3fr',
-                padding: '10px 20px', background: '#f8fafc',
-                borderBottom: '1px solid #e2e8f0',
+                padding: '10px 20px', background: 'var(--bg-primary)',
+                borderBottom: '1px solid var(--card-border)',
               }}>
                 {['Date', 'Check In', 'Check Out', 'Break', 'Work Hours', 'Status', 'Remarks'].map(h => (
-                  <div key={h} style={{ fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  <div key={h} style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                     {h}
                   </div>
                 ))}
@@ -389,7 +389,7 @@ export default function AttendancePage() {
                   padding: '12px 20px', borderBottom: '1px solid #f1f5f9',
                   alignItems: 'center',
                 }}>
-                  <div style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>
+                  <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)' }}>
                     {new Date(r.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                   </div>
                   <div style={{ fontSize: '13px', color: '#16a34a', fontWeight: '600' }}>
@@ -398,14 +398,14 @@ export default function AttendancePage() {
                   <div style={{ fontSize: '13px', color: '#f59e0b', fontWeight: '600' }}>
                     {r.checkOut ? r.checkOut.substring(0, 5) : '--'}
                   </div>
-                  <div style={{ fontSize: '13px', color: '#64748b' }}>
+                  <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
                     {formatDuration(r.totalBreakMinutes)}
                   </div>
-                  <div style={{ fontSize: '13px', color: '#64748b' }}>
+                  <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
                     {r.workHours ? `${r.workHours}h` : '--'}
                   </div>
                   <div><Badge status={r.status} /></div>
-                  <div style={{ fontSize: '12px', color: '#94a3b8' }}>
+                  <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                     {r.remarks || '--'}
                   </div>
                 </div>
@@ -414,21 +414,21 @@ export default function AttendancePage() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div style={{ padding: '14px 20px', display: 'flex', justifyContent: 'center', gap: '8px', borderTop: '1px solid #e2e8f0' }}>
+              <div style={{ padding: '14px 20px', display: 'flex', justifyContent: 'center', gap: '8px', borderTop: '1px solid var(--card-border)' }}>
                 <button
                   onClick={() => setPage(p => Math.max(0, p - 1))}
                   disabled={page === 0}
-                  style={{ padding: '6px 14px', border: '1px solid #e2e8f0', borderRadius: '6px', fontSize: '12px', fontWeight: '600', color: page === 0 ? '#cbd5e1' : '#374151', background: 'white', cursor: page === 0 ? 'not-allowed' : 'pointer' }}
+                  style={{ padding: '6px 14px', border: '1px solid var(--card-border)', borderRadius: '6px', fontSize: '12px', fontWeight: '600', color: page === 0 ? '#cbd5e1' : '#374151', background: 'var(--card-bg)', cursor: page === 0 ? 'not-allowed' : 'pointer' }}
                 >
                   ← Prev
                 </button>
-                <span style={{ padding: '6px 14px', fontSize: '12px', color: '#64748b' }}>
+                <span style={{ padding: '6px 14px', fontSize: '12px', color: 'var(--text-secondary)' }}>
                   Page {page + 1} of {totalPages}
                 </span>
                 <button
                   onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
                   disabled={page >= totalPages - 1}
-                  style={{ padding: '6px 14px', border: '1px solid #e2e8f0', borderRadius: '6px', fontSize: '12px', fontWeight: '600', color: page >= totalPages - 1 ? '#cbd5e1' : '#374151', background: 'white', cursor: page >= totalPages - 1 ? 'not-allowed' : 'pointer' }}
+                  style={{ padding: '6px 14px', border: '1px solid var(--card-border)', borderRadius: '6px', fontSize: '12px', fontWeight: '600', color: page >= totalPages - 1 ? '#cbd5e1' : '#374151', background: 'var(--card-bg)', cursor: page >= totalPages - 1 ? 'not-allowed' : 'pointer' }}
                 >
                   Next →
                 </button>

@@ -5,11 +5,11 @@ import toast from 'react-hot-toast';
 
 function StatusPill({ status }) {
   const map = {
-    APPROVED: { bg: '#DCFCE7', color: '#15803D', icon: '✅' },
-    PENDING: { bg: '#FEF3C7', color: '#B45309', icon: '⏳' },
-    REJECTED: { bg: '#FEE2E2', color: '#B91C1C', icon: '✕' },
-    CANCELLATION_PENDING: { bg: '#F3E8FF', color: '#7E22CE', icon: '↩️' },
-    CANCELLED: { bg: '#F1F5F9', color: '#64748B', icon: '·' },
+    APPROVED: { bg: 'rgba(22, 163, 74, 0.15)', color: '#15803D', icon: '✅' },
+    PENDING: { bg: 'rgba(180, 83, 9, 0.2)', color: '#B45309', icon: '⏳' },
+    REJECTED: { bg: 'rgba(220, 38, 38, 0.15)', color: '#B91C1C', icon: '✕' },
+    CANCELLATION_PENDING: { bg: 'rgba(126, 34, 206, 0.2)', color: '#7E22CE', icon: '↩️' },
+    CANCELLED: { bg: '#1E293B', color: 'var(--text-secondary)', icon: '·' },
   };
   const s = map[status] || map.PENDING;
   return (
@@ -35,12 +35,12 @@ const LEAVE_TYPES = [
 ];
 
 const balanceStyle = {
-  ANNUAL: { color: '#4F46E5', soft: '#EEF0FF', icon: '🌴' },
-  SICK: { color: '#0D9488', soft: '#ECFDF9', icon: '🤒' },
-  CASUAL: { color: '#D97706', soft: '#FFF7ED', icon: '☀️' },
-  PATERNITY: { color: '#8B5CF6', soft: '#F5F3FF', icon: '👨‍🍼' },
-  MATERNITY: { color: '#DB2777', soft: '#FDF2F8', icon: '🤱' },
-  UNPAID: { color: '#64748B', soft: '#F1F5F9', icon: '📋' },
+  ANNUAL: { color: '#4F46E5', soft: 'rgba(79, 70, 229, 0.15)', icon: '🌴' },
+  SICK: { color: '#0D9488', soft: 'rgba(13, 148, 136, 0.15)', icon: '🤒' },
+  CASUAL: { color: '#D97706', soft: 'rgba(217, 119, 6, 0.15)', icon: '☀️' },
+  PATERNITY: { color: '#8B5CF6', soft: 'rgba(139, 92, 246, 0.15)', icon: '👨‍🍼' },
+  MATERNITY: { color: '#DB2777', soft: 'rgba(219, 39, 119, 0.15)', icon: '🤱' },
+  UNPAID: { color: 'var(--text-secondary)', soft: '#1E293B', icon: '📋' },
 };
 
 function BalanceRing({ pct, color, size = 54 }) {
@@ -53,7 +53,7 @@ function BalanceRing({ pct, color, size = 54 }) {
     }}>
       <div style={{
         width: size - 8, height: size - 8, borderRadius: '50%',
-        background: 'white', display: 'flex', alignItems: 'center',
+        background: 'var(--card-bg)', display: 'flex', alignItems: 'center',
         justifyContent: 'center', fontSize: size < 45 ? '9px' : '11px', fontWeight: 800, color,
       }}>
         {Math.round(pct)}%
@@ -161,20 +161,20 @@ export default function LeavePage() {
         @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap');
         .lm-date-input::-webkit-calendar-picker-indicator { opacity: 0.7; cursor: pointer; }
         .lm-reason-textarea, .lm-reason-textarea::placeholder {
-          color: #241F47 !important; background: #ffffff !important;
-          -webkit-text-fill-color: #241F47 !important;
+          color: var(--text-primary) !important; background: var(--card-bg) !important;
+          -webkit-text-fill-color: var(--text-primary) !important;
         }
-        .lm-reason-textarea::placeholder { color: #9CA3AF !important; -webkit-text-fill-color: #9CA3AF !important; }
+        .lm-reason-textarea::placeholder { color: var(--text-muted) !important; -webkit-text-fill-color: var(--text-muted) !important; }
         .lm-type-card:hover { transform: translateY(-2px); }
       `}</style>
 
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '22px', flexWrap: 'wrap', gap: '14px' }}>
         <div>
-          <h1 style={{ fontFamily: "'Quicksand', sans-serif", fontSize: '26px', fontWeight: 800, color: '#241F47', marginBottom: '4px' }}>
+          <h1 style={{ fontFamily: "'Quicksand', sans-serif", fontSize: '26px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '4px' }}>
             🌿 Time Off
           </h1>
-          <p style={{ fontSize: '13.5px', color: '#8B86AA' }}>
+          <p style={{ fontSize: '13.5px', color: 'var(--text-muted)' }}>
             Apply for leave, track your requests, and keep an eye on your balance
           </p>
         </div>
@@ -183,7 +183,7 @@ export default function LeavePage() {
           style={{
             padding: '12px 22px',
             background: 'linear-gradient(135deg, #6D5DFB, #4F3DF5)',
-            color: 'white', border: 'none', borderRadius: '14px',
+            color: 'var(--text-primary)', border: 'none', borderRadius: '14px',
             fontSize: '13.5px', fontWeight: 700, cursor: 'pointer',
             display: 'flex', alignItems: 'center', gap: '6px',
             boxShadow: '0 8px 20px rgba(79,61,245,0.28)',
@@ -199,12 +199,12 @@ export default function LeavePage() {
           Object.keys(balanceStyle).map(type => {
             const c = balanceStyle[type];
             return (
-              <div key={type} style={{ background: 'white', borderRadius: '14px', padding: '12px', border: '1px solid #EEF0F5' }}>
+              <div key={type} style={{ background: 'var(--card-bg)', borderRadius: '14px', padding: '12px', border: '1px solid #EEF0F5' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
                   <span style={{ fontSize: '15px' }}>{c.icon}</span>
-                  <span style={{ fontSize: '11px', color: '#8B86AA', fontWeight: 700 }}>{type}</span>
+                  <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 700 }}>{type}</span>
                 </div>
-                <div style={{ fontSize: '11.5px', color: '#C7C3DE' }}>No data yet</div>
+                <div style={{ fontSize: '11.5px', color: 'var(--text-secondary)' }}>No data yet</div>
               </div>
             );
           })
@@ -224,10 +224,10 @@ export default function LeavePage() {
                   </div>
                   <BalanceRing pct={pct} color={c.color} size={38} />
                 </div>
-                <div style={{ fontSize: '17px', fontWeight: 800, color: '#241F47', fontFamily: "'Quicksand', sans-serif" }}>
-                  {b.remaining} <span style={{ fontSize: '10.5px', fontWeight: 600, color: '#8B86AA' }}>/ {b.totalAllotted}d</span>
+                <div style={{ fontSize: '17px', fontWeight: 800, color: 'var(--text-primary)', fontFamily: "'Quicksand', sans-serif" }}>
+                  {b.remaining} <span style={{ fontSize: '10.5px', fontWeight: 600, color: 'var(--text-muted)' }}>/ {b.totalAllotted}d</span>
                 </div>
-                <div style={{ fontSize: '10px', color: '#8B86AA', marginTop: '2px' }}>Used {b.used}</div>
+                <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>Used {b.used}</div>
               </div>
             );
           })
@@ -237,20 +237,20 @@ export default function LeavePage() {
       {/* Apply Modal */}
       {showForm && (
         <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(36,31,71,0.45)',
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           zIndex: 100, padding: '20px', backdropFilter: 'blur(2px)',
         }}>
           <div style={{
-            background: 'white', borderRadius: '22px', padding: '28px',
-            width: '100%', maxWidth: '500px', boxShadow: '0 24px 70px rgba(36,31,71,0.25)',
+            background: 'var(--card-bg)', borderRadius: '22px', padding: '28px',
+            width: '100%', maxWidth: '500px', boxShadow: '0 24px 70px rgba(0,0,0,0.5)',
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h2 style={{ fontFamily: "'Quicksand', sans-serif", fontSize: '19px', fontWeight: 800, color: '#241F47' }}>
+              <h2 style={{ fontFamily: "'Quicksand', sans-serif", fontSize: '19px', fontWeight: 800, color: 'var(--text-primary)' }}>
                 🌿 Apply for Leave
               </h2>
               <button onClick={() => setShowForm(false)}
-                style={{ background: '#F1F5F9', border: 'none', width: '30px', height: '30px', borderRadius: '10px', fontSize: '15px', cursor: 'pointer', color: '#64748B' }}>
+                style={{ background: 'var(--card-bg)', border: 'none', width: '30px', height: '30px', borderRadius: '10px', fontSize: '15px', cursor: 'pointer', color: 'var(--text-secondary)' }}>
                 ✕
               </button>
             </div>
@@ -258,7 +258,7 @@ export default function LeavePage() {
             <form onSubmit={handleApply}>
               {/* Leave Type — visual chip picker */}
               <div style={{ marginBottom: '18px' }}>
-                <label style={{ fontSize: '13px', fontWeight: 700, color: '#374151', display: 'block', marginBottom: '8px' }}>
+                <label style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', display: 'block', marginBottom: '8px' }}>
                   What kind of leave?
                 </label>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
@@ -270,7 +270,7 @@ export default function LeavePage() {
                         style={{
                           padding: '10px 6px', borderRadius: '12px', cursor: 'pointer',
                           border: active ? '2px solid #6D5DFB' : '1.5px solid #E5E7EB',
-                          background: active ? '#EEF0FF' : 'white',
+                          background: active ? 'rgba(79, 70, 229, 0.15)' : '#1E293B',
                           fontSize: '12px', fontWeight: 700,
                           color: active ? '#4F3DF5' : '#64748B',
                           display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px',
@@ -286,7 +286,7 @@ export default function LeavePage() {
               {/* Dates */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '18px' }}>
                 <div>
-                  <label style={{ fontSize: '13px', fontWeight: 700, color: '#374151', display: 'block', marginBottom: '6px' }}>
+                  <label style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', display: 'block', marginBottom: '6px' }}>
                     From
                   </label>
                   <input
@@ -300,11 +300,11 @@ export default function LeavePage() {
                       }));
                     }}
                     required
-                    style={{ width: '100%', padding: '11px 12px', border: '1.5px solid #E5E7EB', borderRadius: '12px', fontSize: '13px', outline: 'none', boxSizing: 'border-box', color: '#241F47' }}
+                    style={{ width: '100%', padding: '11px 12px', border: '1.5px solid #E5E7EB', borderRadius: '12px', fontSize: '13px', outline: 'none', boxSizing: 'border-box', color: 'var(--text-primary)' }}
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: '13px', fontWeight: 700, color: '#374151', display: 'block', marginBottom: '6px' }}>
+                  <label style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', display: 'block', marginBottom: '6px' }}>
                     To
                   </label>
                   <input
@@ -312,14 +312,14 @@ export default function LeavePage() {
                     value={form.endDate} min={form.startDate || today}
                     onChange={e => setForm({ ...form, endDate: e.target.value })}
                     required
-                    style={{ width: '100%', padding: '11px 12px', border: '1.5px solid #E5E7EB', borderRadius: '12px', fontSize: '13px', outline: 'none', boxSizing: 'border-box', color: '#241F47' }}
+                    style={{ width: '100%', padding: '11px 12px', border: '1.5px solid #E5E7EB', borderRadius: '12px', fontSize: '13px', outline: 'none', boxSizing: 'border-box', color: 'var(--text-primary)' }}
                   />
                 </div>
               </div>
 
               {/* Reason */}
               <div style={{ marginBottom: '22px' }}>
-                <label style={{ fontSize: '13px', fontWeight: 700, color: '#374151', display: 'block', marginBottom: '6px' }}>
+                <label style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', display: 'block', marginBottom: '6px' }}>
                   Tell us why
                 </label>
                 <textarea
@@ -332,20 +332,20 @@ export default function LeavePage() {
                 />
               </div>
 
-              <div style={{ background: '#F5F3FF', borderRadius: '12px', padding: '10px 14px', marginBottom: '18px', fontSize: '12px', color: '#6D5DFB', display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+              <div style={{ background: 'rgba(139, 92, 246, 0.15)', borderRadius: '12px', padding: '10px 14px', marginBottom: '18px', fontSize: '12px', color: '#6D5DFB', display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
                 <span>💡</span>
                 <span>Your request goes straight to Admin/HR — whoever reviews it first will approve or decline it.</span>
               </div>
 
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button type="button" onClick={() => setShowForm(false)}
-                  style={{ flex: 1, padding: '13px', background: 'white', color: '#374151', border: '1.5px solid #E5E7EB', borderRadius: '12px', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }}>
+                  style={{ flex: 1, padding: '13px', background: 'var(--card-bg)', color: 'var(--text-primary)', border: '1.5px solid #E5E7EB', borderRadius: '12px', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }}>
                   Cancel
                 </button>
                 <button type="submit" disabled={submitting}
                   style={{
                     flex: 1, padding: '13px',
-                    background: 'linear-gradient(135deg, #6D5DFB, #4F3DF5)', color: 'white',
+                    background: 'linear-gradient(135deg, #6D5DFB, #4F3DF5)', color: 'var(--text-primary)',
                     border: 'none', borderRadius: '12px', fontSize: '14px', fontWeight: 700,
                     cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.7 : 1,
                   }}>
@@ -358,33 +358,33 @@ export default function LeavePage() {
       )}
 
       {/* Leave History */}
-      <div style={{ background: 'white', borderRadius: '18px', border: '1px solid #EEF0F5', boxShadow: '0 2px 10px rgba(36,31,71,0.04)' }}>
+      <div style={{ background: 'var(--card-bg)', borderRadius: '18px', border: '1px solid #EEF0F5', boxShadow: '0 2px 10px rgba(0,0,0,0.3)' }}>
         <div style={{ padding: '18px 22px', borderBottom: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3 style={{ fontFamily: "'Quicksand', sans-serif", fontSize: '16px', fontWeight: 700, color: '#241F47' }}>
+          <h3 style={{ fontFamily: "'Quicksand', sans-serif", fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)' }}>
             My Requests
           </h3>
-          <span style={{ fontSize: '12px', color: '#8B86AA' }}>{leaves.length} records</span>
+          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{leaves.length} records</span>
         </div>
 
         <div className="table-responsive">
           <div style={{
             display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr 0.6fr 1.4fr 1.3fr 1fr',
-            padding: '10px 22px', background: '#FAFAFF', borderBottom: '1px solid #F1F5F9',
+            padding: '10px 22px', background: 'var(--card-bg)', borderBottom: '1px solid #F1F5F9',
           }}>
             {['Type', 'From', 'To', 'Days', 'Status', 'Reviewed by', 'Action'].map(h => (
-              <div key={h} style={{ fontSize: '10.5px', fontWeight: 700, color: '#8B86AA', textTransform: 'uppercase', letterSpacing: '0.4px' }}>{h}</div>
+              <div key={h} style={{ fontSize: '10.5px', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.4px' }}>{h}</div>
             ))}
           </div>
 
           {loading ? (
-            <div style={{ padding: '50px', textAlign: 'center', color: '#8B86AA' }}>Loading...</div>
+            <div style={{ padding: '50px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</div>
           ) : leaves.length === 0 ? (
             <div style={{ padding: '60px', textAlign: 'center' }}>
               <div style={{ fontSize: '42px', marginBottom: '10px' }}>🌴</div>
-              <div style={{ fontSize: '15px', fontWeight: 700, color: '#241F47', marginBottom: '4px' }}>No requests yet</div>
-              <div style={{ fontSize: '13px', color: '#8B86AA', marginBottom: '16px' }}>Apply for your first leave whenever you need a break</div>
+              <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px' }}>No requests yet</div>
+              <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '16px' }}>Apply for your first leave whenever you need a break</div>
               <button onClick={() => setShowForm(true)}
-                style={{ padding: '10px 20px', background: '#6D5DFB', color: 'white', border: 'none', borderRadius: '10px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>
+                style={{ padding: '10px 20px', background: '#6D5DFB', color: 'var(--text-primary)', border: 'none', borderRadius: '10px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>
                 ✨ Apply for Leave
               </button>
             </div>
@@ -398,14 +398,14 @@ export default function LeavePage() {
                     display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr 0.6fr 1.4fr 1.3fr 1fr',
                     padding: '14px 22px', borderBottom: '1px solid #F8FAFC', alignItems: 'center',
                   }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 700, color: '#241F47' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)' }}>
                       <span>{typeMeta.icon}</span>{l.leaveType}
                     </div>
-                    <div style={{ fontSize: '12.5px', color: '#64748B' }}>{l.startDate}</div>
-                    <div style={{ fontSize: '12.5px', color: '#64748B' }}>{l.endDate}</div>
-                    <div style={{ fontSize: '13px', fontWeight: 800, color: '#241F47' }}>{l.totalDays}</div>
+                    <div style={{ fontSize: '12.5px', color: 'var(--text-secondary)' }}>{l.startDate}</div>
+                    <div style={{ fontSize: '12.5px', color: 'var(--text-secondary)' }}>{l.endDate}</div>
+                    <div style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-primary)' }}>{l.totalDays}</div>
                     <div><StatusPill status={l.status} /></div>
-                    <div style={{ fontSize: '11.5px', color: '#94A3B8' }}>{l.reviewedByName || '—'}</div>
+                    <div style={{ fontSize: '11.5px', color: 'var(--text-secondary)' }}>{l.reviewedByName || '—'}</div>
                     <div>
                       {canCancel && (
                         <button
@@ -413,7 +413,7 @@ export default function LeavePage() {
                           disabled={cancelling === l.id}
                           style={{
                             padding: '6px 12px',
-                            background: l.status === 'APPROVED' ? '#F3E8FF' : '#FEE2E2',
+                            background: l.status === 'APPROVED' ? 'rgba(126, 34, 206, 0.2)' : 'rgba(220, 38, 38, 0.15)',
                             color: l.status === 'APPROVED' ? '#7E22CE' : '#DC2626',
                             border: 'none', borderRadius: '8px', fontSize: '11px', fontWeight: 700, cursor: 'pointer',
                           }}>
@@ -428,12 +428,12 @@ export default function LeavePage() {
               {totalPages > 1 && (
                 <div style={{ padding: '14px 20px', display: 'flex', justifyContent: 'center', gap: '8px', borderTop: '1px solid #F1F5F9' }}>
                   <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}
-                    style={{ padding: '6px 14px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '12px', fontWeight: 700, color: page === 0 ? '#CBD5E1' : '#374151', background: 'white', cursor: page === 0 ? 'not-allowed' : 'pointer' }}>
+                    style={{ padding: '6px 14px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '12px', fontWeight: 700, color: page === 0 ? '#475569' : '#1E293B', background: 'var(--card-bg)', cursor: page === 0 ? 'not-allowed' : 'pointer' }}>
                     ← Prev
                   </button>
-                  <span style={{ padding: '6px 14px', fontSize: '12px', color: '#8B86AA' }}>Page {page + 1} of {totalPages}</span>
+                  <span style={{ padding: '6px 14px', fontSize: '12px', color: 'var(--text-muted)' }}>Page {page + 1} of {totalPages}</span>
                   <button onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page >= totalPages - 1}
-                    style={{ padding: '6px 14px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '12px', fontWeight: 700, color: page >= totalPages - 1 ? '#CBD5E1' : '#374151', background: 'white', cursor: page >= totalPages - 1 ? 'not-allowed' : 'pointer' }}>
+                    style={{ padding: '6px 14px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '12px', fontWeight: 700, color: page >= totalPages - 1 ? '#475569' : '#1E293B', background: 'var(--card-bg)', cursor: page >= totalPages - 1 ? 'not-allowed' : 'pointer' }}>
                     Next →
                   </button>
                 </div>

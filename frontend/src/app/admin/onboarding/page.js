@@ -40,7 +40,7 @@ export default function OnboardingDashboardPage() {
   useEffect(() => { fetchDashboard(); }, [fetchDashboard]);
 
   if (loading || !data) {
-    return <div style={{ padding: '60px', textAlign: 'center', color: '#94a3b8' }}>Loading...</div>;
+    return <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</div>;
   }
 
   const STATS = [
@@ -60,10 +60,10 @@ export default function OnboardingDashboardPage() {
   return (
     <div>
       <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '22px', fontWeight: '800', color: '#1e293b', marginBottom: '4px' }}>
+        <h1 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px' }}>
           HR Dashboard
         </h1>
-        <p style={{ fontSize: '13px', color: '#94a3b8' }}>
+        <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
           Welcome back. Here's your onboarding overview.
         </p>
       </div>
@@ -71,22 +71,22 @@ export default function OnboardingDashboardPage() {
       {/* Stat cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px', marginBottom: '20px' }}>
         {STATS.map((s, i) => (
-          <div key={i} style={{ background: 'white', borderRadius: '12px', padding: '18px', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+          <div key={i} style={{ background: 'var(--card-bg)', borderRadius: '12px', padding: '18px', border: '1px solid var(--card-border)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-              <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '500' }}>{s.label}</span>
+              <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: '500' }}>{s.label}</span>
               <div style={{ width: '30px', height: '30px', background: s.bg, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px' }}>{s.icon}</div>
             </div>
-            <div style={{ fontSize: '28px', fontWeight: '800', color: '#1e293b', marginBottom: '4px' }}>{s.value}</div>
-            <div style={{ fontSize: '12px', color: '#94a3b8' }}>{s.sub}</div>
+            <div style={{ fontSize: '28px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px' }}>{s.value}</div>
+            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{s.sub}</div>
           </div>
         ))}
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '20px' }}>
         {/* Recent Activity */}
-        <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '18px 20px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+        <div style={{ background: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--card-border)', padding: '18px 20px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-            <div style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b' }}>
+            <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)' }}>
               📈 Recent Activity
             </div>
             <button
@@ -97,7 +97,7 @@ export default function OnboardingDashboardPage() {
           </div>
 
           {data.recentActivity.length === 0 ? (
-            <div style={{ padding: '30px', textAlign: 'center', color: '#94a3b8', fontSize: '13px' }}>
+            <div style={{ padding: '30px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
               No recent activity yet.
             </div>
           ) : (
@@ -111,10 +111,10 @@ export default function OnboardingDashboardPage() {
                   {ACTIVITY_ICON[item.type] || '📌'}
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b' }}>{item.title}</div>
-                  <div style={{ fontSize: '12px', color: '#64748b' }}>{item.description}</div>
+                  <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-primary)' }}>{item.title}</div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{item.description}</div>
                 </div>
-                <div style={{ fontSize: '11px', color: '#94a3b8', whiteSpace: 'nowrap' }}>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
                   {timeAgo(item.timestamp)}
                 </div>
               </div>
@@ -123,8 +123,8 @@ export default function OnboardingDashboardPage() {
         </div>
 
         {/* Quick Actions */}
-        <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '18px 20px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-          <div style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b', marginBottom: '14px' }}>
+        <div style={{ background: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--card-border)', padding: '18px 20px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+          <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '14px' }}>
             Quick Actions
           </div>
           {QUICK_ACTIONS.map((a, i) => (
@@ -134,8 +134,8 @@ export default function OnboardingDashboardPage() {
               style={{
                 width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                 padding: '12px 14px', marginBottom: '8px',
-                background: 'white', border: '1px solid #e2e8f0', borderRadius: '10px',
-                fontSize: '13px', fontWeight: '600', color: '#1e293b', cursor: 'pointer',
+                background: 'var(--card-bg)', border: '1px solid var(--card-border)', borderRadius: '10px',
+                fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)', cursor: 'pointer',
               }}>
               {a.label} <span>→</span>
             </button>

@@ -6,7 +6,7 @@ export default function GreetingsPage() {
     return (
         <div style={{
             minHeight: '100vh',
-            background: '#f8fafc',
+            background: 'var(--bg-primary)',
             padding: '32px 24px',
         }}>
             <div style={{
@@ -18,7 +18,7 @@ export default function GreetingsPage() {
                 }}>
                     <nav style={{
                         fontSize: '13px',
-                        color: '#64748b',
+                        color: 'var(--text-secondary)',
                     }}>
                         <a
                             href="/admin/dashboard"
@@ -47,7 +47,7 @@ export default function GreetingsPage() {
                         </a>
                         <span style={{ margin: '0 8px' }}>/</span>
                         <span style={{
-                            color: '#1e293b',
+                            color: 'var(--text-primary)',
                             fontWeight: '600',
                         }}>
                             Send Greeting

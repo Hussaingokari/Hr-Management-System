@@ -11,7 +11,7 @@ function Badge({ status }) {
         IN_PROGRESS: { bg: '#eff6ff', color: '#3b82f6' },
         COMPLETED: { bg: '#dcfce7', color: '#16a34a' },
     };
-    const s = map[status] || { bg: '#f1f5f9', color: '#64748b' };
+    const s = map[status] || { bg: '#f1f5f9', color: 'var(--text-secondary)' };
     return (
         <span style={{ background: s.bg, color: s.color, padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '700' }}>
             {status?.replace('_', ' ')}
@@ -78,10 +78,10 @@ export default function AdminChecklistPage() {
     return (
         <div>
             <div style={{ marginBottom: '24px' }}>
-                <h1 style={{ fontSize: '22px', fontWeight: '800', color: '#1e293b', marginBottom: '4px' }}>
+                <h1 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px' }}>
                     Onboarding Checklists
                 </h1>
-                <p style={{ fontSize: '13px', color: '#94a3b8' }}>
+                <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
                     Initialize and track employee onboarding checklists
                 </p>
             </div>
@@ -93,9 +93,9 @@ export default function AdminChecklistPage() {
                     { label: 'In Progress', value: inProgressCount, color: '#3b82f6', bg: '#eff6ff', icon: '🔄' },
                     { label: 'Completed', value: completedCount, color: '#16a34a', bg: '#dcfce7', icon: '✅' },
                 ].map((s, i) => (
-                    <div key={i} style={{ flex: 1, background: 'white', borderRadius: '12px', padding: '16px', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+                    <div key={i} style={{ flex: 1, background: 'var(--card-bg)', borderRadius: '12px', padding: '16px', border: '1px solid var(--card-border)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                            <span style={{ fontSize: '12px', color: '#64748b', fontWeight: '600' }}>{s.label}</span>
+                            <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: '600' }}>{s.label}</span>
                             <div style={{ width: '28px', height: '28px', background: s.bg, borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }}>{s.icon}</div>
                         </div>
                         <div style={{ fontSize: '26px', fontWeight: '800', color: s.color }}>{s.value}</div>
@@ -103,13 +103,13 @@ export default function AdminChecklistPage() {
                 ))}
             </div>
 
-            <div style={{ background: 'white', borderRadius: '12px', padding: '20px', border: '1px solid #e2e8f0', marginBottom: '20px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-                <div style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b', marginBottom: '14px' }}>
+            <div style={{ background: 'var(--card-bg)', borderRadius: '12px', padding: '20px', border: '1px solid var(--card-border)', marginBottom: '20px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+                <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '14px' }}>
                     🚀 Initialize New Onboarding
                 </div>
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                     <select value={initEmpId} onChange={e => setInitEmpId(e.target.value)}
-                        style={{ flex: 1, padding: '10px 14px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '13px', outline: 'none', background: 'white' }}>
+                        style={{ flex: 1, padding: '10px 14px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '13px', outline: 'none', background: 'var(--card-bg)' }}>
                         <option value="">Select employee to onboard...</option>
                         {employees
                             .filter(e => !onboardings.find(o => o.employeeId === e.id))
@@ -132,8 +132,8 @@ export default function AdminChecklistPage() {
                 </div>
             </div>
 
-            <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', overflow: 'hidden' }}>
-                <div style={{ padding: '12px 16px', borderBottom: '1px solid #e2e8f0', display: 'flex', gap: '4px', background: '#f8fafc' }}>
+            <div style={{ background: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--card-border)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', overflow: 'hidden' }}>
+                <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--card-border)', display: 'flex', gap: '4px', background: 'var(--bg-primary)' }}>
                     {[
                         { key: 'ALL', label: 'All' },
                         { key: 'PENDING', label: 'Pending' },
@@ -155,11 +155,11 @@ export default function AdminChecklistPage() {
                 </div>
 
                 {loading ? (
-                    <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>Loading...</div>
+                    <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</div>
                 ) : filtered.length === 0 ? (
                     <div style={{ padding: '60px', textAlign: 'center' }}>
                         <div style={{ fontSize: '40px', marginBottom: '12px' }}>📋</div>
-                        <div style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b' }}>No onboarding records</div>
+                        <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-primary)' }}>No onboarding records</div>
                     </div>
                 ) : (
                     filtered.map((onb) => (
@@ -177,8 +177,8 @@ export default function AdminChecklistPage() {
                                         {onb.employeeName?.split(' ').map(n => n[0]).join('').slice(0, 2)}
                                     </div>
                                     <div>
-                                        <div style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b' }}>{onb.employeeName}</div>
-                                        <div style={{ fontSize: '11px', color: '#94a3b8' }}>{onb.employeeCode} · {onb.department}</div>
+                                        <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-primary)' }}>{onb.employeeName}</div>
+                                        <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{onb.employeeCode} · {onb.department}</div>
                                     </div>
                                 </div>
                                 <Badge status={onb.status} />
@@ -186,12 +186,12 @@ export default function AdminChecklistPage() {
 
                             <div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                                    <span style={{ fontSize: '11px', color: '#94a3b8' }}>Completion</span>
+                                    <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Completion</span>
                                     <span style={{ fontSize: '11px', fontWeight: '700', color: onb.completionPercent === 100 ? '#16a34a' : '#3b82f6' }}>
                                         {onb.completionPercent}%
                                     </span>
                                 </div>
-                                <div style={{ height: '6px', background: '#f1f5f9', borderRadius: '3px', overflow: 'hidden' }}>
+                                <div style={{ height: '6px', background: 'var(--card-border)', borderRadius: '3px', overflow: 'hidden' }}>
                                     <div style={{
                                         height: '100%', borderRadius: '3px',
                                         background: onb.completionPercent === 100 ? '#16a34a' : '#3b82f6',
@@ -200,7 +200,7 @@ export default function AdminChecklistPage() {
                                 </div>
                             </div>
 
-                            <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '6px' }}>
+                            <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '6px' }}>
                                 Joining: {onb.joiningDate} · HR: {onb.assignedHrName}
                             </div>
                         </div>

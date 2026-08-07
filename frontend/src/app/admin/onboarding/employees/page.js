@@ -13,7 +13,7 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 function OnboardingBadge({ status }) {
     const map = {
-        PENDING: { bg: '#f1f5f9', color: '#64748b', label: 'Not Started' },
+        PENDING: { bg: '#f1f5f9', color: 'var(--text-secondary)', label: 'Not Started' },
         IN_PROGRESS: { bg: '#eff6ff', color: '#3b82f6', label: 'In Progress' },
         COMPLETED: { bg: '#dcfce7', color: '#16a34a', label: 'Completed' },
     };
@@ -209,15 +209,15 @@ export default function OnboardingEmployeesPage() {
         <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                 <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '600', color: '#64748b', marginBottom: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '8px' }}>
                         <span>Onboarding</span>
-                        <span style={{ color: '#cbd5e1' }}>/</span>
+                        <span style={{ color: 'var(--text-muted)' }}>/</span>
                         <span style={{ color: '#3b82f6' }}>Employees</span>
                     </div>
-                    <h1 style={{ fontSize: '22px', fontWeight: '800', color: '#1e293b', marginBottom: '4px' }}>
+                    <h1 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px' }}>
                         Onboarding Employees
                     </h1>
-                    <p style={{ fontSize: '13px', color: '#94a3b8' }}>
+                    <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
                         View, add, edit, and manage employees in the onboarding process.
                     </p>
                 </div>
@@ -241,22 +241,22 @@ export default function OnboardingEmployeesPage() {
                     />
                 </div>
                 <select value={deptFilter} onChange={handleDeptFilterChange}
-                    style={{ padding: '0 14px', height: '40px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '13px', outline: 'none', background: 'white' }}>
+                    style={{ padding: '0 14px', height: '40px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '13px', outline: 'none', background: 'var(--card-bg)' }}>
                     {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
                 </select>
             </div>
 
-            <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1.2fr 1fr 1fr 0.8fr', gap: '16px', padding: '10px 20px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+            <div style={{ background: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--card-border)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1.2fr 1fr 1fr 0.8fr', gap: '16px', padding: '10px 20px', background: 'var(--bg-primary)', borderBottom: '1px solid var(--card-border)' }}>
                     {['Employee', 'Department', 'Joining Date', 'Onboarding', 'Actions'].map(h => (
-                        <div key={h} style={{ fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</div>
+                        <div key={h} style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</div>
                     ))}
                 </div>
 
                 {loading ? (
-                    <div style={{ padding: '60px', textAlign: 'center', color: '#94a3b8' }}>Loading employees...</div>
+                    <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading employees...</div>
                 ) : displayedEmployees.length === 0 ? (
-                    <div style={{ padding: '60px', textAlign: 'center', color: '#94a3b8' }}>No employees found</div>
+                    <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)' }}>No employees found</div>
                 ) : (
                     <>
                         {displayedEmployees.map((emp) => (
@@ -266,19 +266,19 @@ export default function OnboardingEmployeesPage() {
                                         {emp.firstName?.[0]}{emp.lastName?.[0]}
                                     </div>
                                     <div style={{ minWidth: 0 }}>
-                                        <div style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>{emp.firstName} {emp.lastName}</div>
-                                        <div style={{ fontSize: '11px', color: '#94a3b8' }}>{emp.email}</div>
+                                        <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)' }}>{emp.firstName} {emp.lastName}</div>
+                                        <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{emp.email}</div>
                                     </div>
                                 </div>
                                 <div>
-                                    <div style={{ fontSize: '13px', color: '#1e293b' }}>{emp.department || '—'}</div>
-                                    <div style={{ fontSize: '11px', color: '#94a3b8' }}>{emp.designation || '—'}</div>
+                                    <div style={{ fontSize: '13px', color: 'var(--text-primary)' }}>{emp.department || '—'}</div>
+                                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{emp.designation || '—'}</div>
                                 </div>
-                                <div style={{ fontSize: '13px', color: '#64748b' }}>{emp.dateOfJoining || '—'}</div>
+                                <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{emp.dateOfJoining || '—'}</div>
                                 <div><OnboardingBadge status={onboardingByEmpId[emp.id]} /></div>
                                 <div style={{ display: 'flex', gap: '10px' }}>
                                     <button onClick={() => openEditForm(emp)} title="Edit"
-                                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', fontSize: '15px' }}>✏️</button>
+                                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: '15px' }}>✏️</button>
                                     <button onClick={() => setShowDeleteConfirm(emp)} title="Delete"
                                         style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', fontSize: '15px' }}>🗑️</button>
                                 </div>
@@ -286,12 +286,12 @@ export default function OnboardingEmployeesPage() {
                         ))}
 
                         {totalPages > 1 && (
-                            <div style={{ padding: '14px 20px', display: 'flex', justifyContent: 'center', gap: '8px', borderTop: '1px solid #e2e8f0' }}>
+                            <div style={{ padding: '14px 20px', display: 'flex', justifyContent: 'center', gap: '8px', borderTop: '1px solid var(--card-border)' }}>
                                 <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}
-                                    style={{ padding: '6px 14px', border: '1px solid #e2e8f0', borderRadius: '6px', fontSize: '12px', fontWeight: '600', color: page === 0 ? '#cbd5e1' : '#374151', background: 'white', cursor: page === 0 ? 'not-allowed' : 'pointer' }}>← Prev</button>
-                                <span style={{ padding: '6px 14px', fontSize: '12px', color: '#64748b' }}>Page {page + 1} of {totalPages}</span>
+                                    style={{ padding: '6px 14px', border: '1px solid var(--card-border)', borderRadius: '6px', fontSize: '12px', fontWeight: '600', color: page === 0 ? '#cbd5e1' : '#374151', background: 'var(--card-bg)', cursor: page === 0 ? 'not-allowed' : 'pointer' }}>← Prev</button>
+                                <span style={{ padding: '6px 14px', fontSize: '12px', color: 'var(--text-secondary)' }}>Page {page + 1} of {totalPages}</span>
                                 <button onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page >= totalPages - 1}
-                                    style={{ padding: '6px 14px', border: '1px solid #e2e8f0', borderRadius: '6px', fontSize: '12px', fontWeight: '600', color: page >= totalPages - 1 ? '#cbd5e1' : '#374151', background: 'white', cursor: page >= totalPages - 1 ? 'not-allowed' : 'pointer' }}>Next →</button>
+                                    style={{ padding: '6px 14px', border: '1px solid var(--card-border)', borderRadius: '6px', fontSize: '12px', fontWeight: '600', color: page >= totalPages - 1 ? '#cbd5e1' : '#374151', background: 'var(--card-bg)', cursor: page >= totalPages - 1 ? 'not-allowed' : 'pointer' }}>Next →</button>
                             </div>
                         )}
                     </>
@@ -300,10 +300,10 @@ export default function OnboardingEmployeesPage() {
 
             {showForm && (
                 <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '20px' }}>
-                    <div style={{ background: 'white', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
+                    <div style={{ background: 'var(--card-bg)', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                            <h2 style={{ fontSize: '18px', fontWeight: '800', color: '#1e293b' }}>{editMode ? 'Edit Employee' : 'Add New Employee'}</h2>
-                            <button onClick={() => setShowForm(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#94a3b8' }}>✕</button>
+                            <h2 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-primary)' }}>{editMode ? 'Edit Employee' : 'Add New Employee'}</h2>
+                            <button onClick={() => setShowForm(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: 'var(--text-muted)' }}>✕</button>
                         </div>
                         <form onSubmit={handleSubmit}>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
@@ -313,14 +313,14 @@ export default function OnboardingEmployeesPage() {
                                 <InputField label="Email" name="email" type="email" required placeholder="john@hrms.com" value={form.email} onChange={handleFieldChange} />
                                 <div style={{ position: "relative" }}>
                                     <InputField label={editMode ? "Password (leave blank to keep)" : "Password"} name="password" type={showPassword ? "text" : "password"} required={!editMode} placeholder="Min 8 characters" value={form.password} onChange={handleFieldChange} />
-                                    <span onClick={() => setShowPassword(!showPassword)} style={{ position: "absolute", right: "12px", top: "38px", cursor: "pointer", color: "#64748b", fontSize: "16px" }}>
+                                    <span onClick={() => setShowPassword(!showPassword)} style={{ position: "absolute", right: "12px", top: "38px", cursor: "pointer", color: "var(--text-secondary)", fontSize: "16px" }}>
                                         {showPassword ? <FaEyeSlash /> : <FaEye />}
                                     </span>
                                 </div>
                                 <InputField label="Phone" name="phone" placeholder="9876543210" value={form.phone} onChange={handleFieldChange} />
                                 <div>
                                     <label style={{ fontSize: '12px', fontWeight: '600', color: '#374151', display: 'block', marginBottom: '5px' }}>Department</label>
-                                    <select value={form.department} onChange={e => handleFieldChange('department', e.target.value)} style={{ width: '100%', padding: '9px 12px', border: '1.5px solid #e2e8f0', borderRadius: '8px', fontSize: '13px', outline: 'none', background: 'white' }}>
+                                    <select value={form.department} onChange={e => handleFieldChange('department', e.target.value)} style={{ width: '100%', padding: '9px 12px', border: '1.5px solid #e2e8f0', borderRadius: '8px', fontSize: '13px', outline: 'none', background: 'var(--card-bg)' }}>
                                         <option value="">Select Department</option>
                                         {DEPARTMENTS.filter(d => d !== 'All Departments').map(d => <option key={d} value={d}>{d}</option>)}
                                     </select>
@@ -332,14 +332,14 @@ export default function OnboardingEmployeesPage() {
                             </div>
                             <div style={{ marginBottom: '20px' }}>
                                 <label style={{ fontSize: '12px', fontWeight: '600', color: '#374151', display: 'block', marginBottom: '5px' }}>Role <span style={{ color: '#ef4444' }}>*</span></label>
-                                <select value={form.role} onChange={e => setForm({ ...form, role: e.target.value })} style={{ width: '100%', padding: '9px 12px', border: '1.5px solid #e2e8f0', borderRadius: '8px', fontSize: '13px', outline: 'none', background: 'white' }}>
+                                <select value={form.role} onChange={e => setForm({ ...form, role: e.target.value })} style={{ width: '100%', padding: '9px 12px', border: '1.5px solid #e2e8f0', borderRadius: '8px', fontSize: '13px', outline: 'none', background: 'var(--card-bg)' }}>
                                     <option value="EMPLOYEE">EMPLOYEE</option>
                                     <option value="HR">HR</option>
                                     <option value="ADMIN">ADMIN</option>
                                 </select>
                             </div>
                             <div style={{ display: 'flex', gap: '10px' }}>
-                                <button type="button" onClick={() => setShowForm(false)} style={{ flex: 1, padding: '12px', background: 'white', color: '#374151', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>Cancel</button>
+                                <button type="button" onClick={() => setShowForm(false)} style={{ flex: 1, padding: '12px', background: 'var(--card-bg)', color: '#374151', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>Cancel</button>
                                 <button type="submit" disabled={submitting} style={{ flex: 1, padding: '12px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.7 : 1 }}>
                                     {submitting ? '⏳ Saving...' : editMode ? 'Update Employee' : 'Add Employee'}
                                 </button>
@@ -351,14 +351,14 @@ export default function OnboardingEmployeesPage() {
 
             {showDeleteConfirm && (
                 <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '20px' }}>
-                    <div style={{ background: 'white', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '400px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)', textAlign: 'center' }}>
+                    <div style={{ background: 'var(--card-bg)', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '400px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)', textAlign: 'center' }}>
                         <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚠️</div>
-                        <h2 style={{ fontSize: '18px', fontWeight: '800', color: '#1e293b', marginBottom: '8px' }}>Delete Employee?</h2>
-                        <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '24px' }}>
+                        <h2 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '8px' }}>Delete Employee?</h2>
+                        <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '24px' }}>
                             Are you sure you want to delete <strong>{showDeleteConfirm.firstName} {showDeleteConfirm.lastName}</strong>? This action cannot be undone.
                         </p>
                         <div style={{ display: 'flex', gap: '10px' }}>
-                            <button onClick={() => setShowDeleteConfirm(null)} style={{ flex: 1, padding: '12px', background: 'white', color: '#374151', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>Cancel</button>
+                            <button onClick={() => setShowDeleteConfirm(null)} style={{ flex: 1, padding: '12px', background: 'var(--card-bg)', color: '#374151', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>Cancel</button>
                             <button onClick={() => handleDelete(showDeleteConfirm.id)} disabled={deleting === showDeleteConfirm.id} style={{ flex: 1, padding: '12px', background: '#dc2626', color: 'white', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: 'pointer' }}>
                                 {deleting === showDeleteConfirm.id ? '⏳ Deleting...' : 'Yes, Delete'}
                             </button>

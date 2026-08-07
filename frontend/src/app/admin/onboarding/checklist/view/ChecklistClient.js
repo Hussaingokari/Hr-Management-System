@@ -30,7 +30,7 @@ function DocStatusBadge({ status }) {
         APPROVED: { bg: '#dcfce7', color: '#16a34a', label: 'Approved' },
         REJECTED: { bg: '#fee2e2', color: '#dc2626', label: 'Rejected' },
     };
-    const s = map[status] || { bg: '#f1f5f9', color: '#64748b', label: 'Not submitted' };
+    const s = map[status] || { bg: '#f1f5f9', color: 'var(--text-secondary)', label: 'Not submitted' };
     return (
         <span style={{ background: s.bg, color: s.color, padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '700' }}>
             {s.label}
@@ -40,7 +40,7 @@ function DocStatusBadge({ status }) {
 
 function StatusPill({ status }) {
     const map = {
-        PENDING: { bg: '#f1f5f9', color: '#64748b', label: 'Pending' },
+        PENDING: { bg: '#f1f5f9', color: 'var(--text-secondary)', label: 'Pending' },
         IN_PROGRESS: { bg: '#eff6ff', color: '#3b82f6', label: 'In Progress' },
         COMPLETED: { bg: '#dcfce7', color: '#16a34a', label: 'Completed' },
     };
@@ -107,11 +107,11 @@ export default function OnboardingProfilePage() {
     const docsByKey = documents.reduce((acc, d) => { acc[d.documentKey] = d; return acc; }, {});
 
     if (loading) {
-        return <div style={{ padding: '60px', textAlign: 'center', color: '#94a3b8' }}>Loading...</div>;
+        return <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</div>;
     }
 
     if (!onboarding) {
-        return <div style={{ padding: '60px', textAlign: 'center', color: '#94a3b8' }}>Employee not found.</div>;
+        return <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)' }}>Employee not found.</div>;
     }
 
     const initials = onboarding.employeeName?.split(' ').map(n => n[0]).join('').slice(0, 2);
@@ -120,12 +120,12 @@ export default function OnboardingProfilePage() {
         <div>
             <button
                 onClick={() => router.push('/admin/onboarding/checklist')}
-                style={{ background: 'none', border: 'none', color: '#64748b', fontSize: '13px', fontWeight: '600', cursor: 'pointer', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', fontSize: '13px', fontWeight: '600', cursor: 'pointer', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 ← Back to Dashboard
             </button>
 
             <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '20px', alignItems: 'start' }}>
-                <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '24px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', textAlign: 'center' }}>
+                <div style={{ background: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--card-border)', padding: '24px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', textAlign: 'center' }}>
                     <div style={{
                         width: '80px', height: '80px', borderRadius: '16px', margin: '0 auto 14px',
                         background: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
@@ -134,10 +134,10 @@ export default function OnboardingProfilePage() {
                     }}>
                         {initials}
                     </div>
-                    <div style={{ fontSize: '17px', fontWeight: '800', color: '#1e293b', marginBottom: '2px' }}>
+                    <div style={{ fontSize: '17px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '2px' }}>
                         {onboarding.employeeName}
                     </div>
-                    <div style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '10px' }}>
+                    <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '10px' }}>
                         {onboarding.employeeDesignation || '—'}
                     </div>
                     <div style={{ marginBottom: '16px' }}>
@@ -146,15 +146,15 @@ export default function OnboardingProfilePage() {
 
                     <div style={{ marginBottom: '20px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                            <span style={{ fontSize: '12px', color: '#64748b', fontWeight: '600' }}>Onboarding Progress</span>
+                            <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: '600' }}>Onboarding Progress</span>
                             <span style={{ fontSize: '12px', fontWeight: '700', color: '#4f46e5' }}>{onboarding.completionPercent}%</span>
                         </div>
-                        <div style={{ height: '6px', background: '#f1f5f9', borderRadius: '3px', overflow: 'hidden' }}>
+                        <div style={{ height: '6px', background: 'var(--card-border)', borderRadius: '3px', overflow: 'hidden' }}>
                             <div style={{ height: '100%', background: '#4f46e5', width: `${onboarding.completionPercent}%`, borderRadius: '3px' }} />
                         </div>
                     </div>
 
-                    <div style={{ textAlign: 'left', borderTop: '1px solid #e2e8f0', paddingTop: '16px' }}>
+                    <div style={{ textAlign: 'left', borderTop: '1px solid var(--card-border)', paddingTop: '16px' }}>
                         {[
                             { label: 'Email', value: onboarding.employeeEmail },
                             { label: 'Phone', value: onboarding.employeePhone },
@@ -164,10 +164,10 @@ export default function OnboardingProfilePage() {
                             { label: 'Assigned HR', value: onboarding.assignedHrName },
                         ].map(f => (
                             <div key={f.label} style={{ marginBottom: '12px', minWidth: 0 }}>
-                                <div style={{ fontSize: '11px', color: '#94a3b8', marginBottom: '2px' }}>{f.label}</div>
+                                <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '2px' }}>{f.label}</div>
                                 <div style={{
                                     fontSize: '13px',
-                                    color: '#1e293b',
+                                    color: 'var(--text-primary)',
                                     fontWeight: '500',
                                     wordBreak: 'break-word',
                                     overflowWrap: 'anywhere',
@@ -180,12 +180,12 @@ export default function OnboardingProfilePage() {
                 </div>
 
                 <div>
-                    <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '20px', marginBottom: '20px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+                    <div style={{ background: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--card-border)', padding: '20px', marginBottom: '20px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-                            <div style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b' }}>
+                            <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)' }}>
                                 ✅ Onboarding Checklist
                             </div>
-                            <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '600' }}>
+                            <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600' }}>
                                 Click a row to check/uncheck, then Save
                             </div>
                         </div>
@@ -258,8 +258,8 @@ export default function OnboardingProfilePage() {
                         </button>
                     </div>
 
-                    <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '20px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-                        <div style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b', marginBottom: '14px' }}>
+                    <div style={{ background: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--card-border)', padding: '20px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+                        <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '14px' }}>
                             📄 Documents
                         </div>
                         {Object.keys(DOC_KEY_LABELS).map((key, i) => {
@@ -273,7 +273,7 @@ export default function OnboardingProfilePage() {
                                         📄
                                     </div>
                                     <div style={{ flex: 1 }}>
-                                        <div style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>{DOC_KEY_LABELS[key]}</div>
+                                        <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)' }}>{DOC_KEY_LABELS[key]}</div>
                                         {doc?.fileUrl && (
                                             <a href={doc.fileUrl?.startsWith('/') ? `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'}${doc.fileUrl}` : doc.fileUrl} target="_blank" rel="noreferrer" style={{ fontSize: '11px', color: '#3b82f6' }}>
                                                 View file
