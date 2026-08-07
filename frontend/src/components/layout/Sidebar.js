@@ -100,7 +100,7 @@ export default function Sidebar({ role }) {
       )}
       <div className={`app-sidebar ${isMobileOpen ? 'mobile-open' : ''}`} style={{ 
         backgroundColor: sidebarBg,
-        borderRight: \`1px solid \${borderColor}\`,
+        borderRight: `1px solid ${borderColor}`,
         display: 'flex', flexDirection: 'column'
       }}>
         {/* Logo */}
@@ -227,7 +227,7 @@ export default function Sidebar({ role }) {
         )}
 
         {/* Bottom — Settings + Logout exactly like the image */}
-        <div style={{ padding: '16px 16px 24px', borderTop: \`1px solid \${borderColor}\`, background: sidebarBg, zIndex: 2 }}>
+        <div style={{ padding: '16px 16px 24px', borderTop: `1px solid ${borderColor}`, background: sidebarBg, zIndex: 2 }}>
 
           {/* Settings */}
           <div
