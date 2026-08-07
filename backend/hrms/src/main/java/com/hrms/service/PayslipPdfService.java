@@ -173,26 +173,26 @@ public class PayslipPdfService {
                 y = infoBoxBottom - 18;
 
                 // ---------------- Earnings / Deductions table ----------------
+                // NOTE: simplified to two columns per side (LABEL + AMOUNT), right-aligned.
+                // The previous CURRENT MONTH / ARREAR / TOTAL three-column layout had no
+                // real arrear data to show and the columns were too tightly packed for the
+                // available width, which caused the header text to visually overlap/merge.
                 float tableTop = y;
                 float tableLeft = pageLeft;
                 float tableRight = pageRight;
                 float midX = tableLeft + (tableRight - tableLeft) * 0.55f;
 
                 float earnLabelX = tableLeft + 6;
-                float earnCurX = tableLeft + 200;
-                float earnArrX = tableLeft + 280;
-                float earnTotX = midX - 55;
+                float earnAmtRight = midX - 8; // right edge of earnings amount column
                 float dedLabelX = midX + 6;
-                float dedTotX = tableRight - 55;
+                float dedAmtRight = tableRight - 10; // right edge of deductions amount column
 
                 float headerH = 20f;
                 float headerTextY = tableTop - 14;
                 drawText(cs, FONT_BOLD, 9, BLACK, earnLabelX, headerTextY, "EARNINGS");
-                drawText(cs, FONT_BOLD, 7.5f, BLACK, earnCurX, headerTextY, "CURRENT MONTH");
-                drawText(cs, FONT_BOLD, 8, BLACK, earnArrX, headerTextY, "ARREAR");
-                drawText(cs, FONT_BOLD, 9, BLACK, earnTotX, headerTextY, "TOTAL");
+                drawTextRight(cs, FONT_BOLD, 9, BLACK, earnAmtRight, headerTextY, "AMOUNT");
                 drawText(cs, FONT_BOLD, 9, BLACK, dedLabelX, headerTextY, "DEDUCTIONS");
-                drawText(cs, FONT_BOLD, 9, BLACK, dedTotX, headerTextY, "TOTAL");
+                drawTextRight(cs, FONT_BOLD, 9, BLACK, dedAmtRight, headerTextY, "AMOUNT");
 
                 float headerBottomY = tableTop - headerH;
 
@@ -215,12 +215,11 @@ public class PayslipPdfService {
                     float ry = rowsTop - 16 - i * lineH;
                     if (i < earnings.length) {
                         drawText(cs, FONT_REG, 9, BLACK, earnLabelX, ry, earnings[i][0]);
-                        drawText(cs, FONT_REG, 9, BLACK, earnCurX, ry, earnings[i][1]);
-                        drawText(cs, FONT_REG, 9, BLACK, earnTotX, ry, earnings[i][1]);
+                        drawTextRight(cs, FONT_REG, 9, BLACK, earnAmtRight, ry, earnings[i][1]);
                     }
                     if (i < deductions.length) {
                         drawText(cs, FONT_REG, 9, BLACK, dedLabelX, ry, deductions[i][0]);
-                        drawText(cs, FONT_REG, 9, BLACK, dedTotX, ry, deductions[i][1]);
+                        drawTextRight(cs, FONT_REG, 9, BLACK, dedAmtRight, ry, deductions[i][1]);
                     }
                 }
 
@@ -229,9 +228,9 @@ public class PayslipPdfService {
                 float summaryH = 22f;
                 float summaryTextY = rowsBottomY - 15;
                 drawText(cs, FONT_BOLD, 10, BLACK, earnLabelX, summaryTextY, "GROSS EARNINGS");
-                drawText(cs, FONT_BOLD, 10, BLACK, earnTotX, summaryTextY, fmt(p.getGrossSalary()));
+                drawTextRight(cs, FONT_BOLD, 10, BLACK, earnAmtRight, summaryTextY, fmt(p.getGrossSalary()));
                 drawText(cs, FONT_BOLD, 10, BLACK, dedLabelX, summaryTextY, "TOTAL DEDUCTIONS");
-                drawText(cs, FONT_BOLD, 10, BLACK, dedTotX, summaryTextY, fmt(p.getTotalDeductions()));
+                drawTextRight(cs, FONT_BOLD, 10, BLACK, dedAmtRight, summaryTextY, fmt(p.getTotalDeductions()));
 
                 float summaryBottomY = rowsBottomY - summaryH;
 
@@ -286,6 +285,18 @@ public class PayslipPdfService {
         cs.newLineAtOffset(x, y);
         cs.showText(text == null ? "" : text);
         cs.endText();
+    }
+
+    /**
+     * Draws text right-aligned so its right edge lands at {@code rightX}.
+     * Used for amount columns so numbers line up neatly regardless of digit count.
+     */
+    private void drawTextRight(PDPageContentStream cs, PDType1Font font, float size, Color color, float rightX,
+            float y, String text) throws IOException {
+        if (text == null)
+            text = "";
+        float width = font.getStringWidth(text) / 1000f * size;
+        drawText(cs, font, size, color, rightX - width, y, text);
     }
 
     private String nullSafe(String s) {
