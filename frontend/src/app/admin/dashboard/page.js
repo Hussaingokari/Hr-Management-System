@@ -152,29 +152,22 @@ export default function AdminDashboard() {
         </p>
 
         {/* Decorative Mountain Graphic Top Right */}
-        <div style={{ position: 'absolute', top: -24, right: -24, width: '450px', height: '120px', pointerEvents: 'none' }}>
-          {isDark && (
-            <>
-              {/* Fade out on the left side so it blends into the dark background */}
-              <div style={{ position: 'absolute', top: 0, left: 0, width: '100px', height: '100%', background: 'linear-gradient(to right, var(--bg-primary), transparent)', zIndex: 2 }} />
-              
-              <img 
-                src="/up.png" 
-                alt="Header Landscape"
-                style={{ 
-                  position: 'absolute', 
-                  bottom: 0, 
-                  right: 0, 
-                  width: '100%', 
-                  height: '100%', 
-                  objectFit: 'fill', 
-                  objectPosition: 'right bottom',
-                  borderTopRightRadius: '16px',
-                  opacity: 0.9
-                }} 
-              />
-            </>
-          )}
+        <div style={{ position: 'absolute', top: -24, right: -24, height: '120px', pointerEvents: 'none', display: 'flex' }}>
+          {/* Fade out on the left side so it blends into the dark background */}
+          <div style={{ position: 'relative', height: '100%' }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, width: '80px', height: '100%', background: 'linear-gradient(to right, var(--bg-primary), transparent)', zIndex: 2 }} />
+            <img
+              src="/up.png"
+              alt="Header Landscape"
+              style={{
+                height: '100%',
+                width: 'auto',
+                borderTopRightRadius: '16px',
+                opacity: 0.9,
+                display: 'block'
+              }}
+            />
+          </div>
         </div>
       </div>
 
