@@ -18,7 +18,7 @@ function Badge({ status }) {
     HR: { bg: '#fdf4ff', color: '#9333ea' },
     EMPLOYEE: { bg: '#f1f5f9', color: '#374151' },
   };
-  const style = map[status] || { bg: '#f1f5f9', color: '#64748b' };
+  const style = map[status] || { bg: '#f1f5f9', color: 'var(--text-secondary)' };
   return (
     <span style={{ padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '700', background: style.bg, color: style.color }}>
       {status}
@@ -38,8 +38,8 @@ const INPUT_BASE_STYLE = {
   fontSize: '13px',
   outline: 'none',
   boxSizing: 'border-box',
-  background: '#ffffff',
-  color: '#1e293b',
+  background: 'var(--card-bg)',
+  color: 'var(--text-primary)',
   colorScheme: 'light', // stops the browser from re-theming the field (and its placeholder) for dark mode
 };
 
@@ -261,7 +261,7 @@ export default function EmployeeManagementPage() {
           (::placeholder can't be set via inline style). */}
       <style>{`
         .hrms-input::placeholder {
-          color: #94a3b8;
+          color: var(--text-muted);
           opacity: 1;
         }
       `}</style>
@@ -269,10 +269,10 @@ export default function EmployeeManagementPage() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <div>
-          <h1 style={{ fontSize: '22px', fontWeight: '800', color: '#1e293b', marginBottom: '4px' }}>
+          <h1 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px' }}>
             Employee Management
           </h1>
-          <p style={{ fontSize: '13px', color: '#94a3b8' }}>
+          <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
             {totalElements} total employees
           </p>
         </div>
@@ -304,13 +304,13 @@ export default function EmployeeManagementPage() {
             width: '100%', paddingLeft: '38px', paddingRight: '16px',
             height: '40px', border: '1.5px solid #e2e8f0',
             borderRadius: '10px', fontSize: '13px', outline: 'none',
-            background: '#ffffff', color: '#1e293b', colorScheme: 'light',
+            background: 'var(--card-bg)', color: 'var(--text-primary)', colorScheme: 'light',
           }}
           onFocus={e => e.target.style.borderColor = '#3b82f6'}
           onBlur={e => e.target.style.borderColor = '#e2e8f0'}
         />
         {(searching) && (
-          <span style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '12px', color: '#94a3b8' }}>
+          <span style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '12px', color: 'var(--text-muted)' }}>
             Searching...
           </span>
         )}
@@ -318,7 +318,7 @@ export default function EmployeeManagementPage() {
 
       {/* Table */}
       <div className="table-responsive" style={{
-        background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0',
+        background: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--card-border)',
         boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
       }}>
         {/* Table Header */}
@@ -326,25 +326,25 @@ export default function EmployeeManagementPage() {
           display: 'grid',
           gridTemplateColumns: '0.6fr 2fr 1.2fr 1.2fr 1fr 1fr 1fr',
           gap: '16px',
-          padding: '10px 20px', background: '#f8fafc',
-          borderBottom: '1px solid #e2e8f0',
+          padding: '10px 20px', background: 'var(--bg-primary)',
+          borderBottom: '1px solid var(--card-border)',
         }}>
           {['Emp ID', 'Employee', 'Department', 'Designation', 'Role', 'Status', 'Actions'].map(h => (
-            <div key={h} style={{ fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            <div key={h} style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
               {h}
             </div>
           ))}
         </div>
 
         {loading ? (
-          <div style={{ padding: '60px', textAlign: 'center', color: '#94a3b8' }}>Loading employees...</div>
+          <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading employees...</div>
         ) : employees.length === 0 ? (
           <div style={{ padding: '60px', textAlign: 'center' }}>
             <div style={{ fontSize: '40px', marginBottom: '12px' }}>👥</div>
-            <div style={{ fontSize: '15px', fontWeight: '600', color: '#1e293b', marginBottom: '8px' }}>
+            <div style={{ fontSize: '15px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '8px' }}>
               {search ? 'No employees found' : 'No employees yet'}
             </div>
-            <div style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '16px' }}>
+            <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '16px' }}>
               {search ? `No results for "${search}"` : 'Add your first employee'}
             </div>
             {!search && (
@@ -366,7 +366,7 @@ export default function EmployeeManagementPage() {
                 onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
                 onMouseLeave={e => e.currentTarget.style.background = 'white'}
               >
-                <div style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '600' }}>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '600' }}>
                   {emp.employeeId}
                 </div>
 
@@ -380,15 +380,15 @@ export default function EmployeeManagementPage() {
                     {emp.firstName?.[0]}{emp.lastName?.[0]}
                   </div>
                   <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {emp.firstName} {emp.lastName}
                     </div>
-                    <div style={{ fontSize: '11px', color: '#94a3b8', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{emp.email}</div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{emp.email}</div>
                   </div>
                 </div>
 
-                <div style={{ fontSize: '13px', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{emp.department || '—'}</div>
-                <div style={{ fontSize: '13px', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{emp.designation || '—'}</div>
+                <div style={{ fontSize: '13px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{emp.department || '—'}</div>
+                <div style={{ fontSize: '13px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{emp.designation || '—'}</div>
                 <Badge status={emp.role} />
                 <Badge status={emp.active ? 'ACTIVE' : 'INACTIVE'} />
 
@@ -417,16 +417,16 @@ export default function EmployeeManagementPage() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div style={{ padding: '14px 20px', display: 'flex', justifyContent: 'center', gap: '8px', borderTop: '1px solid #e2e8f0' }}>
+              <div style={{ padding: '14px 20px', display: 'flex', justifyContent: 'center', gap: '8px', borderTop: '1px solid var(--card-border)' }}>
                 <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}
-                  style={{ padding: '6px 14px', border: '1px solid #e2e8f0', borderRadius: '6px', fontSize: '12px', fontWeight: '600', color: page === 0 ? '#cbd5e1' : '#374151', background: 'white', cursor: page === 0 ? 'not-allowed' : 'pointer' }}>
+                  style={{ padding: '6px 14px', border: '1px solid var(--card-border)', borderRadius: '6px', fontSize: '12px', fontWeight: '600', color: page === 0 ? '#cbd5e1' : '#374151', background: 'var(--card-bg)', cursor: page === 0 ? 'not-allowed' : 'pointer' }}>
                   ← Prev
                 </button>
-                <span style={{ padding: '6px 14px', fontSize: '12px', color: '#64748b' }}>
+                <span style={{ padding: '6px 14px', fontSize: '12px', color: 'var(--text-secondary)' }}>
                   Page {page + 1} of {totalPages}
                 </span>
                 <button onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page >= totalPages - 1}
-                  style={{ padding: '6px 14px', border: '1px solid #e2e8f0', borderRadius: '6px', fontSize: '12px', fontWeight: '600', color: page >= totalPages - 1 ? '#cbd5e1' : '#374151', background: 'white', cursor: page >= totalPages - 1 ? 'not-allowed' : 'pointer' }}>
+                  style={{ padding: '6px 14px', border: '1px solid var(--card-border)', borderRadius: '6px', fontSize: '12px', fontWeight: '600', color: page >= totalPages - 1 ? '#cbd5e1' : '#374151', background: 'var(--card-bg)', cursor: page >= totalPages - 1 ? 'not-allowed' : 'pointer' }}>
                   Next →
                 </button>
               </div>
@@ -444,17 +444,17 @@ export default function EmployeeManagementPage() {
           justifyContent: 'center', zIndex: 100, padding: '20px',
         }}>
           <div style={{
-            background: 'white', borderRadius: '16px',
+            background: 'var(--card-bg)', borderRadius: '16px',
             padding: '28px', width: '100%', maxWidth: '600px',
             maxHeight: '90vh', overflowY: 'auto',
             boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h2 style={{ fontSize: '18px', fontWeight: '800', color: '#1e293b' }}>
+              <h2 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-primary)' }}>
                 {editMode ? 'Edit Employee' : 'Add New Employee'}
               </h2>
               <button onClick={() => setShowForm(false)}
-                style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#94a3b8' }}>✕</button>
+                style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: 'var(--text-muted)' }}>✕</button>
             </div>
 
             <form onSubmit={handleSubmit}>
@@ -487,7 +487,7 @@ export default function EmployeeManagementPage() {
                       right: "12px",
                       top: "38px",
                       cursor: "pointer",
-                      color: "#64748b",
+                      color: "var(--text-secondary)",
                       fontSize: "16px"
                     }}
                   >
@@ -529,7 +529,7 @@ export default function EmployeeManagementPage() {
                   style={{
                     width: '100%', padding: '9px 12px', border: '1.5px solid #e2e8f0',
                     borderRadius: '8px', fontSize: '13px', outline: 'none',
-                    background: '#ffffff', color: '#1e293b', colorScheme: 'light',
+                    background: 'var(--card-bg)', color: 'var(--text-primary)', colorScheme: 'light',
                   }}
                 >
                   <option value="EMPLOYEE">EMPLOYEE</option>
@@ -540,7 +540,7 @@ export default function EmployeeManagementPage() {
 
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button type="button" onClick={() => setShowForm(false)}
-                  style={{ flex: 1, padding: '12px', background: 'white', color: '#374151', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
+                  style={{ flex: 1, padding: '12px', background: 'var(--card-bg)', color: '#374151', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
                   Cancel
                 </button>
                 <button type="submit" disabled={submitting}
@@ -561,22 +561,22 @@ export default function EmployeeManagementPage() {
           zIndex: 100, padding: '20px',
         }}>
           <div style={{
-            background: 'white', borderRadius: '16px', padding: '28px',
+            background: 'var(--card-bg)', borderRadius: '16px', padding: '28px',
             width: '100%', maxWidth: '400px',
             boxShadow: '0 20px 60px rgba(0,0,0,0.2)', textAlign: 'center',
           }}>
             <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚠️</div>
-            <h2 style={{ fontSize: '18px', fontWeight: '800', color: '#1e293b', marginBottom: '8px' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '8px' }}>
               Delete Employee?
             </h2>
-            <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '24px' }}>
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '24px' }}>
               Are you sure you want to delete <strong>{showDeleteConfirm.firstName} {showDeleteConfirm.lastName}</strong>?
               This action cannot be undone.
             </p>
             <div style={{ display: 'flex', gap: '10px' }}>
               <button
                 onClick={() => setShowDeleteConfirm(null)}
-                style={{ flex: 1, padding: '12px', background: 'white', color: '#374151', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}
+                style={{ flex: 1, padding: '12px', background: 'var(--card-bg)', color: '#374151', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}
               >
                 Cancel
               </button>

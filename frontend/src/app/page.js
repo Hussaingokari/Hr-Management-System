@@ -80,7 +80,7 @@ export default function Home() {
         </Link>
 
         <div className="flex flex-col items-center mt-2 text-center">
-          <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-600 uppercase tracking-wider glow-cycle-text">
+          <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-600 uppercase tracking-wider">
             © 2026 Saiteja Infotech Private Limited.
           </p>
           <p className="text-[9px] font-medium text-slate-400 dark:text-slate-700 uppercase tracking-widest mt-1">

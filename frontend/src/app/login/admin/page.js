@@ -221,7 +221,7 @@ export default function AdminLogin() {
         {/* Footer */}
         <div className="absolute bottom-6 left-0 w-full px-6 xl:px-12 flex flex-col xl:flex-row justify-between items-center gap-4 text-[10px] text-slate-400 ">
           <div className="flex flex-col text-center xl:text-left">
-            <span className="font-semibold text-slate-500 uppercase tracking-wider glow-cycle-text">© 2026 Saiteja Infotech Private Limited.</span>
+            <span className="font-semibold text-slate-500 uppercase tracking-wider">© 2026 Saiteja Infotech Private Limited.</span>
             <span className="text-[9px] text-slate-400 uppercase tracking-widest mt-0.5">All rights reserved.</span>
           </div>
           <div className="flex gap-6 items-center">
