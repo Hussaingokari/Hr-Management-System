@@ -49,7 +49,7 @@ function Badge({ status }) {
 function Loader() {
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px' }}>
-      <div style={{ width: '32px', height: '32px', border: '3px solid #e2e8f0', borderTopColor: '#3b82f6', borderRadius: '50', animation: 'spin 0.8s linear infinite' }} />
+      <div style={{ width: '32px', height: '32px', border: '3px solid #e2e8f0', borderTopColor: '#3b82f6', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
