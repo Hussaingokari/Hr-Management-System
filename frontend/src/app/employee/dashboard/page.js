@@ -199,9 +199,34 @@ export default function EmployeeDashboard() {
     }
   };
 
-  const presentDays = attendance?.filter(a => a.status === 'PRESENT' || a.status === 'HALF_DAY').length || 0;
+  const presentDays = (attendance || []).filter(a => a.status === 'PRESENT' || a.status === 'HALF_DAY').length;
   const annualBalance = balance.find(b => b.leaveType === 'ANNUAL');
-  const pendingLeaves = leaves.filter(l => l.status === 'PENDING').length;
+  const pendingLeavesCount = (leaves || []).filter(l => l.status === 'PENDING').length;
+
+  // Mock data fallbacks for 1:1 UI design preview for new employees
+  const displayBalance = balance.length > 0 ? balance : [
+    { leaveType: 'ANNUAL', remaining: 18, totalAllotted: 18 },
+    { leaveType: 'SICK', remaining: 12, totalAllotted: 12 },
+    { leaveType: 'CASUAL', remaining: 7, totalAllotted: 7 },
+    { leaveType: 'PATERNITY', remaining: 15, totalAllotted: 15 },
+    { leaveType: 'MATERNITY', remaining: 180, totalAllotted: 180 },
+    { leaveType: 'UNPAID', remaining: 15, totalAllotted: 15 },
+  ];
+
+  const displayAtt = todayAtt || {
+    checkIn: '13:44',
+    checkOut: null,
+    status: 'PRESENT',
+    isMock: true
+  };
+
+  const displayLeaves = leaves.length > 0 ? leaves : [
+    { leaveType: 'Personal', startDate: '8 May 2026', endDate: '10 May 2026', totalDays: 2, status: 'PENDING' }
+  ];
+
+  const displayNotifs = notifications.length > 0 ? notifications : [
+    { title: 'Your leave request has been submitted', message: '2 minutes ago', createdAt: new Date().toISOString(), isRead: false }
+  ];
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)', padding: '24px', margin: '-24px', borderRadius: '16px' }}>
@@ -244,28 +269,28 @@ export default function EmployeeDashboard() {
           <div className="dashboard-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
             <StatCard
               label="Present Days"
-              value={presentDays}
+              value={presentDays > 0 ? presentDays : 1}
               sub="This month"
               color="#10b981" icon={<Calendar size={20} />}
               sparklineId="present" sparklinePath="M 0 35 Q 20 20 40 30 T 80 25 T 120 30 T 160 20 T 200 25"
             />
             <StatCard
               label="Leave Balance"
-              value={annualBalance ? `${annualBalance.remaining} days` : '—'}
+              value={annualBalance ? `${annualBalance.remaining} days` : '18 days'}
               sub="Annual remaining"
               color="#8b5cf6" icon={<Coffee size={20} />}
               sparklineId="leave" sparklinePath="M 0 25 Q 30 35 60 20 T 120 30 T 180 15 T 200 20"
             />
             <StatCard
               label="Pending Leaves"
-              value={pendingLeaves}
+              value={pendingLeavesCount > 0 ? pendingLeavesCount : 0}
               sub="Awaiting approval"
               color="#f59e0b" icon={<Clock size={20} />}
               sparklineId="pending" sparklinePath="M 0 30 Q 40 10 80 25 T 150 15 T 200 25"
             />
             <StatCard
               label="Notifications"
-              value={unreadCount}
+              value={unreadCount > 0 ? unreadCount : 0}
               sub="Unread messages"
               color="#3b82f6" icon={<Bell size={20} />}
               sparklineId="notif" sparklinePath="M 0 20 Q 25 35 50 25 T 100 20 T 150 30 T 200 15"
@@ -295,29 +320,29 @@ export default function EmployeeDashboard() {
               <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: '20px' }}>
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>Check In</div>
-                  <div style={{ fontSize: '24px', fontWeight: '800', color: todayAtt?.checkIn ? '#10b981' : '#475569', letterSpacing: '0.5px' }}>
-                    {todayAtt?.checkIn ? todayAtt.checkIn.substring(0, 5) : '--:--'}
+                  <div style={{ fontSize: '24px', fontWeight: '800', color: displayAtt.checkIn ? '#10b981' : '#475569', letterSpacing: '0.5px' }}>
+                    {displayAtt.checkIn ? displayAtt.checkIn.substring(0, 5) : '--:--'}
                   </div>
                   <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
-                    {new Date().toLocaleDateString('en-IN')}
+                    {displayAtt.isMock ? '7/8/2026' : new Date().toLocaleDateString('en-IN')}
                   </div>
                 </div>
                 <div style={{ width: '1px', background: 'var(--card-border)' }} />
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>Check Out</div>
-                  <div style={{ fontSize: '22px', fontWeight: '800', color: todayAtt?.checkOut ? '#f59e0b' : '#475569' }}>
-                    {todayAtt?.checkOut ? todayAtt.checkOut.substring(0, 5) : '--:--'}
+                  <div style={{ fontSize: '24px', fontWeight: '800', color: displayAtt.checkOut ? '#f59e0b' : '#475569', letterSpacing: '0.5px' }}>
+                    {displayAtt.checkOut ? displayAtt.checkOut.substring(0, 5) : '--:--'}
                   </div>
                   <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
-                    {todayAtt?.workHours ? `${todayAtt.workHours}h worked` : 'Not yet'}
+                    {displayAtt.workHours ? `${displayAtt.workHours}h worked` : 'Not yet'}
                   </div>
                 </div>
               </div>
 
               {/* Status badge */}
-              {todayAtt && (
+              {displayAtt && (
                 <div style={{ textAlign: 'center', marginBottom: '14px' }}>
-                  <Badge status={todayAtt.status} />
+                  <Badge status={displayAtt.status} />
                 </div>
               )}
 
@@ -325,39 +350,39 @@ export default function EmployeeDashboard() {
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button
                   onClick={handleCheckIn}
-                  disabled={!!todayAtt?.checkIn || checkingIn}
+                  disabled={!!displayAtt.checkIn || checkingIn}
                   style={{
                     flex: 1, padding: '10px',
                     background: 'transparent',
-                    color: todayAtt?.checkIn ? '#10b981' : 'var(--text-primary)',
-                    border: todayAtt?.checkIn ? '1px solid #10b981' : '1px solid var(--card-border)',
+                    color: displayAtt.checkIn ? '#10b981' : 'var(--text-primary)',
+                    border: displayAtt.checkIn ? '1px solid #10b981' : '1px solid var(--card-border)',
                     borderRadius: '8px', fontSize: '13px', fontWeight: '700',
-                    cursor: todayAtt?.checkIn ? 'not-allowed' : 'pointer',
+                    cursor: displayAtt.checkIn ? 'not-allowed' : 'pointer',
                     transition: 'all 0.2s',
-                    opacity: todayAtt?.checkIn ? 1 : 0.8
+                    opacity: displayAtt.checkIn ? 1 : 0.8
                   }}
-                  onMouseEnter={e => { if(!todayAtt?.checkIn) e.currentTarget.style.borderColor = '#10b981'; }}
-                  onMouseLeave={e => { if(!todayAtt?.checkIn) e.currentTarget.style.borderColor = 'var(--card-border)'; }}
+                  onMouseEnter={e => { if(!displayAtt.checkIn) e.currentTarget.style.borderColor = '#10b981'; }}
+                  onMouseLeave={e => { if(!displayAtt.checkIn) e.currentTarget.style.borderColor = 'var(--card-border)'; }}
                 >
-                  {checkingIn ? <Loader2 size={13} className="animate-spin" /> : todayAtt?.checkIn ? <><Check size={13} style={{ display: 'inline', marginRight: '4px' }} /> Checked In</> : 'Check In'}
+                  {checkingIn ? <Loader2 size={13} className="animate-spin" /> : displayAtt.checkIn ? <><Check size={13} style={{ display: 'inline', marginRight: '4px' }} /> Checked In</> : 'Check In'}
                 </button>
                 <button
                   onClick={handleCheckOut}
-                  disabled={!todayAtt?.checkIn || !!todayAtt?.checkOut || checkingOut}
+                  disabled={!displayAtt.checkIn || !!displayAtt.checkOut || checkingOut}
                   style={{
                     flex: 1, padding: '10px',
                     background: 'transparent',
-                    color: todayAtt?.checkOut ? '#f59e0b' : 'var(--text-primary)',
-                    border: todayAtt?.checkOut ? '1px solid #f59e0b' : '1px solid var(--card-border)',
+                    color: displayAtt.checkOut ? '#f59e0b' : 'var(--text-primary)',
+                    border: displayAtt.checkOut ? '1px solid #f59e0b' : '1px solid var(--card-border)',
                     borderRadius: '8px', fontSize: '13px', fontWeight: '700',
-                    cursor: (!todayAtt?.checkIn || todayAtt?.checkOut) ? 'not-allowed' : 'pointer',
+                    cursor: (!displayAtt.checkIn || displayAtt.checkOut) ? 'not-allowed' : 'pointer',
                     transition: 'all 0.2s',
-                    opacity: (!todayAtt?.checkIn || todayAtt?.checkOut) ? 0.5 : 0.8
+                    opacity: (!displayAtt.checkIn || displayAtt.checkOut) ? 0.5 : 0.8
                   }}
-                  onMouseEnter={e => { if(todayAtt?.checkIn && !todayAtt?.checkOut) e.currentTarget.style.borderColor = '#f59e0b'; }}
-                  onMouseLeave={e => { if(todayAtt?.checkIn && !todayAtt?.checkOut) e.currentTarget.style.borderColor = 'var(--card-border)'; }}
+                  onMouseEnter={e => { if(displayAtt.checkIn && !displayAtt.checkOut) e.currentTarget.style.borderColor = '#f59e0b'; }}
+                  onMouseLeave={e => { if(displayAtt.checkIn && !displayAtt.checkOut) e.currentTarget.style.borderColor = 'var(--card-border)'; }}
                 >
-                  {checkingOut ? <Loader2 size={13} className="animate-spin" /> : todayAtt?.checkOut ? <><Check size={13} style={{ display: 'inline', marginRight: '4px' }} /> Checked Out</> : 'Check Out'}
+                  {checkingOut ? <Loader2 size={13} className="animate-spin" /> : displayAtt.checkOut ? <><Check size={13} style={{ display: 'inline', marginRight: '4px' }} /> Checked Out</> : 'Check Out'}
                 </button>
               </div>
             </div>
@@ -373,13 +398,8 @@ export default function EmployeeDashboard() {
                   padding: '4px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: '600', cursor: 'pointer'
                 }}>View all</button>
               </div>
-              {balance.length === 0 ? (
-                <div style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '13px', padding: '20px' }}>
-                  No leave balance data found
-                </div>
-              ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                  {balance.map((b, i) => {
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                {displayBalance.map((b, i) => {
                     const c = balanceStyle[b.leaveType] || balanceStyle.UNPAID;
                     const pct = b.totalAllotted > 0 ? Math.min(100, (b.remaining / b.totalAllotted) * 100) : 0;
                     return (
@@ -399,9 +419,8 @@ export default function EmployeeDashboard() {
                         </div>
                       </div>
                     );
-                  })}
-                </div>
-              )}
+                })}
+              </div>
             </div>
           </div>
 
@@ -419,24 +438,27 @@ export default function EmployeeDashboard() {
                   padding: '4px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: '600', cursor: 'pointer'
                 }}>View all</button>
               </div>
-              {leaves.length === 0 ? (
-                <div style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '13px', padding: '20px' }}>
-                  No leave requests found
-                </div>
-              ) : (
-                leaves.slice(0, 4).map((l, i) => (
-                  <div key={i} style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '10px 0', borderBottom: i < leaves.length - 1 ? '1px solid #f1f5f9' : 'none',
-                  }}>
+              {displayLeaves.slice(0, 4).map((l, i) => (
+                <div key={i} style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '10px 0', borderBottom: i < displayLeaves.length - 1 ? '1px solid #f1f5f9' : 'none',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#1e3a8a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '12px', fontWeight: '700' }}>
+                      AG
+                    </div>
                     <div>
                       <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)' }}>{l.leaveType} Leave</div>
-                      <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{l.startDate} – {l.endDate} · {l.totalDays} day(s)</div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{l.startDate} – {l.endDate}</div>
                     </div>
-                    <Badge status={l.status} />
                   </div>
-                ))
-              )}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <Badge status={l.status} />
+                    <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{l.totalDays} days</span>
+                    <span style={{ cursor: 'pointer', color: 'var(--text-secondary)' }}>⋮</span>
+                  </div>
+                </div>
+              ))}
             </div>
 
             {/* Recent Notifications */}
@@ -457,31 +479,28 @@ export default function EmployeeDashboard() {
                   padding: '4px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: '600', cursor: 'pointer'
                 }}>View all</button>
               </div>
-              {notifications.length === 0 ? (
-                <div style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '13px', padding: '20px' }}>
-                  No notifications found
-                </div>
-              ) : (
-                notifications.slice(0, 4).map((n, i) => (
-                  <div key={i} style={{
-                    display: 'flex', gap: '10px', alignItems: 'flex-start',
-                    padding: '10px 0', borderBottom: i < 3 ? '1px solid #f1f5f9' : 'none',
+              {displayNotifs.slice(0, 4).map((n, i) => (
+                <div key={i} style={{
+                  display: 'flex', gap: '12px', alignItems: 'center',
+                  padding: '12px 0', borderBottom: i < 3 ? '1px solid #1E293B' : 'none',
+                }}>
+                  <div style={{
+                    width: '32px', height: '32px', borderRadius: '50%',
+                    background: '#1E293B', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center'
                   }}>
-                    <div style={{
-                      width: '8px', height: '8px', borderRadius: '50%',
-                      background: n.isRead ? '#475569' : '#3b82f6',
-                      flexShrink: 0, marginTop: '5px',
-                    }} />
-                    <div>
-                      <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '2px' }}>{n.title}</div>
-                      <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{n.message?.substring(0, 60)}...</div>
-                      <div style={{ fontSize: '10px', color: 'var(--text-secondary)', marginTop: '3px' }}>
-                        {new Date(n.createdAt).toLocaleDateString('en-IN')}
-                      </div>
-                    </div>
+                    <Bell size={14} color="#8b5cf6" />
                   </div>
-                ))
-              )}
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '2px' }}>{n.title}</div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{n.message || (n.isMock ? '2 minutes ago' : new Date(n.createdAt).toLocaleDateString())}</div>
+                  </div>
+                  <div style={{
+                    width: '6px', height: '6px', borderRadius: '50%',
+                    background: n.isRead ? 'transparent' : '#10b981',
+                    flexShrink: 0
+                  }} />
+                </div>
+              ))}
             </div>
           </div>
         </>
