@@ -101,10 +101,11 @@ export default function Sidebar({ role }) {
       <div className={`app-sidebar ${isMobileOpen ? 'mobile-open' : ''}`} style={{ 
         backgroundColor: sidebarBg,
         borderRight: `1px solid ${borderColor}`,
-        display: 'flex', flexDirection: 'column'
+        display: 'flex', flexDirection: 'column',
+        height: '100vh'
       }}>
-        {/* Logo */}
-        <div style={{ padding: '28px 24px 20px', borderBottom: '1px solid transparent' }}>
+        {/* Fixed Logo */}
+        <div style={{ padding: '28px 24px 20px', borderBottom: '1px solid transparent', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <div style={{
               width: '42px', height: '42px',
@@ -120,114 +121,69 @@ export default function Sidebar({ role }) {
           </div>
         </div>
 
-        {/* Main Menu */}
-        <div style={{ padding: '16px 16px 0', flexShrink: 0 }}>
-          {menu.map((item) => (
-            <div
-              key={item.key}
-              onClick={() => { setIsMobileOpen(false); router.push(item.key); }}
-              style={{...navItemStyle(item.key), position: 'relative'}}
-              onMouseEnter={e => {
-                if (!isItemActive(item.key)) e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.03)' : '#f8fafc';
-              }}
-              onMouseLeave={e => {
-                if (!isItemActive(item.key)) e.currentTarget.style.background = 'transparent';
-              }}
-            >
-              <div style={{ color: isItemActive(item.key) ? '#34d399' : '#64748b', display: 'flex' }}>
-                {item.icon}
-              </div>
-              <span style={{ color: isItemActive(item.key) ? (isDark ? '#ffffff' : '#0f172a') : (isDark ? '#cbd5e1' : '#475569') }}>
-                {item.label}
-              </span>
-              
-              {/* Purple Badge for Notifications exactly like the image */}
-              {item.badge && (
-                <div style={{ 
-                  position: 'absolute', right: '12px',
-                  background: '#8b5cf6', color: 'white',
-                  fontSize: '11px', fontWeight: '700',
-                  width: '20px', height: '20px', borderRadius: '50%',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: '0 2px 8px rgba(139, 92, 246, 0.4)'
-                }}>
-                  {item.badge}
+        {/* Scrollable Middle Container (Menu + Spacer + Mountain) */}
+        <div className="hide-scrollbar" style={{ flex: 1, overflowY: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          {/* Main Menu */}
+          <div style={{ padding: '16px 16px 0', flexShrink: 0 }}>
+            {menu.map((item) => (
+              <div
+                key={item.key}
+                onClick={() => { setIsMobileOpen(false); router.push(item.key); }}
+                style={{...navItemStyle(item.key), position: 'relative'}}
+                onMouseEnter={e => {
+                  if (!isItemActive(item.key)) e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.03)' : '#f8fafc';
+                }}
+                onMouseLeave={e => {
+                  if (!isItemActive(item.key)) e.currentTarget.style.background = 'transparent';
+                }}
+              >
+                <div style={{ color: isItemActive(item.key) ? '#34d399' : '#64748b', display: 'flex' }}>
+                  {item.icon}
                 </div>
-              )}
+                <span style={{ color: isItemActive(item.key) ? (isDark ? '#ffffff' : '#0f172a') : (isDark ? '#cbd5e1' : '#475569') }}>
+                  {item.label}
+                </span>
+                
+                {item.badge && (
+                  <div style={{ 
+                    position: 'absolute', right: '12px',
+                    background: '#8b5cf6', color: 'white',
+                    fontSize: '11px', fontWeight: '700',
+                    width: '20px', height: '20px', borderRadius: '50%',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    boxShadow: '0 2px 8px rgba(139, 92, 246, 0.4)'
+                  }}>
+                    {item.badge}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Spacer to push Mountain Vector to the bottom of the scrollable area */}
+          <div style={{ flex: 1, minHeight: '20px' }} />
+
+          {/* Decorative Mountain Vector exactly matching the user's image */}
+          {isDark && (
+            <div style={{ position: 'relative', width: '100%', flexShrink: 0, overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '40px', background: 'linear-gradient(to bottom, #0A0E17, transparent)', zIndex: 1 }} />
+              <img 
+                src="/bottom.png" 
+                alt="Landscape"
+                style={{ 
+                  width: '100%', 
+                  height: 'auto', 
+                  display: 'block',
+                  opacity: 0.9 
+                }} 
+              />
             </div>
-          ))}
+          )}
         </div>
 
-        {/* Decorative Mountain Vector exactly matching the user's image */}
-        {isDark && (
-          <div style={{ position: 'relative', flex: 1, minHeight: '100px', overflow: 'hidden', marginTop: '10px' }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '60px', background: 'linear-gradient(to bottom, #0A0E17, transparent)', zIndex: 1 }} />
-            <svg width="100%" height="100%" viewBox="0 0 240 200" style={{ position: 'absolute', bottom: 0, opacity: 1 }} preserveAspectRatio="xMidYMax slice">
-              <defs>
-                <linearGradient id="skyGrad" x1="0" x2="0" y1="0" y2="1">
-                  <stop offset="0%" stopColor="#0A0E17" />
-                  <stop offset="60%" stopColor="#1e183a" />
-                  <stop offset="100%" stopColor="#301c4d" />
-                </linearGradient>
-                <linearGradient id="mntBack" x1="0" x2="0" y1="0" y2="1">
-                  <stop offset="0%" stopColor="#432868" />
-                  <stop offset="100%" stopColor="#251442" />
-                </linearGradient>
-                <linearGradient id="mntMid" x1="0" x2="0" y1="0" y2="1">
-                  <stop offset="0%" stopColor="#2b184a" />
-                  <stop offset="100%" stopColor="#120826" />
-                </linearGradient>
-                <linearGradient id="mntFront" x1="0" x2="0" y1="0" y2="1">
-                  <stop offset="0%" stopColor="#150e24" />
-                  <stop offset="100%" stopColor="#07040f" />
-                </linearGradient>
-                <radialGradient id="sunGlow" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="#fca5a5" stopOpacity="0.8" />
-                  <stop offset="50%" stopColor="#ef4444" stopOpacity="0.5" />
-                  <stop offset="100%" stopColor="#ef4444" stopOpacity="0" />
-                </radialGradient>
-              </defs>
-              
-              <rect width="240" height="200" fill="url(#skyGrad)" />
-              
-              {/* Stars */}
-              <circle cx="30" cy="50" r="1" fill="#fff" opacity="0.6" />
-              <circle cx="85" cy="30" r="1.5" fill="#fff" opacity="0.4" />
-              <circle cx="160" cy="60" r="1" fill="#fff" opacity="0.8" />
-              <circle cx="210" cy="40" r="1.5" fill="#fff" opacity="0.5" />
-              <circle cx="130" cy="90" r="1" fill="#fff" opacity="0.3" />
-              <circle cx="190" cy="80" r="0.8" fill="#fff" opacity="0.7" />
-              
-              {/* Moon / Sun with glow */}
-              <circle cx="70" cy="110" r="28" fill="url(#sunGlow)" />
-              <circle cx="70" cy="110" r="14" fill="#fb923c" />
-              
-              {/* Back Mountains */}
-              <path d="M-20 200 L20 120 L60 145 L110 95 L160 135 L210 80 L260 140 L260 200 Z" fill="url(#mntBack)" opacity="0.8" />
-              
-              {/* Mid Mountains */}
-              <path d="M-10 200 L40 140 L80 170 L130 115 L180 150 L230 100 L260 130 L260 200 Z" fill="url(#mntMid)" />
-              
-              {/* Front Mountains */}
-              <path d="M0 200 L50 160 L90 185 L140 140 L190 170 L240 130 L260 150 L260 200 Z" fill="url(#mntFront)" />
-              
-              {/* Pine Trees Silhouette */}
-              <g fill="#05030a">
-                <path d="M15 200 L18 175 L21 200 Z" />
-                <path d="M35 200 L39 160 L43 200 Z" />
-                <path d="M45 200 L48 180 L51 200 Z" />
-                <path d="M110 200 L115 170 L120 200 Z" />
-                <path d="M125 200 L128 155 L131 200 Z" />
-                <path d="M175 200 L180 165 L185 200 Z" />
-                <path d="M210 200 L214 150 L218 200 Z" />
-                <path d="M225 200 L228 175 L231 200 Z" />
-              </g>
-            </svg>
-          </div>
-        )}
-
-        {/* Bottom — Settings + Logout exactly like the image */}
-        <div style={{ padding: '16px 16px 24px', borderTop: `1px solid ${borderColor}`, background: sidebarBg, zIndex: 2, flexShrink: 0 }}>
+        {/* Fixed Bottom — Settings + Logout exactly like the image */}
+        {/* Extra paddingBottom added to prevent Next.js dev overlay from hiding the Logout icon! */}
+        <div style={{ padding: '16px 16px 20px', borderTop: `1px solid ${borderColor}`, background: sidebarBg, zIndex: 2, flexShrink: 0 }}>
 
           {/* Settings */}
           <div

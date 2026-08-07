@@ -152,22 +152,29 @@ export default function AdminDashboard() {
         </p>
 
         {/* Decorative Mountain Graphic Top Right */}
-        <div style={{ position: 'absolute', top: -20, right: -20, width: '300px', height: '100px', pointerEvents: 'none', opacity: 0.8 }}>
-          <svg viewBox="0 0 300 100" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
-            <defs>
-              <linearGradient id="mntHdr3" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stopColor="#1e3a8a" stopOpacity="0.8" />
-                <stop offset="100%" stopColor="var(--bg-primary)" stopOpacity="0" />
-              </linearGradient>
-              <linearGradient id="mntHdr4" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.6" />
-                <stop offset="100%" stopColor="var(--bg-primary)" stopOpacity="0" />
-              </linearGradient>
-            </defs>
-            <circle cx="240" cy="40" r="16" fill="#c084fc" opacity="0.6" />
-            <path d="M50 100 L120 40 L160 60 L220 20 L300 80 L300 100 Z" fill="url(#mntHdr3)" />
-            <path d="M0 100 L70 50 L130 80 L190 30 L250 70 L300 40 L300 100 Z" fill="url(#mntHdr4)" />
-          </svg>
+        <div style={{ position: 'absolute', top: -24, right: -24, width: '450px', height: '120px', pointerEvents: 'none' }}>
+          {isDark && (
+            <>
+              {/* Fade out on the left side so it blends into the dark background */}
+              <div style={{ position: 'absolute', top: 0, left: 0, width: '100px', height: '100%', background: 'linear-gradient(to right, var(--bg-primary), transparent)', zIndex: 2 }} />
+              
+              <img 
+                src="/up.png" 
+                alt="Header Landscape"
+                style={{ 
+                  position: 'absolute', 
+                  bottom: 0, 
+                  right: 0, 
+                  width: '100%', 
+                  height: '100%', 
+                  objectFit: 'fill', 
+                  objectPosition: 'right bottom',
+                  borderTopRightRadius: '16px',
+                  opacity: 0.9
+                }} 
+              />
+            </>
+          )}
         </div>
       </div>
 

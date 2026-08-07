@@ -541,10 +541,11 @@ export default function Navbar() {
           {unreadCount > 0 && (
             <span style={{
               position: 'absolute', top: '2px', right: '2px',
-              background: '#ef4444', color: 'white',
+              background: '#8b5cf6', color: 'white',
               borderRadius: '50%', minWidth: '16px', height: '16px',
               fontSize: '9px', display: 'flex', alignItems: 'center',
               justifyContent: 'center', fontWeight: '700', padding: '0 3px',
+              boxShadow: '0 2px 8px rgba(139, 92, 246, 0.4)'
             }}>
               {unreadCount > 99 ? '99+' : unreadCount}
             </span>

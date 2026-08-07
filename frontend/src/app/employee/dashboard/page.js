@@ -18,8 +18,8 @@ function StatCard({ label, value, sub, color, icon, sparklineId, sparklinePath }
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', position: 'relative', zIndex: 2 }}>
         <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: '500' }}>{label}</span>
-        <div style={{ 
-          width: '36px', height: '36px', background: color + '15', 
+        <div style={{
+          width: '36px', height: '36px', background: color + '15',
           borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center',
           border: `1px solid ${color}40`, color: color
         }}>
@@ -28,7 +28,7 @@ function StatCard({ label, value, sub, color, icon, sparklineId, sparklinePath }
       </div>
       <div style={{ fontSize: '28px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px', position: 'relative', zIndex: 2 }}>{value}</div>
       <div style={{ fontSize: '12px', color: 'var(--text-secondary)', position: 'relative', zIndex: 2 }}>{sub}</div>
-      
+
       {sparklinePath && (
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '45px', zIndex: 1, opacity: 0.9 }}>
           <svg viewBox="0 0 200 45" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
@@ -60,8 +60,8 @@ function Badge({ status }) {
   };
   const s = map[status] || { bg: '#1E293B', color: 'var(--text-secondary)', border: 'transparent' };
   return (
-    <span style={{ 
-      background: s.bg, color: s.color, padding: '3px 10px', 
+    <span style={{
+      background: s.bg, color: s.color, padding: '3px 10px',
       borderRadius: '20px', fontSize: '11px', fontWeight: '700',
       border: `1px solid ${s.border}`
     }}>
@@ -203,30 +203,11 @@ export default function EmployeeDashboard() {
   const annualBalance = balance.find(b => b.leaveType === 'ANNUAL');
   const pendingLeavesCount = (leaves || []).filter(l => l.status === 'PENDING').length;
 
-  // Mock data fallbacks for 1:1 UI design preview for new employees
-  const displayBalance = balance.length > 0 ? balance : [
-    { leaveType: 'ANNUAL', remaining: 18, totalAllotted: 18 },
-    { leaveType: 'SICK', remaining: 12, totalAllotted: 12 },
-    { leaveType: 'CASUAL', remaining: 7, totalAllotted: 7 },
-    { leaveType: 'PATERNITY', remaining: 15, totalAllotted: 15 },
-    { leaveType: 'MATERNITY', remaining: 180, totalAllotted: 180 },
-    { leaveType: 'UNPAID', remaining: 15, totalAllotted: 15 },
-  ];
-
-  const displayAtt = todayAtt || {
-    checkIn: '13:44',
-    checkOut: null,
-    status: 'PRESENT',
-    isMock: true
-  };
-
-  const displayLeaves = leaves.length > 0 ? leaves : [
-    { leaveType: 'Personal', startDate: '8 May 2026', endDate: '10 May 2026', totalDays: 2, status: 'PENDING' }
-  ];
-
-  const displayNotifs = notifications.length > 0 ? notifications : [
-    { title: 'Your leave request has been submitted', message: '2 minutes ago', createdAt: new Date().toISOString(), isRead: false }
-  ];
+  // True data from backend (no mock fallbacks)
+  const displayBalance = balance || [];
+  const displayAtt = todayAtt || null;
+  const displayLeaves = leaves || [];
+  const displayNotifs = notifications || [];
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)', padding: '24px', margin: '-24px', borderRadius: '16px' }}>
@@ -244,22 +225,22 @@ export default function EmployeeDashboard() {
         </p>
 
         {/* Decorative Mountain Graphic Top Right */}
-        <div style={{ position: 'absolute', top: -20, right: -20, width: '300px', height: '100px', pointerEvents: 'none', opacity: 0.8 }}>
-          <svg viewBox="0 0 300 100" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
-            <defs>
-              <linearGradient id="mntHdr1" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stopColor="#0d9488" stopOpacity="0.8" />
-                <stop offset="100%" stopColor="var(--bg-primary)" stopOpacity="0" />
-              </linearGradient>
-              <linearGradient id="mntHdr2" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.6" />
-                <stop offset="100%" stopColor="var(--bg-primary)" stopOpacity="0" />
-              </linearGradient>
-            </defs>
-            <circle cx="240" cy="40" r="16" fill="#34d399" opacity="0.6" />
-            <path d="M50 100 L120 40 L160 60 L220 20 L300 80 L300 100 Z" fill="url(#mntHdr1)" />
-            <path d="M0 100 L70 50 L130 80 L190 30 L250 70 L300 40 L300 100 Z" fill="url(#mntHdr2)" />
-          </svg>
+        <div style={{ position: 'absolute', top: -24, right: -24, height: '120px', pointerEvents: 'none', display: 'flex' }}>
+          {/* Fade out on the left side so it blends into the dark background */}
+          <div style={{ position: 'relative', height: '100%' }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, width: '80px', height: '100%', background: 'linear-gradient(to right, var(--bg-primary), transparent)', zIndex: 2 }} />
+            <img
+              src="/up.png"
+              alt="Header Landscape"
+              style={{
+                height: '100%',
+                width: 'auto',
+                borderTopRightRadius: '16px',
+                opacity: 0.9,
+                display: 'block'
+              }}
+            />
+          </div>
         </div>
       </div>
 
@@ -301,16 +282,16 @@ export default function EmployeeDashboard() {
           <div className="dashboard-main-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
 
             {/* Today Attendance */}
-            <div style={{ 
-              background: 'var(--card-bg)', borderRadius: '12px', padding: '20px', 
+            <div style={{
+              background: 'var(--card-bg)', borderRadius: '12px', padding: '20px',
               border: '1px solid var(--card-border)', boxShadow: 'var(--card-shadow)',
               position: 'relative', overflow: 'hidden'
             }}>
               {/* Subtle dot pattern background on top right */}
               <div style={{ position: 'absolute', top: 10, right: 10, opacity: 0.05, pointerEvents: 'none' }}>
                 <svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
-                  <defs><pattern id="dots" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="2" fill="currentColor"/></pattern></defs>
-                  <rect width="60" height="60" fill="url(#dots)"/>
+                  <defs><pattern id="dots" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="2" fill="currentColor" /></pattern></defs>
+                  <rect width="60" height="60" fill="url(#dots)" />
                 </svg>
               </div>
 
@@ -320,21 +301,21 @@ export default function EmployeeDashboard() {
               <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: '20px' }}>
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>Check In</div>
-                  <div style={{ fontSize: '24px', fontWeight: '800', color: displayAtt.checkIn ? '#10b981' : '#475569', letterSpacing: '0.5px' }}>
-                    {displayAtt.checkIn ? displayAtt.checkIn.substring(0, 5) : '--:--'}
+                  <div style={{ fontSize: '24px', fontWeight: '800', color: displayAtt?.checkIn ? '#10b981' : '#475569', letterSpacing: '0.5px' }}>
+                    {displayAtt?.checkIn ? displayAtt.checkIn.substring(0, 5) : '--:--'}
                   </div>
                   <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
-                    {displayAtt.isMock ? '7/8/2026' : new Date().toLocaleDateString('en-IN')}
+                    {new Date().toLocaleDateString('en-IN')}
                   </div>
                 </div>
                 <div style={{ width: '1px', background: 'var(--card-border)' }} />
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>Check Out</div>
-                  <div style={{ fontSize: '24px', fontWeight: '800', color: displayAtt.checkOut ? '#f59e0b' : '#475569', letterSpacing: '0.5px' }}>
-                    {displayAtt.checkOut ? displayAtt.checkOut.substring(0, 5) : '--:--'}
+                  <div style={{ fontSize: '24px', fontWeight: '800', color: displayAtt?.checkOut ? '#f59e0b' : '#475569', letterSpacing: '0.5px' }}>
+                    {displayAtt?.checkOut ? displayAtt.checkOut.substring(0, 5) : '--:--'}
                   </div>
                   <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
-                    {displayAtt.workHours ? `${displayAtt.workHours}h worked` : 'Not yet'}
+                    {displayAtt?.workHours ? `${displayAtt.workHours}h worked` : 'Not yet'}
                   </div>
                 </div>
               </div>
@@ -350,39 +331,39 @@ export default function EmployeeDashboard() {
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button
                   onClick={handleCheckIn}
-                  disabled={!!displayAtt.checkIn || checkingIn}
+                  disabled={!!displayAtt?.checkIn || checkingIn}
                   style={{
                     flex: 1, padding: '10px',
                     background: 'transparent',
-                    color: displayAtt.checkIn ? '#10b981' : 'var(--text-primary)',
-                    border: displayAtt.checkIn ? '1px solid #10b981' : '1px solid var(--card-border)',
+                    color: displayAtt?.checkIn ? '#10b981' : 'var(--text-primary)',
+                    border: displayAtt?.checkIn ? '1px solid #10b981' : '1px solid var(--card-border)',
                     borderRadius: '8px', fontSize: '13px', fontWeight: '700',
-                    cursor: displayAtt.checkIn ? 'not-allowed' : 'pointer',
+                    cursor: displayAtt?.checkIn ? 'not-allowed' : 'pointer',
                     transition: 'all 0.2s',
-                    opacity: displayAtt.checkIn ? 1 : 0.8
+                    opacity: displayAtt?.checkIn ? 1 : 0.8
                   }}
-                  onMouseEnter={e => { if(!displayAtt.checkIn) e.currentTarget.style.borderColor = '#10b981'; }}
-                  onMouseLeave={e => { if(!displayAtt.checkIn) e.currentTarget.style.borderColor = 'var(--card-border)'; }}
+                  onMouseEnter={e => { if (!displayAtt?.checkIn) e.currentTarget.style.borderColor = '#10b981'; }}
+                  onMouseLeave={e => { if (!displayAtt?.checkIn) e.currentTarget.style.borderColor = 'var(--card-border)'; }}
                 >
-                  {checkingIn ? <Loader2 size={13} className="animate-spin" /> : displayAtt.checkIn ? <><Check size={13} style={{ display: 'inline', marginRight: '4px' }} /> Checked In</> : 'Check In'}
+                  {checkingIn ? <Loader2 size={13} className="animate-spin" /> : displayAtt?.checkIn ? <><Check size={13} style={{ display: 'inline', marginRight: '4px' }} /> Checked In</> : 'Check In'}
                 </button>
                 <button
                   onClick={handleCheckOut}
-                  disabled={!displayAtt.checkIn || !!displayAtt.checkOut || checkingOut}
+                  disabled={!displayAtt?.checkIn || !!displayAtt?.checkOut || checkingOut}
                   style={{
                     flex: 1, padding: '10px',
                     background: 'transparent',
-                    color: displayAtt.checkOut ? '#f59e0b' : 'var(--text-primary)',
-                    border: displayAtt.checkOut ? '1px solid #f59e0b' : '1px solid var(--card-border)',
+                    color: displayAtt?.checkOut ? '#f59e0b' : 'var(--text-primary)',
+                    border: displayAtt?.checkOut ? '1px solid #f59e0b' : '1px solid var(--card-border)',
                     borderRadius: '8px', fontSize: '13px', fontWeight: '700',
-                    cursor: (!displayAtt.checkIn || displayAtt.checkOut) ? 'not-allowed' : 'pointer',
+                    cursor: (!displayAtt?.checkIn || displayAtt?.checkOut) ? 'not-allowed' : 'pointer',
                     transition: 'all 0.2s',
-                    opacity: (!displayAtt.checkIn || displayAtt.checkOut) ? 0.5 : 0.8
+                    opacity: (!displayAtt?.checkIn || displayAtt?.checkOut) ? 0.5 : 0.8
                   }}
-                  onMouseEnter={e => { if(displayAtt.checkIn && !displayAtt.checkOut) e.currentTarget.style.borderColor = '#f59e0b'; }}
-                  onMouseLeave={e => { if(displayAtt.checkIn && !displayAtt.checkOut) e.currentTarget.style.borderColor = 'var(--card-border)'; }}
+                  onMouseEnter={e => { if (displayAtt?.checkIn && !displayAtt?.checkOut) e.currentTarget.style.borderColor = '#f59e0b'; }}
+                  onMouseLeave={e => { if (displayAtt?.checkIn && !displayAtt?.checkOut) e.currentTarget.style.borderColor = 'var(--card-border)'; }}
                 >
-                  {checkingOut ? <Loader2 size={13} className="animate-spin" /> : displayAtt.checkOut ? <><Check size={13} style={{ display: 'inline', marginRight: '4px' }} /> Checked Out</> : 'Check Out'}
+                  {checkingOut ? <Loader2 size={13} className="animate-spin" /> : displayAtt?.checkOut ? <><Check size={13} style={{ display: 'inline', marginRight: '4px' }} /> Checked Out</> : 'Check Out'}
                 </button>
               </div>
             </div>
@@ -393,32 +374,32 @@ export default function EmployeeDashboard() {
                 <h3 style={{ fontFamily: "'Quicksand', sans-serif", fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center' }}>
                   <Leaf size={16} style={{ marginRight: '6px', color: '#10b981' }} /> Leave Balance
                 </h3>
-                <button style={{ 
+                <button style={{
                   background: 'transparent', border: '1px solid var(--card-border)', color: 'var(--text-secondary)',
                   padding: '4px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: '600', cursor: 'pointer'
                 }}>View all</button>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 {displayBalance.map((b, i) => {
-                    const c = balanceStyle[b.leaveType] || balanceStyle.UNPAID;
-                    const pct = b.totalAllotted > 0 ? Math.min(100, (b.remaining / b.totalAllotted) * 100) : 0;
-                    return (
-                      <div key={i} style={{
-                        background: c.bg, borderRadius: '10px', padding: '12px',
-                        display: 'flex', alignItems: 'center', gap: '12px',
-                        border: `1px solid ${c.color}30`,
-                      }}>
-                        <MiniRing pct={pct} color={c.color} />
-                        <div style={{ minWidth: 0 }}>
-                          <div style={{ fontSize: '10px', fontWeight: 800, color: c.color, display: 'flex', alignItems: 'center', gap: '4px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                            <span>{c.icon}</span>{b.leaveType}
-                          </div>
-                          <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)', fontFamily: "'Quicksand', sans-serif", marginTop: '2px' }}>
-                            {b.remaining}<span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-secondary)' }}> /{b.totalAllotted}d</span>
-                          </div>
+                  const c = balanceStyle[b.leaveType] || balanceStyle.UNPAID;
+                  const pct = b.totalAllotted > 0 ? Math.min(100, (b.remaining / b.totalAllotted) * 100) : 0;
+                  return (
+                    <div key={i} style={{
+                      background: c.bg, borderRadius: '10px', padding: '12px',
+                      display: 'flex', alignItems: 'center', gap: '12px',
+                      border: `1px solid ${c.color}30`,
+                    }}>
+                      <MiniRing pct={pct} color={c.color} />
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontSize: '10px', fontWeight: 800, color: c.color, display: 'flex', alignItems: 'center', gap: '4px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                          <span>{c.icon}</span>{b.leaveType}
+                        </div>
+                        <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)', fontFamily: "'Quicksand', sans-serif", marginTop: '2px' }}>
+                          {b.remaining}<span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-secondary)' }}> /{b.totalAllotted}d</span>
                         </div>
                       </div>
-                    );
+                    </div>
+                  );
                 })}
               </div>
             </div>
@@ -433,32 +414,38 @@ export default function EmployeeDashboard() {
                 <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center' }}>
                   <ClipboardList size={16} style={{ marginRight: '6px' }} /> Recent Leave Requests
                 </h3>
-                <button style={{ 
+                <button style={{
                   background: 'transparent', border: '1px solid var(--card-border)', color: 'var(--text-secondary)',
                   padding: '4px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: '600', cursor: 'pointer'
                 }}>View all</button>
               </div>
-              {displayLeaves.slice(0, 4).map((l, i) => (
-                <div key={i} style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  padding: '10px 0', borderBottom: i < displayLeaves.length - 1 ? '1px solid #f1f5f9' : 'none',
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#1e3a8a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '12px', fontWeight: '700' }}>
-                      AG
-                    </div>
-                    <div>
-                      <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)' }}>{l.leaveType} Leave</div>
-                      <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{l.startDate} – {l.endDate}</div>
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <Badge status={l.status} />
-                    <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{l.totalDays} days</span>
-                    <span style={{ cursor: 'pointer', color: 'var(--text-secondary)' }}>⋮</span>
-                  </div>
+              {displayLeaves.length === 0 ? (
+                <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '13px' }}>
+                  No recent leave requests found.
                 </div>
-              ))}
+              ) : (
+                displayLeaves.slice(0, 4).map((l, i) => (
+                  <div key={i} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '10px 0', borderBottom: i < displayLeaves.length - 1 ? '1px solid #f1f5f9' : 'none',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#1e3a8a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '12px', fontWeight: '700' }}>
+                        {user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'EMP'}
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)' }}>{l.leaveType} Leave</div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{l.startDate} – {l.endDate}</div>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                      <Badge status={l.status} />
+                      <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{l.totalDays} days</span>
+                      <span style={{ cursor: 'pointer', color: 'var(--text-secondary)' }}>⋮</span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
 
             {/* Recent Notifications */}
@@ -474,33 +461,39 @@ export default function EmployeeDashboard() {
                     </span>
                   )}
                 </div>
-                <button style={{ 
+                <button style={{
                   background: 'transparent', border: '1px solid var(--card-border)', color: 'var(--text-secondary)',
                   padding: '4px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: '600', cursor: 'pointer'
                 }}>View all</button>
               </div>
-              {displayNotifs.slice(0, 4).map((n, i) => (
-                <div key={i} style={{
-                  display: 'flex', gap: '12px', alignItems: 'center',
-                  padding: '12px 0', borderBottom: i < 3 ? '1px solid #1E293B' : 'none',
-                }}>
-                  <div style={{
-                    width: '32px', height: '32px', borderRadius: '50%',
-                    background: '#1E293B', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center'
-                  }}>
-                    <Bell size={14} color="#8b5cf6" />
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '2px' }}>{n.title}</div>
-                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{n.message || (n.isMock ? '2 minutes ago' : new Date(n.createdAt).toLocaleDateString())}</div>
-                  </div>
-                  <div style={{
-                    width: '6px', height: '6px', borderRadius: '50%',
-                    background: n.isRead ? 'transparent' : '#10b981',
-                    flexShrink: 0
-                  }} />
+              {displayNotifs.length === 0 ? (
+                <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '13px' }}>
+                  You have no new notifications.
                 </div>
-              ))}
+              ) : (
+                displayNotifs.slice(0, 4).map((n, i) => (
+                  <div key={i} style={{
+                    display: 'flex', gap: '12px', alignItems: 'center',
+                    padding: '12px 0', borderBottom: i < 3 ? '1px solid #1E293B' : 'none',
+                  }}>
+                    <div style={{
+                      width: '32px', height: '32px', borderRadius: '50%',
+                      background: '#1E293B', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center'
+                    }}>
+                      <Bell size={14} color="#8b5cf6" />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '2px' }}>{n.title}</div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{n.message || new Date(n.createdAt).toLocaleDateString()}</div>
+                    </div>
+                    <div style={{
+                      width: '6px', height: '6px', borderRadius: '50%',
+                      background: n.isRead ? 'transparent' : '#10b981',
+                      flexShrink: 0
+                    }} />
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </>
