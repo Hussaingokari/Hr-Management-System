@@ -3,14 +3,14 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
+import { FileText, AlertTriangle, CheckCircle, Star, Bell } from 'lucide-react';
 
 const TYPE_META = {
-    DOCUMENT_UPLOADED: { icon: '📄', color: '#3b82f6', bg: '#eff6ff' },
-    DOCUMENT_REJECTED: { icon: '⚠️', color: '#dc2626', bg: '#fee2e2' },
-    DOCUMENT_APPROVED: { icon: '✅', color: '#16a34a', bg: '#dcfce7' },
-    CHECKLIST_COMPLETED: { icon: '🎉', color: '#16a34a', bg: '#dcfce7' },
-    ONBOARDING_INITIATED: { icon: '👋', color: '#4f46e5', bg: '#eef2ff' },
-    DEFAULT: { icon: '🔔', color: 'var(--text-secondary)', bg: '#f1f5f9' },
+    DOCUMENT_UPLOADED: { icon: <FileText size={16} color="#3b82f6" />, color: '#3b82f6', bg: '#eff6ff' },
+    DOCUMENT_REJECTED: { icon: <AlertTriangle size={16} color="#dc2626" />, color: '#dc2626', bg: '#fee2e2' },
+    DOCUMENT_APPROVED: { icon: <CheckCircle size={16} color="#16a34a" />, color: '#16a34a', bg: '#dcfce7' },
+    CHECKLIST_COMPLETED: { icon: <Star size={16} color="#16a34a" />, color: '#16a34a', bg: '#dcfce7' },
+    DEFAULT: { icon: <Bell size={16} color="var(--text-secondary)" />, color: 'var(--text-secondary)', bg: '#f1f5f9' },
 };
 
 function timeAgo(dateStr) {
@@ -132,8 +132,10 @@ export default function EmployeeOnboardingNotificationsPage() {
                 {loading ? (
                     <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</div>
                 ) : visible.length === 0 ? (
-                    <div style={{ padding: '60px', textAlign: 'center' }}>
-                        <div style={{ fontSize: '32px', marginBottom: '8px' }}>🔔</div>
+                    <div style={{ padding: '60px', textAlign: 'center', color: '#94a3b8' }}>
+                        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>
+                            <Bell size={32} strokeWidth={1.5} />
+                        </div>
                         <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '4px' }}>
                             {tab === 'UNREAD' ? 'No unread notifications' : 'No notifications yet'}
                         </div>

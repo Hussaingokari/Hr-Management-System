@@ -9,7 +9,7 @@ import {
 import { getUnreadCount } from '@/lib/employeeApi';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
-import { Users, CheckCircle, Clock, Bell } from 'lucide-react';
+import { Users, CheckCircle, Clock, Bell, PartyPopper, XCircle, Loader2, Check, X, Calendar, UserPlus, Banknote, Briefcase } from 'lucide-react';
 
 function StatCard({ label, value, sub, color, bg, icon }) {
   return (
@@ -107,11 +107,11 @@ export default function AdminDashboard() {
         action,
         remarks: action === 'APPROVED' ? 'Approved' : 'Rejected',
       });
-      toast.success(action === 'APPROVED' ? '✅ Leave approved!' : '❌ Leave rejected');
+      toast.success(action === 'APPROVED' ? 'Leave approved!' : 'Leave rejected');
       fetchAll();
     } catch (err) {
       const msg = err.response?.data?.message || 'Action failed';
-      toast.error(msg.includes('already') ? '⚡ Someone already actioned this one' : msg);
+      toast.error(msg.includes('already') ? 'Someone already actioned this one' : msg);
       fetchAll();
     } finally {
       setActioning(null);
@@ -171,7 +171,9 @@ export default function AdminDashboard() {
             {/* Leave Approvals & Requests Section */}
             <div style={{ background: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--card-border)', boxShadow: 'var(--card-shadow)', overflow: 'hidden' }}>
               <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--card-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)' }}>⏳ Leave Requests</h3>
+                <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center' }}>
+                  <Clock size={16} style={{ marginRight: '6px' }} /> Leave Requests
+                </h3>
                 <button
                   onClick={() => router.push('/admin/leave')}
                   style={{ fontSize: '12px', color: '#3b82f6', fontWeight: '600', background: 'none', border: 'none', cursor: 'pointer' }}
@@ -182,7 +184,7 @@ export default function AdminDashboard() {
 
               {pendingLeaves.length === 0 ? (
                 <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)' }}>
-                  <div style={{ fontSize: '32px', marginBottom: '8px' }}>🎉</div>
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}><PartyPopper size={32} strokeWidth={1.5} /></div>
                   No leave requests found
                 </div>
               ) : (
@@ -223,7 +225,7 @@ export default function AdminDashboard() {
                               gap: '6px',
                             }}
                           >
-                            🚫 Leave was cancelled by the employee
+                            <XCircle size={14} /> Leave was cancelled by the employee
                           </div>
                         ) : (
                           <>
@@ -244,7 +246,7 @@ export default function AdminDashboard() {
                                 transition: 'background-color 0.2s',
                               }}
                             >
-                              {actioning === l.id + 'APPROVED' ? '⏳ Processing...' : '✓ Approve'}
+                              {actioning === l.id + 'APPROVED' ? <><Loader2 size={12} className="animate-spin" style={{ display: 'inline', marginRight: '4px' }} /> Processing...</> : <><Check size={12} style={{ display: 'inline', marginRight: '4px' }} /> Approve</>}
                             </button>
 
                             {/* Reject Button */}
@@ -264,7 +266,7 @@ export default function AdminDashboard() {
                                 transition: 'background-color 0.2s',
                               }}
                             >
-                              {actioning === l.id + 'REJECTED' ? '⏳ Processing...' : '✗ Reject'}
+                              {actioning === l.id + 'REJECTED' ? <><Loader2 size={12} className="animate-spin" style={{ display: 'inline', marginRight: '4px' }} /> Processing...</> : <><X size={12} style={{ display: 'inline', marginRight: '4px' }} /> Reject</>}
                             </button>
                           </>
                         )}
@@ -280,7 +282,7 @@ export default function AdminDashboard() {
               <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--card-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
                   <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)' }}>
-                    📅 Today&apos;s Attendance
+                    <Calendar size={16} style={{ marginRight: '6px' }} /> Today&apos;s Attendance
                   </h3>
                   <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px' }}>
                     {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
@@ -296,7 +298,7 @@ export default function AdminDashboard() {
 
               {todayAttendance.length === 0 ? (
                 <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)' }}>
-                  <div style={{ fontSize: '32px', marginBottom: '8px' }}>📅</div>
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}><Calendar size={32} strokeWidth={1.5} /></div>
                   No attendance records for today
                 </div>
               ) : (
@@ -335,7 +337,9 @@ export default function AdminDashboard() {
           {/* Recent Employees Table */}
           <div style={{ background: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--card-border)', boxShadow: 'var(--card-shadow)', overflow: 'hidden' }}>
             <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--card-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)' }}>👥 Employees</h3>
+              <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center' }}>
+                <Users size={16} style={{ marginRight: '6px' }} /> Employees
+              </h3>
               <button
                 onClick={() => router.push('/admin/employees')}
                 style={{ fontSize: '12px', color: '#3b82f6', fontWeight: '600', background: 'none', border: 'none', cursor: 'pointer' }}
@@ -401,10 +405,10 @@ export default function AdminDashboard() {
           {/* Quick Actions */}
           <div className="dashboard-actions-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px', marginTop: '20px' }}>
             {[
-              { label: 'Add Employee', icon: '👤', color: '#1e3a5f', route: '/admin/employees' },
-              { label: 'Leave Approvals', icon: '✅', color: '#16a34a', route: '/admin/leave' },
-              { label: 'Generate Payroll', icon: '💰', color: '#f59e0b', route: '/admin/payroll' },
-              { label: 'Recruitment', icon: '💼', color: '#8b5cf6', route: '/admin/recruitment' },
+              { label: 'Add Employee', icon: <UserPlus size={20} />, color: '#1e3a5f', route: '/admin/employees' },
+              { label: 'Leave Approvals', icon: <CheckCircle size={20} />, color: '#16a34a', route: '/admin/leave' },
+              { label: 'Generate Payroll', icon: <Banknote size={20} />, color: '#f59e0b', route: '/admin/payroll' },
+              { label: 'Recruitment', icon: <Briefcase size={20} />, color: '#8b5cf6', route: '/admin/recruitment' },
             ].map((a) => (
               <button
                 key={a.label}

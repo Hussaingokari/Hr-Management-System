@@ -10,6 +10,7 @@ import {
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { Edit, Trash2, Loader2, AlertTriangle } from 'lucide-react';
 
 function OnboardingBadge({ status }) {
     const map = {
@@ -278,9 +279,9 @@ export default function OnboardingEmployeesPage() {
                                 <div><OnboardingBadge status={onboardingByEmpId[emp.id]} /></div>
                                 <div style={{ display: 'flex', gap: '10px' }}>
                                     <button onClick={() => openEditForm(emp)} title="Edit"
-                                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: '15px' }}>✏️</button>
+                                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}><Edit size={16} /></button>
                                     <button onClick={() => setShowDeleteConfirm(emp)} title="Delete"
-                                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', fontSize: '15px' }}>🗑️</button>
+                                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626' }}><Trash2 size={16} /></button>
                                 </div>
                             </div>
                         ))}
@@ -340,8 +341,8 @@ export default function OnboardingEmployeesPage() {
                             </div>
                             <div style={{ display: 'flex', gap: '10px' }}>
                                 <button type="button" onClick={() => setShowForm(false)} style={{ flex: 1, padding: '12px', background: 'var(--card-bg)', color: '#374151', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>Cancel</button>
-                                <button type="submit" disabled={submitting} style={{ flex: 1, padding: '12px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.7 : 1 }}>
-                                    {submitting ? '⏳ Saving...' : editMode ? 'Update Employee' : 'Add Employee'}
+                                <button type="submit" disabled={submitting} style={{ flex: 1, padding: '12px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.7 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                                    {submitting ? <><Loader2 size={16} className="animate-spin" /> Saving...</> : editMode ? 'Update Employee' : 'Add Employee'}
                                 </button>
                             </div>
                         </form>
@@ -352,15 +353,17 @@ export default function OnboardingEmployeesPage() {
             {showDeleteConfirm && (
                 <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '20px' }}>
                     <div style={{ background: 'var(--card-bg)', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '400px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)', textAlign: 'center' }}>
-                        <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚠️</div>
+                        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px', color: '#dc2626' }}>
+                            <AlertTriangle size={48} strokeWidth={1.5} />
+                        </div>
                         <h2 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '8px' }}>Delete Employee?</h2>
                         <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '24px' }}>
                             Are you sure you want to delete <strong>{showDeleteConfirm.firstName} {showDeleteConfirm.lastName}</strong>? This action cannot be undone.
                         </p>
                         <div style={{ display: 'flex', gap: '10px' }}>
                             <button onClick={() => setShowDeleteConfirm(null)} style={{ flex: 1, padding: '12px', background: 'var(--card-bg)', color: '#374151', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>Cancel</button>
-                            <button onClick={() => handleDelete(showDeleteConfirm.id)} disabled={deleting === showDeleteConfirm.id} style={{ flex: 1, padding: '12px', background: '#dc2626', color: 'white', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: 'pointer' }}>
-                                {deleting === showDeleteConfirm.id ? '⏳ Deleting...' : 'Yes, Delete'}
+                            <button onClick={() => handleDelete(showDeleteConfirm.id)} disabled={deleting === showDeleteConfirm.id} style={{ flex: 1, padding: '12px', background: '#dc2626', color: 'white', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                                {deleting === showDeleteConfirm.id ? <><Loader2 size={16} className="animate-spin" /> Deleting...</> : 'Yes, Delete'}
                             </button>
                         </div>
                     </div>

@@ -7,7 +7,7 @@ import {
   getUnreadCount, getMyNotifications
 } from '@/lib/employeeApi';
 import toast from 'react-hot-toast';
-import { Calendar, Coffee, Clock, Bell } from 'lucide-react';
+import { Calendar, Coffee, Clock, Bell, Check, Loader2, Palmtree, Thermometer, Sun, Baby, ClipboardList, Leaf } from 'lucide-react';
 
 function StatCard({ label, value, sub, color, icon }) {
   return (
@@ -58,12 +58,12 @@ function Loader() {
 
 // Same palette used across the leave pages, so balances look consistent everywhere
 const balanceStyle = {
-  ANNUAL: { color: '#4F46E5', soft: 'rgba(79, 70, 229, 0.15)', icon: '🌴' },
-  SICK: { color: '#0D9488', soft: 'rgba(13, 148, 136, 0.15)', icon: '🤒' },
-  CASUAL: { color: '#D97706', soft: 'rgba(217, 119, 6, 0.15)', icon: '☀️' },
-  PATERNITY: { color: '#8B5CF6', soft: 'rgba(139, 92, 246, 0.15)', icon: '👨‍🍼' },
-  MATERNITY: { color: '#DB2777', soft: 'rgba(219, 39, 119, 0.15)', icon: '🤱' },
-  UNPAID: { color: 'var(--text-secondary)', soft: '#1E293B', icon: '📋' },
+  ANNUAL: { color: '#4F46E5', soft: 'rgba(79, 70, 229, 0.15)', icon: <Palmtree size={18} /> },
+  SICK: { color: '#0D9488', soft: 'rgba(13, 148, 136, 0.15)', icon: <Thermometer size={18} /> },
+  CASUAL: { color: '#D97706', soft: 'rgba(217, 119, 6, 0.15)', icon: <Sun size={18} /> },
+  PATERNITY: { color: '#8B5CF6', soft: 'rgba(139, 92, 246, 0.15)', icon: <Baby size={18} /> },
+  MATERNITY: { color: '#DB2777', soft: 'rgba(219, 39, 119, 0.15)', icon: <Baby size={18} /> },
+  UNPAID: { color: 'var(--text-secondary)', soft: '#1E293B', icon: <ClipboardList size={18} /> },
 };
 
 function MiniRing({ pct, color }) {
@@ -223,8 +223,8 @@ export default function EmployeeDashboard() {
 
             {/* Today Attendance */}
             <div style={{ background: 'var(--card-bg)', borderRadius: '12px', padding: '20px', border: '1px solid var(--card-border)', boxShadow: 'var(--card-shadow)' }}>
-              <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '16px' }}>
-                📅 Today&apos;s Attendance
+              <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '16px', display: 'flex', alignItems: 'center' }}>
+                <Calendar size={16} style={{ marginRight: '6px' }} /> Today&apos;s Attendance
               </h3>
               <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: '20px' }}>
                 <div style={{ textAlign: 'center' }}>
@@ -270,7 +270,7 @@ export default function EmployeeDashboard() {
                     transition: 'all 0.2s',
                   }}
                 >
-                  {checkingIn ? '⏳' : todayAtt?.checkIn ? '✓ Checked In' : 'Check In'}
+                  {checkingIn ? <Loader2 size={13} className="animate-spin" /> : todayAtt?.checkIn ? <><Check size={13} style={{ display: 'inline', marginRight: '4px' }} /> Checked In</> : 'Check In'}
                 </button>
                 <button
                   onClick={handleCheckOut}
@@ -285,15 +285,15 @@ export default function EmployeeDashboard() {
                     transition: 'all 0.2s',
                   }}
                 >
-                  {checkingOut ? '⏳' : todayAtt?.checkOut ? '✓ Checked Out' : 'Check Out'}
+                  {checkingOut ? <Loader2 size={13} className="animate-spin" /> : todayAtt?.checkOut ? <><Check size={13} style={{ display: 'inline', marginRight: '4px' }} /> Checked Out</> : 'Check Out'}
                 </button>
               </div>
             </div>
 
             {/* Leave Balance — redesigned: icon chips + gradient rounded bars instead of plain bars */}
             <div style={{ background: 'var(--card-bg)', borderRadius: '12px', padding: '20px', border: '1px solid var(--card-border)', boxShadow: 'var(--card-shadow)' }}>
-              <h3 style={{ fontFamily: "'Quicksand', sans-serif", fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '16px' }}>
-                🌿 Leave Balance
+              <h3 style={{ fontFamily: "'Quicksand', sans-serif", fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '16px', display: 'flex', alignItems: 'center' }}>
+                <Leaf size={16} style={{ marginRight: '6px', color: '#16a34a' }} /> Leave Balance
               </h3>
               {balance.length === 0 ? (
                 <div style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '13px', padding: '20px' }}>
@@ -333,7 +333,9 @@ export default function EmployeeDashboard() {
             {/* Recent Leave Requests */}
             <div style={{ background: 'var(--card-bg)', borderRadius: '12px', padding: '20px', border: '1px solid var(--card-border)', boxShadow: 'var(--card-shadow)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)' }}>📋 Recent Leave Requests</h3>
+                <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center' }}>
+                  <ClipboardList size={16} style={{ marginRight: '6px' }} /> Recent Leave Requests
+                </h3>
               </div>
               {leaves.length === 0 ? (
                 <div style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '13px', padding: '20px' }}>
@@ -358,7 +360,9 @@ export default function EmployeeDashboard() {
             {/* Recent Notifications */}
             <div style={{ background: 'var(--card-bg)', borderRadius: '12px', padding: '20px', border: '1px solid var(--card-border)', boxShadow: 'var(--card-shadow)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)' }}>🔔 Recent Notifications</h3>
+                <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center' }}>
+                  <Bell size={16} style={{ marginRight: '6px' }} /> Recent Notifications
+                </h3>
                 {unreadCount > 0 && (
                   <span style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', padding: '2px 8px', borderRadius: '20px', fontSize: '11px', fontWeight: '700' }}>
                     {unreadCount} unread

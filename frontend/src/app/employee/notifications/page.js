@@ -3,24 +3,25 @@ import { useState, useEffect, useCallback } from 'react';
 import { getMyNotifications, getUnreadCount, markNotificationRead } from '@/lib/employeeApi';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
+import { Palmtree, Calendar, Banknote, Star, BookOpen, Hand, FileText, CheckCircle, AlertTriangle, Briefcase, Bell, Check } from 'lucide-react';
 
 const TYPE_META = {
-  LEAVE_APPLIED: { icon: '🌴', bg: '#f0fdf4', color: '#16a34a' },
-  LEAVE_APPROVED: { icon: '🌴', bg: '#dcfce7', color: '#16a34a' },
-  LEAVE_REJECTED: { icon: '🌴', bg: '#fee2e2', color: '#dc2626' },
-  LEAVE_CANCELLED: { icon: '🌴', bg: '#f1f5f9', color: 'var(--text-secondary)' },
-  ATTENDANCE_REMINDER: { icon: '📅', bg: '#eff6ff', color: '#3b82f6' },
-  PAYROLL_GENERATED: { icon: '💰', bg: '#fef9c3', color: '#ca8a04' },
-  PERFORMANCE_REVIEWED: { icon: '⭐', bg: '#eef2ff', color: '#4f46e5' },
-  TRAINING_ENROLLED: { icon: '📚', bg: '#eff6ff', color: '#3b82f6' },
-  TRAINING_COMPLETED: { icon: '📚', bg: '#dcfce7', color: '#16a34a' },
-  ONBOARDING_INITIATED: { icon: '👋', bg: '#eef2ff', color: '#4f46e5' },
-  DOCUMENT_UPLOADED: { icon: '📄', bg: '#eff6ff', color: '#3b82f6' },
-  DOCUMENT_APPROVED: { icon: '✅', bg: '#dcfce7', color: '#16a34a' },
-  DOCUMENT_REJECTED: { icon: '⚠️', bg: '#fee2e2', color: '#dc2626' },
-  CHECKLIST_COMPLETED: { icon: '🎉', bg: '#dcfce7', color: '#16a34a' },
-  JOB_APPLICATION: { icon: '💼', bg: '#eef2ff', color: '#4f46e5' },
-  GENERAL: { icon: '🔔', bg: '#f1f5f9', color: 'var(--text-secondary)' },
+  LEAVE_APPLIED: { icon: <Palmtree size={20} color="#16a34a" />, bg: '#f0fdf4', color: '#16a34a' },
+  LEAVE_APPROVED: { icon: <Palmtree size={20} color="#16a34a" />, bg: '#dcfce7', color: '#16a34a' },
+  LEAVE_REJECTED: { icon: <Palmtree size={20} color="#dc2626" />, bg: '#fee2e2', color: '#dc2626' },
+  LEAVE_CANCELLED: { icon: <Palmtree size={20} color="var(--text-secondary)" />, bg: '#f1f5f9', color: 'var(--text-secondary)' },
+  ATTENDANCE_REMINDER: { icon: <Calendar size={20} color="#3b82f6" />, bg: '#eff6ff', color: '#3b82f6' },
+  PAYROLL_GENERATED: { icon: <Banknote size={20} color="#ca8a04" />, bg: '#fef9c3', color: '#ca8a04' },
+  PERFORMANCE_REVIEWED: { icon: <Star size={20} color="#4f46e5" />, bg: '#eef2ff', color: '#4f46e5' },
+  TRAINING_ENROLLED: { icon: <BookOpen size={20} color="#3b82f6" />, bg: '#eff6ff', color: '#3b82f6' },
+  TRAINING_COMPLETED: { icon: <BookOpen size={20} color="#16a34a" />, bg: '#dcfce7', color: '#16a34a' },
+  ONBOARDING_INITIATED: { icon: <Hand size={20} color="#4f46e5" />, bg: '#eef2ff', color: '#4f46e5' },
+  DOCUMENT_UPLOADED: { icon: <FileText size={20} color="#3b82f6" />, bg: '#eff6ff', color: '#3b82f6' },
+  DOCUMENT_APPROVED: { icon: <CheckCircle size={20} color="#16a34a" />, bg: '#dcfce7', color: '#16a34a' },
+  DOCUMENT_REJECTED: { icon: <AlertTriangle size={20} color="#dc2626" />, bg: '#fee2e2', color: '#dc2626' },
+  CHECKLIST_COMPLETED: { icon: <CheckCircle size={20} color="#16a34a" />, bg: '#dcfce7', color: '#16a34a' },
+  JOB_APPLICATION: { icon: <Briefcase size={20} color="#4f46e5" />, bg: '#eef2ff', color: '#4f46e5' },
+  GENERAL: { icon: <Bell size={20} color="var(--text-secondary)" />, bg: '#f1f5f9', color: 'var(--text-secondary)' },
 };
 
 function getMeta(n) {
@@ -145,9 +146,10 @@ export default function NotificationsPage() {
               borderRadius: '10px', fontSize: '13px',
               fontWeight: '700', cursor: markingAll ? 'not-allowed' : 'pointer',
               whiteSpace: 'nowrap',
+              display: 'flex', alignItems: 'center', gap: '6px'
             }}
           >
-            {markingAll ? 'Marking...' : '✓ Mark all as read'}
+            {markingAll ? 'Marking...' : <><Check size={14} /> Mark all as read</>}
           </button>
         )}
       </div>
@@ -180,8 +182,10 @@ export default function NotificationsPage() {
             Loading notifications...
           </div>
         ) : notifications.length === 0 ? (
-          <div style={{ padding: '80px 20px', textAlign: 'center' }}>
-            <div style={{ fontSize: '44px', marginBottom: '14px' }}>🔔</div>
+          <div style={{ padding: '80px 20px', textAlign: 'center', color: '#94a3b8' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '14px' }}>
+                <Bell size={44} strokeWidth={1.5} />
+            </div>
             <div style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '6px' }}>
               {filter === 'UNREAD' ? "You're all caught up!" : 'No notifications yet'}
             </div>

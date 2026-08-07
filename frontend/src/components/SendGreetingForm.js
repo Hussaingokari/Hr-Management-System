@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useGreeting } from '@/lib/useGreeting';
-import { Mail, Loader } from 'lucide-react';
+import { Mail, Loader, CheckCircle, AlertTriangle } from 'lucide-react';
 import DOMPurify from 'dompurify';
 
 export default function SendGreetingForm() {
@@ -326,7 +326,7 @@ export default function SendGreetingForm() {
                             color: '#991b1b',
                             margin: 0,
                         }}>
-                            ❌ {error}
+                            <AlertTriangle size={14} style={{ display: 'inline', marginRight: '4px' }} /> {error}
                         </p>
                     </div>
                 )}
@@ -343,7 +343,7 @@ export default function SendGreetingForm() {
                             color: '#166534',
                             margin: 0,
                         }}>
-                            ✓ {success}
+                            <CheckCircle size={14} style={{ display: 'inline', marginRight: '4px' }} /> {success}
                         </p>
                     </div>
                 )}

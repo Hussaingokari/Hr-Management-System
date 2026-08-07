@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
+import { BookOpen, User, Calendar, Clock, Users, MapPin, Link as LinkIcon, Inbox, Loader2 } from 'lucide-react';
 
 function Badge({ status }) {
   const map = {
@@ -163,7 +164,9 @@ export default function TrainingPage() {
             <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</div>
           ) : trainings.length === 0 ? (
             <div style={{ padding: '60px', textAlign: 'center' }}>
-              <div style={{ fontSize: '40px', marginBottom: '12px' }}>📚</div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px', color: '#1e3a5f' }}>
+                <BookOpen size={40} strokeWidth={1.5} />
+              </div>
               <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '8px' }}>No trainings yet</div>
               <button onClick={() => setShowForm(true)}
                 style={{ padding: '8px 18px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>
@@ -186,14 +189,14 @@ export default function TrainingPage() {
                   <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)' }}>{t.title}</div>
                   <Badge status={t.status} />
                 </div>
-                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
-                  👨‍🏫 {t.trainer} · <Badge status={t.mode} />
+                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <User size={12} /> {t.trainer} · <Badge status={t.mode} />
                 </div>
-                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>
-                  📅 {t.startDate} → {t.endDate} · ⏱ {t.durationHours}h
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Calendar size={12} /> {t.startDate} → {t.endDate} · <Clock size={12} /> {t.durationHours}h
                 </div>
-                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                  👥 Max: {t.maxParticipants} · 📍 {t.venue || 'No venue'}
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Users size={12} /> Max: {t.maxParticipants} · <MapPin size={12} /> {t.venue || 'No venue'}
                 </div>
               </div>
             ))
@@ -220,8 +223,8 @@ export default function TrainingPage() {
 
             {selected.meetingLink && (
               <div style={{ padding: '10px 20px', borderBottom: '1px solid #f1f5f9', background: '#f0fdf4' }}>
-                <span style={{ fontSize: '12px', color: '#16a34a', fontWeight: '600' }}>
-                  🔗 {selected.meetingLink}
+                <span style={{ fontSize: '12px', color: '#16a34a', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <LinkIcon size={12} /> {selected.meetingLink}
                 </span>
               </div>
             )}
@@ -235,7 +238,9 @@ export default function TrainingPage() {
                 <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '20px' }}>Loading...</div>
               ) : enrollments.length === 0 ? (
                 <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '20px' }}>
-                  <div style={{ fontSize: '28px', marginBottom: '8px' }}>📭</div>
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px', color: '#94a3b8' }}>
+                    <Inbox size={28} strokeWidth={1.5} />
+                  </div>
                   No enrollments yet
                 </div>
               ) : (
@@ -280,8 +285,8 @@ export default function TrainingPage() {
                             style={{ flex: 2, minWidth: '140px', padding: '7px 10px', border: '1.5px solid #e2e8f0', borderRadius: '7px', fontSize: '12px', outline: 'none' }}
                           />
                           <button onClick={() => handleComplete(enr.id)} disabled={completing === enr.id}
-                            style={{ padding: '7px 14px', background: '#dcfce7', color: '#16a34a', border: '1px solid #bbf7d0', borderRadius: '7px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}>
-                            {completing === enr.id ? '⏳' : '✓ Complete'}
+                            style={{ padding: '7px 14px', background: '#dcfce7', color: '#16a34a', border: '1px solid #bbf7d0', borderRadius: '7px', fontSize: '12px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {completing === enr.id ? <Loader2 size={14} className="animate-spin" /> : '✓ Complete'}
                           </button>
                           <button onClick={() => setCompletingId(null)}
                             style={{ padding: '7px 12px', background: 'var(--card-border)', color: 'var(--text-secondary)', border: 'none', borderRadius: '7px', fontSize: '12px', cursor: 'pointer' }}>
@@ -498,8 +503,8 @@ export default function TrainingPage() {
                   Cancel
                 </button>
                 <button type="submit" disabled={submitting}
-                  style={{ flex: 1, padding: '12px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.7 : 1 }}>
-                  {submitting ? '⏳ Creating...' : 'Create Training'}
+                  style={{ flex: 1, padding: '12px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.7 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                  {submitting ? <><Loader2 size={16} className="animate-spin" /> Creating...</> : 'Create Training'}
                 </button>
               </div>
             </form>

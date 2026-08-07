@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
+import { FileText, Loader2 } from 'lucide-react';
 
 const DOC_KEY_LABELS = {
     OFFER_LETTER: 'Offer Letter',
@@ -67,8 +68,8 @@ function RejectModal({ doc, onClose, onConfirm, submitting }) {
                     <button
                         onClick={() => onConfirm(remarks)}
                         disabled={submitting || !remarks.trim()}
-                        style={{ padding: '9px 16px', background: remarks.trim() ? '#dc2626' : '#fca5a5', color: 'white', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '700', cursor: remarks.trim() ? 'pointer' : 'not-allowed' }}>
-                        {submitting ? 'Rejecting...' : 'Reject Document'}
+                        style={{ padding: '9px 16px', background: remarks.trim() ? '#dc2626' : '#fca5a5', color: 'white', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '700', cursor: remarks.trim() ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                        {submitting ? <><Loader2 size={14} className="animate-spin" /> Rejecting...</> : 'Reject Document'}
                     </button>
                 </div>
             </div>
@@ -81,8 +82,8 @@ function DocumentCard({ doc, tab, onApprove, onReject, actingId }) {
     return (
         <div style={{ background: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--card-border)', padding: '18px 20px', marginBottom: '12px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
             <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
-                    📄
+                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4f46e5', flexShrink: 0 }}>
+                    <FileText size={20} strokeWidth={1.5} />
                 </div>
                 <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
@@ -112,8 +113,8 @@ function DocumentCard({ doc, tab, onApprove, onReject, actingId }) {
                         <button
                             onClick={() => onApprove(doc)}
                             disabled={isActing}
-                            style={{ padding: '7px 14px', background: '#16a34a', color: 'white', border: 'none', borderRadius: '8px', fontSize: '12px', fontWeight: '700', cursor: isActing ? 'not-allowed' : 'pointer', opacity: isActing ? 0.7 : 1 }}>
-                            {isActing ? '...' : 'Approve'}
+                            style={{ padding: '7px 14px', background: '#16a34a', color: 'white', border: 'none', borderRadius: '8px', fontSize: '12px', fontWeight: '700', cursor: isActing ? 'not-allowed' : 'pointer', opacity: isActing ? 0.7 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                            {isActing ? <><Loader2 size={12} className="animate-spin" /> ...</> : 'Approve'}
                         </button>
                         <button
                             onClick={() => onReject(doc)}
@@ -233,8 +234,10 @@ export default function DocumentRequestsPage() {
             {loading ? (
                 <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</div>
             ) : docs.length === 0 ? (
-                <div style={{ background: 'var(--card-bg)', borderRadius: '12px', border: '1px dashed #e2e8f0', padding: '60px', textAlign: 'center' }}>
-                    <div style={{ fontSize: '40px', marginBottom: '12px' }}>📄</div>
+                <div style={{ background: 'var(--card-bg)', borderRadius: '12px', border: '1px dashed #e2e8f0', padding: '60px', textAlign: 'center', color: '#94a3b8' }}>
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+                        <FileText size={40} strokeWidth={1.5} />
+                    </div>
                     <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '4px' }}>
                         No {tab.toLowerCase()} documents
                     </div>

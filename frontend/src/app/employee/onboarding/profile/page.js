@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getMyOnboarding } from '@/lib/employeeApi';
 import toast from 'react-hot-toast';
+import { Mail, Phone, Building2, Briefcase, Calendar, Cake } from 'lucide-react';
 
 function StatusPill({ status }) {
     const map = {
@@ -104,12 +105,12 @@ export default function EmployeeOnboardingProfilePage() {
                         Contact & Personal Information
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 24px' }}>
-                        <InfoField icon="✉️" label="Email" value={onboarding.employeeEmail} />
-                        <InfoField icon="📞" label="Phone" value={onboarding.employeePhone} />
-                        <InfoField icon="🏢" label="Department" value={onboarding.department} />
-                        <InfoField icon="💼" label="Designation" value={onboarding.employeeDesignation} />
-                        <InfoField icon="📅" label="Joining Date" value={onboarding.joiningDate} />
-                        <InfoField icon="🎂" label="Date of Birth" value={onboarding.employeeDateOfBirth} />
+                        <InfoField icon={<Mail size={18} />} label="Email" value={onboarding.employeeEmail} />
+                        <InfoField icon={<Phone size={18} />} label="Phone" value={onboarding.employeePhone} />
+                        <InfoField icon={<Building2 size={18} />} label="Department" value={onboarding.department} />
+                        <InfoField icon={<Briefcase size={18} />} label="Designation" value={onboarding.employeeDesignation} />
+                        <InfoField icon={<Calendar size={18} />} label="Joining Date" value={onboarding.joiningDate} />
+                        <InfoField icon={<Cake size={18} />} label="Date of Birth" value={onboarding.employeeDateOfBirth} />
                     </div>
                 </div>
             </div>

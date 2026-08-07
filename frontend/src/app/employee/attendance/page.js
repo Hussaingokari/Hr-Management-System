@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getMyAttendance, checkIn, checkOut, startBreak, endBreak } from '@/lib/employeeApi';
 import toast from 'react-hot-toast';
+import { Pause, Loader2, Check, ArrowRight, Play, ArrowLeft, CheckCircle, Zap, XCircle, BarChart2 } from 'lucide-react';
 
 function Badge({ status }) {
   const map = {
@@ -157,7 +158,7 @@ export default function AttendancePage() {
               padding: '4px 12px', borderRadius: '20px',
               fontSize: '11px', fontWeight: '700',
             }}>
-              ⏸ On break
+              <Pause size={11} style={{ display: 'inline', marginRight: '4px' }} /> On break
             </span>
           )}
         </div>
@@ -209,7 +210,7 @@ export default function AttendancePage() {
                 transition: 'all 0.2s',
               }}
             >
-              {checkingIn ? '⏳ Checking in...' : todayAtt?.checkIn ? '✓ Checked In' : '→ Check In'}
+              {checkingIn ? <><Loader2 size={14} className="animate-spin" style={{ display: 'inline', marginRight: '4px' }} /> Checking in...</> : todayAtt?.checkIn ? <><Check size={14} style={{ display: 'inline', marginRight: '4px' }} /> Checked In</> : <><ArrowRight size={14} style={{ display: 'inline', marginRight: '4px' }} /> Check In</>}
             </button>
 
             <button
@@ -224,7 +225,7 @@ export default function AttendancePage() {
                 cursor: !canBreak ? 'not-allowed' : 'pointer',
               }}
             >
-              {togglingBreak ? '⏳' : onBreak ? '▶ Resume work' : '⏸ Take a break'}
+              {togglingBreak ? <Loader2 size={14} className="animate-spin" style={{ display: 'inline', marginRight: '4px' }} /> : onBreak ? <><Play size={14} style={{ display: 'inline', marginRight: '4px' }} /> Resume work</> : <><Pause size={14} style={{ display: 'inline', marginRight: '4px' }} /> Take a break</>}
             </button>
 
             {!showRemarks ? (
@@ -243,7 +244,7 @@ export default function AttendancePage() {
                   cursor: (!todayAtt?.checkIn || todayAtt?.checkOut) ? 'not-allowed' : 'pointer',
                 }}
               >
-                {todayAtt?.checkOut ? '✓ Checked Out' : '← Check Out'}
+                {todayAtt?.checkOut ? <><Check size={14} style={{ display: 'inline', marginRight: '4px' }} /> Checked Out</> : <><ArrowLeft size={14} style={{ display: 'inline', marginRight: '4px' }} /> Check Out</>}
               </button>
             ) : (
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -269,7 +270,7 @@ export default function AttendancePage() {
                     fontWeight: '700', cursor: 'pointer',
                   }}
                 >
-                  {checkingOut ? '⏳' : 'Confirm'}
+                  {checkingOut ? <Loader2 size={13} className="animate-spin" style={{ display: 'inline' }} /> : 'Confirm'}
                 </button>
                 <button
                   onClick={() => setShowRemarks(false)}
@@ -327,10 +328,10 @@ export default function AttendancePage() {
       {/* Monthly Stats */}
       <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
         {[
-          { label: 'Present', value: presentCount, color: '#16a34a', bg: '#dcfce7', icon: '✅' },
-          { label: 'Half Day', value: halfDayCount, color: '#f59e0b', bg: '#fff7ed', icon: '⚡' },
-          { label: 'Absent', value: absentCount, color: '#dc2626', bg: '#fee2e2', icon: '❌' },
-          { label: 'Total Records', value: records.length, color: '#3b82f6', bg: '#eff6ff', icon: '📊' },
+          { label: 'Present', value: presentCount, color: '#16a34a', bg: '#dcfce7', icon: <CheckCircle size={16} /> },
+          { label: 'Half Day', value: halfDayCount, color: '#f59e0b', bg: '#fff7ed', icon: <Zap size={16} /> },
+          { label: 'Absent', value: absentCount, color: '#dc2626', bg: '#fee2e2', icon: <XCircle size={16} /> },
+          { label: 'Total Records', value: records.length, color: '#3b82f6', bg: '#eff6ff', icon: <BarChart2 size={16} /> },
         ].map((s, i) => (
           <div key={i} style={{
             flex: 1, background: 'var(--card-bg)', borderRadius: '12px',

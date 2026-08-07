@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
+import { Briefcase, MapPin, Banknote, Inbox, Building2, Calendar, Loader2 } from 'lucide-react';
 
 const STATUSES = [
   'APPLIED', 'SHORTLISTED', 'INTERVIEW_SCHEDULED',
@@ -170,7 +171,9 @@ export default function RecruitmentPage() {
             <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</div>
           ) : jobs.length === 0 ? (
             <div style={{ padding: '60px', textAlign: 'center' }}>
-              <div style={{ fontSize: '40px', marginBottom: '12px' }}>💼</div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px', color: '#1e3a5f' }}>
+                <Briefcase size={40} strokeWidth={1.5} />
+              </div>
               <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '8px' }}>No jobs posted yet</div>
               <button onClick={() => setShowJobForm(true)}
                 style={{ padding: '8px 18px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>
@@ -195,11 +198,11 @@ export default function RecruitmentPage() {
                   <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)' }}>{job.title}</div>
                   <Badge status={job.status}/>
                 </div>
-                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
-                  📍 {job.location} · {job.department} · {job.employmentType}
+                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <MapPin size={12} /> {job.location} · {job.department} · {job.employmentType}
                 </div>
-                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                  💰 {job.salaryRange} · Exp: {job.experienceRequired}
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Banknote size={12} /> {job.salaryRange} · Exp: {job.experienceRequired}
                 </div>
                 <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
                   Deadline: {job.applicationDeadline}
@@ -229,7 +232,9 @@ export default function RecruitmentPage() {
               <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading applications...</div>
             ) : applications.length === 0 ? (
               <div style={{ padding: '60px', textAlign: 'center' }}>
-                <div style={{ fontSize: '40px', marginBottom: '12px' }}>📭</div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px', color: '#94a3b8' }}>
+                  <Inbox size={40} strokeWidth={1.5} />
+                </div>
                 <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-primary)' }}>No applications yet</div>
                 <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px' }}>
                   Applications will appear here when candidates apply
@@ -260,13 +265,13 @@ export default function RecruitmentPage() {
                     <Badge status={app.status}/>
                   </div>
 
-                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px' }}>
-                    🏢 {app.currentCompany} · {app.currentDesignation} · {app.experienceYears} yrs exp
+                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Building2 size={12} /> {app.currentCompany} · {app.currentDesignation} · {app.experienceYears} yrs exp
                   </div>
 
                   {app.interviewDate && (
-                    <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '8px' }}>
-                      📅 Interview: {app.interviewDate} · {app.interviewMode}
+                    <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Calendar size={12} /> Interview: {app.interviewDate} · {app.interviewMode}
                       {app.interviewScore && ` · Score: ${app.interviewScore}/100`}
                     </div>
                   )}
@@ -320,9 +325,9 @@ export default function RecruitmentPage() {
                         <button
                           onClick={() => handleUpdateApplication(app.id)}
                           disabled={updatingApp === app.id}
-                          style={{ flex: 1, padding: '8px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '7px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
+                          style={{ flex: 1, padding: '8px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '7px', fontSize: '12px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                         >
-                          {updatingApp === app.id ? '⏳' : 'Update'}
+                          {updatingApp === app.id ? <Loader2 size={14} className="animate-spin" /> : 'Update'}
                         </button>
                         <button
                           onClick={() => { setSelectedApp(null); setNewStatus(''); }}
@@ -438,8 +443,8 @@ export default function RecruitmentPage() {
                   Cancel
                 </button>
                 <button type="submit" disabled={submitting}
-                  style={{ flex: 1, padding: '12px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.7 : 1 }}>
-                  {submitting ? '⏳ Posting...' : 'Post Job'}
+                  style={{ flex: 1, padding: '12px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.7 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                  {submitting ? <><Loader2 size={16} className="animate-spin" /> Posting...</> : 'Post Job'}
                 </button>
               </div>
             </form>

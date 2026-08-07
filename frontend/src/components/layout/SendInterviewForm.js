@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useInterview } from '@/lib/InterviewForm';
-import { Mail, Loader } from 'lucide-react';
+import { Mail, Loader, CheckCircle, AlertTriangle } from 'lucide-react';
 
 export default function SendInterviewForm() {
   const { sendOnlineInterview, sendOfflineInterview } = useInterview();
@@ -286,8 +286,8 @@ export default function SendInterviewForm() {
             />
           </div>
 
-          {onlineError && <div className="p-3 bg-red-100 border border-red-300 rounded-lg"><p className="text-sm text-red-800">❌ {onlineError}</p></div>}
-          {showOnlineSuccess && onlineSuccess && <div className="p-3 bg-green-100 border border-green-300 rounded-lg"><p className="text-sm text-green-800">✓ {onlineSuccess}</p></div>}
+          {onlineError && <div className="p-3 bg-red-100 border border-red-300 rounded-lg"><p className="text-sm text-red-800 flex items-center gap-1"><AlertTriangle size={14} /> {onlineError}</p></div>}
+          {showOnlineSuccess && onlineSuccess && <div className="p-3 bg-green-100 border border-green-300 rounded-lg"><p className="text-sm text-green-800 flex items-center gap-1"><CheckCircle size={14} /> {onlineSuccess}</p></div>}
 
           <div className="flex gap-3 justify-end pt-4 border-t border-gray-300 ">
             <button type="button" onClick={() => setOnlineData({ candidateName: '', recipientEmail: '', jobTitle: '', interviewDate: '', interviewTime: '', platform: '', meetingLink: '', meetingId: '', passcode: '' })} disabled={onlineLoading} className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60">CANCEL</button>
@@ -402,8 +402,8 @@ export default function SendInterviewForm() {
             />
           </div>
 
-          {offlineError && <div className="p-3 bg-red-100 border border-red-300 rounded-lg"><p className="text-sm text-red-800">❌ {offlineError}</p></div>}
-          {showOfflineSuccess && offlineSuccess && <div className="p-3 bg-green-100 border border-green-300 rounded-lg"><p className="text-sm text-green-800">✓ {offlineSuccess}</p></div>}
+          {offlineError && <div className="p-3 bg-red-100 border border-red-300 rounded-lg"><p className="text-sm text-red-800 flex items-center gap-1"><AlertTriangle size={14} /> {offlineError}</p></div>}
+          {showOfflineSuccess && offlineSuccess && <div className="p-3 bg-green-100 border border-green-300 rounded-lg"><p className="text-sm text-green-800 flex items-center gap-1"><CheckCircle size={14} /> {offlineSuccess}</p></div>}
 
           <div className="flex gap-3 justify-end pt-4 border-t border-gray-300 ">
             <button type="button" onClick={() => setOfflineData({ candidateName: '', recipientEmail: '', jobTitle: '', interviewDate: '', interviewTime: '', venueAddress: '', cityLocation: '' })} disabled={offlineLoading} className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60">CANCEL</button>

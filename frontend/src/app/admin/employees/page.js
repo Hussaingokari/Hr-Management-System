@@ -9,6 +9,7 @@ import {
 } from '@/lib/adminApi';
 import toast from 'react-hot-toast';
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { Users, AlertTriangle, Loader2 } from 'lucide-react';
 
 function Badge({ status }) {
   const map = {
@@ -340,7 +341,9 @@ export default function EmployeeManagementPage() {
           <div style={{ padding: '60px', textAlign: 'center', color: '#94a3b8' }}>Loading employees...</div>
         ) : employees.length === 0 ? (
           <div style={{ padding: '60px', textAlign: 'center' }}>
-            <div style={{ fontSize: '40px', marginBottom: '12px' }}>👥</div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px', color: '#94a3b8' }}>
+              <Users size={48} strokeWidth={1.5} />
+            </div>
             <div style={{ fontSize: '15px', fontWeight: '600', color: '#1e293b', marginBottom: '8px' }}>
               {search ? 'No employees found' : 'No employees yet'}
             </div>
@@ -544,8 +547,8 @@ export default function EmployeeManagementPage() {
                   Cancel
                 </button>
                 <button type="submit" disabled={submitting}
-                  style={{ flex: 1, padding: '12px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.7 : 1 }}>
-                  {submitting ? '⏳ Saving...' : editMode ? 'Update Employee' : 'Add Employee'}
+                  style={{ flex: 1, padding: '12px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.7 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                  {submitting ? <><Loader2 size={16} className="animate-spin" /> Saving...</> : editMode ? 'Update Employee' : 'Add Employee'}
                 </button>
               </div>
             </form>
@@ -565,7 +568,9 @@ export default function EmployeeManagementPage() {
             width: '100%', maxWidth: '400px',
             boxShadow: '0 20px 60px rgba(0,0,0,0.2)', textAlign: 'center',
           }}>
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚠️</div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px', color: '#dc2626' }}>
+              <AlertTriangle size={48} strokeWidth={1.5} />
+            </div>
             <h2 style={{ fontSize: '18px', fontWeight: '800', color: '#1e293b', marginBottom: '8px' }}>
               Delete Employee?
             </h2>
@@ -583,9 +588,9 @@ export default function EmployeeManagementPage() {
               <button
                 onClick={() => handleDelete(showDeleteConfirm.id)}
                 disabled={deleting === showDeleteConfirm.id}
-                style={{ flex: 1, padding: '12px', background: '#dc2626', color: 'white', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: 'pointer' }}
+                style={{ flex: 1, padding: '12px', background: '#dc2626', color: 'white', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
               >
-                {deleting === showDeleteConfirm.id ? '⏳ Deleting...' : 'Yes, Delete'}
+                {deleting === showDeleteConfirm.id ? <><Loader2 size={16} className="animate-spin" /> Deleting...</> : 'Yes, Delete'}
               </button>
             </div>
           </div>

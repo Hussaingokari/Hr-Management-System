@@ -8,6 +8,7 @@ import {
   generatePayslip,
 } from '@/lib/adminApi';
 import toast from 'react-hot-toast';
+import { Users, Banknote, MinusCircle, Wallet, CheckCircle, FileText, Loader2 } from 'lucide-react';
 
 const MONTHS = [
   'January','February','March','April','May','June',
@@ -205,11 +206,11 @@ export default function PayrollPage() {
       {payrolls.length > 0 && (
         <div style={{ display: 'flex', gap: '14px', marginBottom: '20px' }}>
           {[
-            { label: 'Total Employees', value: payrolls.length, color: '#1e3a5f', bg: '#eff6ff', icon: '👥' },
-            { label: 'Total Gross', value: formatCurrency(totalGross), color: '#16a34a', bg: '#dcfce7', icon: '💵' },
-            { label: 'Total Deductions', value: formatCurrency(totalDed), color: '#dc2626', bg: '#fee2e2', icon: '➖' },
-            { label: 'Total Net Pay', value: formatCurrency(totalNet), color: '#f59e0b', bg: '#fff7ed', icon: '💰' },
-            { label: 'Paid', value: `${paidCount}/${payrolls.length}`, color: '#8b5cf6', bg: '#fdf4ff', icon: '✅' },
+            { label: 'Total Employees', value: payrolls.length, color: '#1e3a5f', bg: '#eff6ff', icon: <Users size={16} color="#1e3a5f" /> },
+            { label: 'Total Gross', value: formatCurrency(totalGross), color: '#16a34a', bg: '#dcfce7', icon: <Banknote size={16} color="#16a34a" /> },
+            { label: 'Total Deductions', value: formatCurrency(totalDed), color: '#dc2626', bg: '#fee2e2', icon: <MinusCircle size={16} color="#dc2626" /> },
+            { label: 'Total Net Pay', value: formatCurrency(totalNet), color: '#f59e0b', bg: '#fff7ed', icon: <Wallet size={16} color="#f59e0b" /> },
+            { label: 'Paid', value: `${paidCount}/${payrolls.length}`, color: '#8b5cf6', bg: '#fdf4ff', icon: <CheckCircle size={16} color="#8b5cf6" /> },
           ].map((s, i) => (
             <div key={i} style={{
               flex: 1, background: 'var(--card-bg)', borderRadius: '12px',
@@ -256,7 +257,9 @@ export default function PayrollPage() {
           <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</div>
         ) : payrolls.length === 0 ? (
           <div style={{ padding: '80px', textAlign: 'center' }}>
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>💰</div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px', color: '#1e3a5f' }}>
+              <Wallet size={48} strokeWidth={1.5} />
+            </div>
             <div style={{ fontSize: '16px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '8px' }}>
               No payroll for {MONTHS[month - 1]} {year}
             </div>
@@ -329,10 +332,10 @@ export default function PayrollPage() {
                       padding: '5px 10px', background: '#dcfce7',
                       color: '#16a34a', border: '1px solid #bbf7d0',
                       borderRadius: '6px', fontSize: '11px', fontWeight: '700',
-                      cursor: 'pointer',
+                      cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '90px'
                     }}
                   >
-                    {actioningId === p.id + 'pay' ? '⏳' : '✓ Mark Paid'}
+                    {actioningId === p.id + 'pay' ? <Loader2 size={12} className="animate-spin" /> : '✓ Mark Paid'}
                   </button>
                 )}
                 <button
@@ -342,10 +345,10 @@ export default function PayrollPage() {
                     padding: '5px 10px', background: '#eff6ff',
                     color: '#3b82f6', border: '1px solid #bfdbfe',
                     borderRadius: '6px', fontSize: '11px', fontWeight: '700',
-                    cursor: 'pointer',
+                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', minWidth: '80px'
                   }}
                 >
-                  {actioningId === p.id + 'slip' ? '⏳' : '📄 Payslip'}
+                  {actioningId === p.id + 'slip' ? <Loader2 size={12} className="animate-spin" /> : <><FileText size={12} /> Payslip</>}
                 </button>
               </div>
             </div>
@@ -432,8 +435,8 @@ export default function PayrollPage() {
                   Cancel
                 </button>
                 <button type="submit" disabled={generating}
-                  style={{ flex: 1, padding: '12px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: generating ? 'not-allowed' : 'pointer', opacity: generating ? 0.7 : 1 }}>
-                  {generating ? '⏳ Generating...' : 'Generate'}
+                  style={{ flex: 1, padding: '12px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: generating ? 'not-allowed' : 'pointer', opacity: generating ? 0.7 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                  {generating ? <><Loader2 size={16} className="animate-spin" /> Generating...</> : 'Generate'}
                 </button>
               </div>
             </form>

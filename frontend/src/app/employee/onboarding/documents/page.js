@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getMyOnboarding, getMyDocuments, uploadFile, uploadOnboardingDocument } from '@/lib/employeeApi';
 import toast from 'react-hot-toast';
+import { FileText, Loader2, UploadCloud, MessageSquare } from 'lucide-react';
 
 const DOC_KEY_LABELS = {
     OFFER_LETTER: 'Offer Letter',
@@ -45,11 +46,8 @@ function DocumentRow({ documentKey, doc, onUpload, isUploading }) {
             padding: '18px 20px', marginBottom: '12px',
         }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{
-                    width: '46px', height: '46px', borderRadius: '12px', background: 'var(--card-border)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0,
-                }}>
-                    📄
+                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4f46e5', flexShrink: 0 }}>
+                    <FileText size={20} strokeWidth={1.5} />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-primary)' }}>
@@ -84,7 +82,7 @@ function DocumentRow({ documentKey, doc, onUpload, isUploading }) {
                         color: !canUpload ? '#94a3b8' : isRejected ? '#dc2626' : '#3b82f6',
                         cursor: (!canUpload || isUploading) ? 'not-allowed' : 'pointer',
                     }}>
-                    {isUploading ? 'Uploading...' : isRejected ? 'Re-upload' : 'Upload'}
+                    {isUploading ? <><Loader2 size={12} className="animate-spin" style={{ display: 'inline', marginRight: '4px' }} /> Uploading...</> : isRejected ? 'Re-upload' : 'Upload'}
                 </button>
             </div>
 
@@ -95,7 +93,7 @@ function DocumentRow({ documentKey, doc, onUpload, isUploading }) {
                     padding: '10px 14px',
                 }}>
                     <div style={{ fontSize: '13px', color: '#dc2626' }}>
-                        💬 {doc.rejectionRemarks}
+                        <MessageSquare size={13} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'text-bottom' }} /> {doc.rejectionRemarks}
                     </div>
                 </div>
             )}

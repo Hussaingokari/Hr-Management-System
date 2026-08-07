@@ -1,7 +1,8 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
+import { TrendingUp, MessageSquare, FileText, Loader2, Check, CheckCircle, MessageCircle } from 'lucide-react';
 
 function StarRating({ value }) {
   return (
@@ -165,7 +166,7 @@ export default function EmployeePerformancePage() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '20px' }}>
                 {[
                   { label: '💪 Strengths', value: r.strengths, color: '#16a34a', bg: '#f0fdf4' },
-                  { label: '📈 Improvements', value: r.improvements, color: '#f59e0b', bg: '#fff7ed' },
+                  { label: <><TrendingUp size={16} style={{ display: 'inline', marginRight: '4px' }} /> Improvements</>, value: r.improvements, color: '#f59e0b', bg: '#fff7ed' },
                   { label: '🎯 Goals', value: r.goals, color: '#3b82f6', bg: '#eff6ff' },
                 ].map(d => d.value && (
                   <div key={d.label} style={{ background: d.bg, borderRadius: '10px', padding: '14px', border: `1px solid ${d.color}30` }}>
@@ -178,9 +179,9 @@ export default function EmployeePerformancePage() {
               {/* Employee Comments (if acknowledged) */}
               {r.employeeComments && (
                 <div style={{ background: '#f0fdf4', borderRadius: '10px', padding: '14px', border: '1px solid #bbf7d0', marginBottom: '16px' }}>
-                  <div style={{ fontSize: '12px', fontWeight: '700', color: '#16a34a', marginBottom: '6px' }}>
-                    💬 Your Comments
-                  </div>
+                  <h4 style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '8px' }}>
+                    <MessageSquare size={16} style={{ display: 'inline', marginRight: '4px' }} /> Your Comments
+                  </h4>
                   <div style={{ fontSize: '13px', color: '#374151', lineHeight: 1.6 }}>
                     {r.employeeComments}
                   </div>
@@ -190,9 +191,9 @@ export default function EmployeePerformancePage() {
               {/* Acknowledge Section */}
               {r.status === 'SUBMITTED' && (
                 <div style={{ background: '#eff6ff', borderRadius: '12px', padding: '16px', border: '1px solid #bfdbfe' }}>
-                  <div style={{ fontSize: '14px', fontWeight: '700', color: '#1e3a5f', marginBottom: '4px' }}>
-                    📝 Acknowledge This Review
-                  </div>
+                  <h4 style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '12px' }}>
+                    <FileText size={16} style={{ display: 'inline', marginRight: '4px' }} /> Acknowledge This Review
+                  </h4>
                   <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '12px' }}>
                     Add your comments and acknowledge to complete the review process
                   </div>
@@ -224,7 +225,7 @@ export default function EmployeePerformancePage() {
                             opacity: acknowledging ? 0.7 : 1,
                           }}
                         >
-                          {acknowledging ? '⏳ Acknowledging...' : '✓ Acknowledge Review'}
+                          {acknowledging ? <><Loader2 size={16} className="animate-spin" style={{ display: 'inline', marginRight: '6px' }} /> Acknowledging...</> : <><Check size={16} style={{ display: 'inline', marginRight: '6px' }} /> Acknowledge Review</>}
                         </button>
                         <button
                           onClick={() => { setSelected(null); setComment(''); }}
@@ -243,7 +244,7 @@ export default function EmployeePerformancePage() {
                         fontSize: '13px', fontWeight: '700', cursor: 'pointer',
                       }}
                     >
-                      ✍️ Add Comments & Acknowledge
+                      <MessageCircle size={14} style={{ display: 'inline', marginRight: '4px' }} /> Add Comments & Acknowledge
                     </button>
                   )}
                 </div>
@@ -252,7 +253,7 @@ export default function EmployeePerformancePage() {
               {/* Already acknowledged message */}
               {r.status === 'ACKNOWLEDGED' && (
                 <div style={{ background: '#f0fdf4', borderRadius: '10px', padding: '12px 16px', border: '1px solid #bbf7d0', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span style={{ fontSize: '20px' }}>✅</span>
+                  <span style={{ color: '#16a34a' }}><CheckCircle size={20} /></span>
                   <span style={{ fontSize: '13px', color: '#16a34a', fontWeight: '600' }}>
                     You have acknowledged this review
                   </span>

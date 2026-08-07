@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useInterview } from '@/lib/InterviewForm';
-import { Mail, Loader } from 'lucide-react';
+import { Mail, Loader, CheckCircle, AlertTriangle } from 'lucide-react';
 
 export default function SendOfferLetterForm() {
   const { sendOfferLetter } = useInterview();
@@ -191,8 +191,8 @@ export default function SendOfferLetterForm() {
             />
           </div>
 
-          {error && <div className="p-3 bg-red-100 border border-red-300 rounded-lg"><p className="text-sm text-red-800">❌ {error}</p></div>}
-          {showSuccess && success && <div className="p-3 bg-green-100 border border-green-300 rounded-lg"><p className="text-sm text-green-800">✓ {success}</p></div>}
+          {error && <div className="p-3 bg-red-100 border border-red-300 rounded-lg"><p className="text-sm text-red-800 flex items-center gap-1"><AlertTriangle size={14} /> {error}</p></div>}
+          {showSuccess && success && <div className="p-3 bg-green-100 border border-green-300 rounded-lg"><p className="text-sm text-green-800 flex items-center gap-1"><CheckCircle size={14} /> {success}</p></div>}
 
           <div className="flex gap-3 justify-end pt-4 border-t border-gray-300 ">
             <button

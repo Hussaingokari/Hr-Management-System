@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import api from "@/lib/axios";
+import { Mail } from "lucide-react";
 
 function formatDisplayDate(yyyyMmDd) {
     if (!yyyyMmDd) return "[Date]";
@@ -76,7 +77,7 @@ export default function SendDocumentRequestForm() {
     return (
         <div className="max-w-xl mx-auto bg-white rounded-2xl shadow-sm p-8" style={{ colorScheme: 'light' }}>
             <div className="flex items-center gap-3 mb-1">
-                <span className="text-blue-600 text-2xl">✉️</span>
+                <Mail className="text-blue-600" size={24} />
                 <h2 className="text-2xl font-bold text-gray-900 ">Send Document Request</h2>
             </div>
             <p className="text-gray-500 mb-6">Send onboarding document request email to the candidate.</p>

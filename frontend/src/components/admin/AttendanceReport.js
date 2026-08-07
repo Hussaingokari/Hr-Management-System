@@ -4,6 +4,7 @@ import { getAttendanceSummaryByDate, exportAttendanceRange } from '@/lib/adminAp
 import { downloadBlob } from '@/lib/downloadFile';
 import EmployeeAttendanceModal from './EmployeeAttendanceModal';
 import toast from 'react-hot-toast';
+import { Download, Loader2 } from 'lucide-react';
 
 const STATUS_COLORS = {
     PRESENT: { bg: '#dcfce7', color: '#16a34a' },
@@ -214,7 +215,7 @@ export default function AttendanceReport() {
                         cursor: exporting ? 'not-allowed' : 'pointer',
                     }}
                 >
-                    {exporting ? 'Exporting...' : '⬇ Export'}
+                    {exporting ? <><Loader2 size={14} className="animate-spin inline" /> Exporting...</> : <><Download size={14} className="inline" /> Export</>}
                 </button>
             </div>
 

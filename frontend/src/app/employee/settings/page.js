@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
+import { Eye, EyeOff, Lock, Info, Loader2 } from 'lucide-react';
 
 const EyeIcon = ({ show, toggle }) => (
   <button type="button" onClick={toggle}
@@ -158,14 +159,8 @@ export default function SettingsPage() {
               </div>
             ))}
 
-            <div style={{
-              marginTop: '16px', padding: '12px',
-              background: '#eff6ff', borderRadius: '8px',
-              border: '1px solid #bfdbfe',
-            }}>
-              <div style={{ fontSize: '12px', color: '#3b82f6', fontWeight: '600' }}>
-                ℹ️ To update profile info, contact your HR Admin
-              </div>
+            <div style={{ padding: '12px', background: '#eef2ff', borderRadius: '10px', marginTop: '24px', fontSize: '13px', color: '#4f46e5', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Info size={16} /> To update profile info, contact your HR Admin
             </div>
           </div>
         </div>
@@ -180,7 +175,7 @@ export default function SettingsPage() {
             padding: '16px 20px', borderBottom: '1px solid var(--card-border)',
             background: 'linear-gradient(135deg, #1e3a5f, #2563eb)', color: 'white',
           }}>
-            <h3 style={{ fontSize: '15px', fontWeight: '700' }}>🔒 Change Password</h3>
+            <h3 style={{ fontSize: '15px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}><Lock size={16} /> Change Password</h3>
           </div>
           <div style={{ padding: '20px' }}>
             <form onSubmit={handleChangePassword}>
@@ -286,7 +281,7 @@ export default function SettingsPage() {
                   justifyContent: 'center', gap: '8px',
                 }}
               >
-                {changing ? '⏳ Changing...' : (
+                {changing ? <><Loader2 size={14} className="animate-spin" style={{ display: 'inline', marginRight: '4px' }} /> Changing...</> : (
                   <>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                       stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

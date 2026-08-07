@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { getAllEmployees } from '@/lib/adminApi';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
+import { Star, Award, TrendingUp, Target, MessageSquare, Loader2 } from 'lucide-react';
 
 function StarRating({ value }) {
   return (
@@ -133,7 +134,9 @@ export default function PerformancePage() {
           <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</div>
         ) : reviews.length === 0 ? (
           <div style={{ padding: '80px', textAlign: 'center' }}>
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>⭐</div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px', color: '#f59e0b' }}>
+              <Star size={48} strokeWidth={1.5} />
+            </div>
             <div style={{ fontSize: '16px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '8px' }}>No reviews yet</div>
             <button onClick={() => setShowForm(true)}
               style={{ padding: '10px 20px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>
@@ -189,11 +192,11 @@ export default function PerformancePage() {
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
                     {[
-                      { label: '💪 Strengths', value: r.strengths },
-                      { label: '📈 Improvements', value: r.improvements },
-                      { label: '🎯 Goals', value: r.goals },
-                    ].map(d => d.value && (
-                      <div key={d.label} style={{ background: 'var(--card-bg)', borderRadius: '8px', padding: '12px', border: '1px solid var(--card-border)' }}>
+                      { label: <><Award size={14} className="inline mr-1" /> Strengths</>, value: r.strengths },
+                      { label: <><TrendingUp size={14} className="inline mr-1" /> Improvements</>, value: r.improvements },
+                      { label: <><Target size={14} className="inline mr-1" /> Goals</>, value: r.goals },
+                    ].map((d, index) => d.value && (
+                      <div key={index} style={{ background: 'var(--card-bg)', borderRadius: '8px', padding: '12px', border: '1px solid var(--card-border)' }}>
                         <div style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-secondary)', marginBottom: '6px' }}>{d.label}</div>
                         <div style={{ fontSize: '13px', color: '#374151', lineHeight: 1.5 }}>{d.value}</div>
                       </div>
@@ -202,7 +205,9 @@ export default function PerformancePage() {
 
                   {r.employeeComments && (
                     <div style={{ marginTop: '12px', background: '#eff6ff', borderRadius: '8px', padding: '12px', border: '1px solid #bfdbfe' }}>
-                      <div style={{ fontSize: '11px', fontWeight: '700', color: '#3b82f6', marginBottom: '4px' }}>💬 Employee Comments</div>
+                      <div style={{ fontSize: '11px', fontWeight: '700', color: '#3b82f6', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <MessageSquare size={12} /> Employee Comments
+                      </div>
                       <div style={{ fontSize: '13px', color: '#374151' }}>{r.employeeComments}</div>
                     </div>
                   )}
@@ -302,8 +307,8 @@ export default function PerformancePage() {
                   Cancel
                 </button>
                 <button type="submit" disabled={submitting}
-                  style={{ flex: 1, padding: '12px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.7 : 1 }}>
-                  {submitting ? '⏳ Creating...' : 'Create Review'}
+                  style={{ flex: 1, padding: '12px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.7 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                  {submitting ? <><Loader2 size={16} className="animate-spin" /> Creating...</> : 'Create Review'}
                 </button>
               </div>
             </form>

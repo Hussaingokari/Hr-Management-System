@@ -2,14 +2,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getMyOnboarding } from '@/lib/employeeApi';
 import toast from 'react-hot-toast';
+import { FileText, IdCard, GraduationCap, Landmark, Mail, Lock, Clock, CheckCircle } from 'lucide-react';
 
 const CHECKLIST_ITEMS = [
-    { key: 'offerLetterSigned', label: 'Offer Letter Signed', icon: '📄' },
-    { key: 'idProofSubmitted', label: 'ID Proof Submitted', icon: '🪪' },
-    { key: 'educationDocsSubmitted', label: 'Education Docs Submitted', icon: '🎓' },
-    { key: 'bankDetailsSubmitted', label: 'Bank Details Submitted', icon: '🏦' },
-    { key: 'emailCreated', label: 'Email Created', icon: '📧' },
-    { key: 'systemAccessGiven', label: 'System Access Given', icon: '🔐' },
+    { key: 'offerLetterSigned', label: 'Offer Letter Signed', icon: <FileText size={18} /> },
+    { key: 'idProofSubmitted', label: 'ID Proof Submitted', icon: <IdCard size={18} /> },
+    { key: 'educationDocsSubmitted', label: 'Education Docs Submitted', icon: <GraduationCap size={18} /> },
+    { key: 'bankDetailsSubmitted', label: 'Bank Details Submitted', icon: <Landmark size={18} /> },
+    { key: 'emailCreated', label: 'Email Created', icon: <Mail size={18} /> },
+    { key: 'systemAccessGiven', label: 'System Access Given', icon: <Lock size={18} /> },
 ];
 
 export default function EmployeeOnboardingChecklistPage() {
@@ -70,8 +71,8 @@ export default function EmployeeOnboardingChecklistPage() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '18px' }}>
                         <div style={{
                             width: '28px', height: '28px', borderRadius: '8px', background: '#fef9c3',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px',
-                        }}>⏳</div>
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ca8a04',
+                        }}><Clock size={16} strokeWidth={2.5} /></div>
                         <div style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-primary)' }}>
                             To Do ({pendingItems.length})
                         </div>
@@ -103,8 +104,8 @@ export default function EmployeeOnboardingChecklistPage() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '18px' }}>
                         <div style={{
                             width: '28px', height: '28px', borderRadius: '8px', background: '#dcfce7',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px',
-                        }}>✅</div>
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#16a34a',
+                        }}><CheckCircle size={16} strokeWidth={2.5} /></div>
                         <div style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-primary)' }}>
                             Completed ({completedItems.length})
                         </div>

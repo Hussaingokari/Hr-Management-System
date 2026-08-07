@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { getEmployeeDetailedReport, exportEmployeeAttendanceRange } from '@/lib/adminApi';
 import { downloadBlob } from '@/lib/downloadFile';
 import toast from 'react-hot-toast';
+import { Download, Loader2 } from 'lucide-react';
 
 const STATUS_COLORS = {
     PRESENT: { bg: '#dcfce7', color: '#16a34a' },
@@ -323,7 +324,7 @@ export default function EmployeeAttendanceModal({ employeeId, asOfDate, onClose 
                                     cursor: exporting ? 'not-allowed' : 'pointer',
                                 }}
                             >
-                                {exporting ? 'Exporting...' : '⬇ Export'}
+                                {exporting ? <><Loader2 size={12} className="animate-spin inline" /> Exporting...</> : <><Download size={12} className="inline" /> Export</>}
                             </button>
                         </div>
 

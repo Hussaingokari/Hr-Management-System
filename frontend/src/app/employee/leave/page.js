@@ -2,14 +2,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
+import { Leaf, Check, Clock, X, Undo2, Circle, Palmtree, Thermometer, Sun, Baby, ClipboardList, Sparkles, Lightbulb, Loader2 } from 'lucide-react';
 
 function StatusPill({ status }) {
   const map = {
-    APPROVED: { bg: 'rgba(22, 163, 74, 0.15)', color: '#15803D', icon: '✅' },
-    PENDING: { bg: 'rgba(180, 83, 9, 0.2)', color: '#B45309', icon: '⏳' },
-    REJECTED: { bg: 'rgba(220, 38, 38, 0.15)', color: '#B91C1C', icon: '✕' },
-    CANCELLATION_PENDING: { bg: 'rgba(126, 34, 206, 0.2)', color: '#7E22CE', icon: '↩️' },
-    CANCELLED: { bg: '#1E293B', color: 'var(--text-secondary)', icon: '·' },
+    APPROVED: { bg: 'rgba(22, 163, 74, 0.15)', color: '#15803D', icon: <Check size={12} strokeWidth={3} /> },
+    PENDING: { bg: 'rgba(180, 83, 9, 0.2)', color: '#B45309', icon: <Clock size={12} strokeWidth={3} /> },
+    REJECTED: { bg: 'rgba(220, 38, 38, 0.15)', color: '#B91C1C', icon: <X size={12} strokeWidth={3} /> },
+    CANCELLATION_PENDING: { bg: 'rgba(126, 34, 206, 0.2)', color: '#7E22CE', icon: <Undo2 size={12} strokeWidth={3} /> },
+    CANCELLED: { bg: '#1E293B', color: 'var(--text-secondary)', icon: <Circle size={8} fill="currentColor" /> },
   };
   const s = map[status] || map.PENDING;
   return (
@@ -26,21 +27,21 @@ function StatusPill({ status }) {
 }
 
 const LEAVE_TYPES = [
-  { value: 'ANNUAL', label: 'Annual', icon: '🌴' },
-  { value: 'SICK', label: 'Sick', icon: '🤒' },
-  { value: 'CASUAL', label: 'Casual', icon: '☀️' },
-  { value: 'PATERNITY', label: 'Paternity', icon: '👨‍🍼' },
-  { value: 'MATERNITY', label: 'Maternity', icon: '🤱' },
-  { value: 'UNPAID', label: 'Unpaid', icon: '📋' },
+  { value: 'ANNUAL', label: 'Annual', icon: <Palmtree size={18} /> },
+  { value: 'SICK', label: 'Sick', icon: <Thermometer size={18} /> },
+  { value: 'CASUAL', label: 'Casual', icon: <Sun size={18} /> },
+  { value: 'PATERNITY', label: 'Paternity', icon: <Baby size={18} /> },
+  { value: 'MATERNITY', label: 'Maternity', icon: <Baby size={18} /> },
+  { value: 'UNPAID', label: 'Unpaid', icon: <ClipboardList size={18} /> },
 ];
 
 const balanceStyle = {
-  ANNUAL: { color: '#4F46E5', soft: 'rgba(79, 70, 229, 0.15)', icon: '🌴' },
-  SICK: { color: '#0D9488', soft: 'rgba(13, 148, 136, 0.15)', icon: '🤒' },
-  CASUAL: { color: '#D97706', soft: 'rgba(217, 119, 6, 0.15)', icon: '☀️' },
-  PATERNITY: { color: '#8B5CF6', soft: 'rgba(139, 92, 246, 0.15)', icon: '👨‍🍼' },
-  MATERNITY: { color: '#DB2777', soft: 'rgba(219, 39, 119, 0.15)', icon: '🤱' },
-  UNPAID: { color: 'var(--text-secondary)', soft: '#1E293B', icon: '📋' },
+  ANNUAL: { color: '#4F46E5', soft: 'rgba(79, 70, 229, 0.15)', icon: <Palmtree size={18} /> },
+  SICK: { color: '#0D9488', soft: 'rgba(13, 148, 136, 0.15)', icon: <Thermometer size={18} /> },
+  CASUAL: { color: '#D97706', soft: 'rgba(217, 119, 6, 0.15)', icon: <Sun size={18} /> },
+  PATERNITY: { color: '#8B5CF6', soft: 'rgba(139, 92, 246, 0.15)', icon: <Baby size={18} /> },
+  MATERNITY: { color: '#DB2777', soft: 'rgba(219, 39, 119, 0.15)', icon: <Baby size={18} /> },
+  UNPAID: { color: 'var(--text-secondary)', soft: '#1E293B', icon: <ClipboardList size={18} /> },
 };
 
 function BalanceRing({ pct, color, size = 54 }) {
@@ -131,7 +132,7 @@ export default function LeavePage() {
         endDate: form.endDate,
         reason: form.reason,
       });
-      toast.success('🌿 Leave request sent!');
+      toast.success('Leave request sent!');
       setShowForm(false);
       setForm({ leaveType: 'ANNUAL', startDate: '', endDate: '', reason: '' });
       fetchAll();
@@ -171,8 +172,8 @@ export default function LeavePage() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '22px', flexWrap: 'wrap', gap: '14px' }}>
         <div>
-          <h1 style={{ fontFamily: "'Quicksand', sans-serif", fontSize: '26px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '4px' }}>
-            🌿 Time Off
+          <h1 style={{ fontFamily: "'Quicksand', sans-serif", fontSize: '26px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Leaf size={26} color="#16a34a" /> Time Off
           </h1>
           <p style={{ fontSize: '13.5px', color: 'var(--text-muted)' }}>
             Apply for leave, track your requests, and keep an eye on your balance
@@ -189,7 +190,7 @@ export default function LeavePage() {
             boxShadow: '0 8px 20px rgba(79,61,245,0.28)',
           }}
         >
-          ✨ Apply for Leave
+          <Sparkles size={16} /> Apply for Leave
         </button>
       </div>
 
@@ -246,8 +247,8 @@ export default function LeavePage() {
             width: '100%', maxWidth: '500px', boxShadow: '0 24px 70px rgba(0,0,0,0.5)',
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h2 style={{ fontFamily: "'Quicksand', sans-serif", fontSize: '19px', fontWeight: 800, color: 'var(--text-primary)' }}>
-                🌿 Apply for Leave
+              <h2 style={{ fontFamily: "'Quicksand', sans-serif", fontSize: '19px', fontWeight: 800, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Leaf size={19} color="#16a34a" /> Apply for Leave
               </h2>
               <button onClick={() => setShowForm(false)}
                 style={{ background: 'var(--card-bg)', border: 'none', width: '30px', height: '30px', borderRadius: '10px', fontSize: '15px', cursor: 'pointer', color: 'var(--text-secondary)' }}>
@@ -333,7 +334,7 @@ export default function LeavePage() {
               </div>
 
               <div style={{ background: 'rgba(139, 92, 246, 0.15)', borderRadius: '12px', padding: '10px 14px', marginBottom: '18px', fontSize: '12px', color: '#6D5DFB', display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-                <span>💡</span>
+                <span><Lightbulb size={16} /></span>
                 <span>Your request goes straight to Admin/HR — whoever reviews it first will approve or decline it.</span>
               </div>
 
@@ -380,12 +381,12 @@ export default function LeavePage() {
             <div style={{ padding: '50px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</div>
           ) : leaves.length === 0 ? (
             <div style={{ padding: '60px', textAlign: 'center' }}>
-              <div style={{ fontSize: '42px', marginBottom: '10px' }}>🌴</div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px', color: '#16a34a' }}><Palmtree size={42} strokeWidth={1.5} /></div>
               <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px' }}>No requests yet</div>
               <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '16px' }}>Apply for your first leave whenever you need a break</div>
               <button onClick={() => setShowForm(true)}
                 style={{ padding: '10px 20px', background: '#6D5DFB', color: 'var(--text-primary)', border: 'none', borderRadius: '10px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>
-                ✨ Apply for Leave
+                <Sparkles size={16} style={{ display: 'inline', marginRight: '4px' }} /> Apply for Leave
               </button>
             </div>
           ) : (
@@ -417,7 +418,7 @@ export default function LeavePage() {
                             color: l.status === 'APPROVED' ? '#7E22CE' : '#DC2626',
                             border: 'none', borderRadius: '8px', fontSize: '11px', fontWeight: 700, cursor: 'pointer',
                           }}>
-                          {cancelling === l.id ? '⏳' : l.status === 'APPROVED' ? 'Request Cancel' : 'Cancel'}
+                          {cancelling === l.id ? <Loader2 size={12} className="animate-spin" style={{ display: 'inline' }} /> : l.status === 'APPROVED' ? 'Request Cancel' : 'Cancel'}
                         </button>
                       )}
                     </div>

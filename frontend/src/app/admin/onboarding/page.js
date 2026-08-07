@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
+import { Clock, FileText, CheckCircle, Users, Activity, TrendingUp, ChevronRight } from 'lucide-react';
 
 function timeAgo(dateStr) {
   if (!dateStr) return '';
@@ -15,9 +16,9 @@ function timeAgo(dateStr) {
 }
 
 const ACTIVITY_ICON = {
-  PENDING_SUMMARY: '⏳',
-  DOCUMENT_UPLOADED: '📄',
-  ONBOARDING_COMPLETED: '✅',
+  PENDING_SUMMARY: <Clock size={16} />,
+  DOCUMENT_UPLOADED: <FileText size={16} />,
+  ONBOARDING_COMPLETED: <CheckCircle size={16} />,
 };
 
 export default function OnboardingDashboardPage() {
@@ -44,10 +45,10 @@ export default function OnboardingDashboardPage() {
   }
 
   const STATS = [
-    { label: 'Total Employees', value: data.totalEmployees, sub: 'All time', color: '#1e3a5f', bg: '#eef2ff', icon: '👥' },
-    { label: 'Pending Onboarding', value: data.pendingOnboarding, sub: 'In progress', color: '#ca8a04', bg: '#fef9c3', icon: '⏰' },
-    { label: 'Completed Onboarding', value: data.completedOnboarding, sub: 'Fully onboarded', color: '#16a34a', bg: '#dcfce7', icon: '✅' },
-    { label: 'Pending Doc Verifications', value: data.pendingDocVerifications, sub: 'Awaiting review', color: '#dc2626', bg: '#fee2e2', icon: '📄' },
+    { label: 'Total Employees', value: data.totalEmployees, sub: 'All time', color: '#1e3a5f', bg: '#eef2ff', icon: <Users size={16} color="#1e3a5f" /> },
+    { label: 'Pending Onboarding', value: data.pendingOnboarding, sub: 'In progress', color: '#ca8a04', bg: '#fef9c3', icon: <Clock size={16} color="#ca8a04" /> },
+    { label: 'Completed Onboarding', value: data.completedOnboarding, sub: 'Fully onboarded', color: '#16a34a', bg: '#dcfce7', icon: <CheckCircle size={16} color="#16a34a" /> },
+    { label: 'Pending Doc Verifications', value: data.pendingDocVerifications, sub: 'Awaiting review', color: '#dc2626', bg: '#fee2e2', icon: <FileText size={16} color="#dc2626" /> },
   ];
 
   const QUICK_ACTIONS = [
@@ -86,8 +87,8 @@ export default function OnboardingDashboardPage() {
         {/* Recent Activity */}
         <div style={{ background: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--card-border)', padding: '18px 20px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-            <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)' }}>
-              📈 Recent Activity
+            <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <TrendingUp size={16} /> Recent Activity
             </div>
             <button
               onClick={() => router.push('/admin/onboarding/notifications')}
@@ -107,8 +108,8 @@ export default function OnboardingDashboardPage() {
                 borderRadius: '8px',
                 background: i === 0 ? '#f8fafc' : 'transparent',
               }}>
-                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', flexShrink: 0 }}>
-                  {ACTIVITY_ICON[item.type] || '📌'}
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  {ACTIVITY_ICON[item.type] || <Activity size={16} />}
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-primary)' }}>{item.title}</div>
@@ -137,7 +138,7 @@ export default function OnboardingDashboardPage() {
                 background: 'var(--card-bg)', border: '1px solid var(--card-border)', borderRadius: '10px',
                 fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)', cursor: 'pointer',
               }}>
-              {a.label} <span>→</span>
+              {a.label} <ChevronRight size={14} />
             </button>
           ))}
         </div>

@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { getMyOnboarding, getMyDocuments } from '@/lib/employeeApi';
 import toast from 'react-hot-toast';
+import { ClipboardList, Clock, FileText, CheckCircle, Hand } from 'lucide-react';
 
 const CHECKLIST_ITEMS = [
     { key: 'offerLetterSigned', label: 'Offer Letter Signed' },
@@ -70,7 +71,7 @@ export default function EmployeeOnboardingDashboardPage() {
     if (!onboarding) {
         return (
             <div style={{ background: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--card-border)', padding: '60px', textAlign: 'center', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-                <div style={{ fontSize: '40px', marginBottom: '12px' }}>📋</div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px', color: '#94a3b8' }}><ClipboardList size={40} strokeWidth={1.5} /></div>
                 <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '4px' }}>No onboarding checklist yet</div>
                 <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Your HR team hasn't set this up for you yet.</div>
             </div>
@@ -83,9 +84,9 @@ export default function EmployeeOnboardingDashboardPage() {
     const firstName = onboarding.employeeName?.split(' ')[0] || 'there';
 
     const STATS = [
-        { label: 'Pending Tasks', value: pendingTasksCount, sub: 'To be completed', bg: '#fef9c3', icon: '⏰' },
-        { label: 'Documents Uploaded', value: documents.length, sub: 'Total uploaded', bg: '#eff6ff', icon: '📄' },
-        { label: 'Approved Docs', value: approvedDocsCount, sub: 'Verified by HR', bg: '#dcfce7', icon: '✅' },
+        { label: 'Pending Tasks', value: pendingTasksCount, sub: 'To be completed', bg: '#fef9c3', icon: <Clock size={15} color="#ca8a04" /> },
+        { label: 'Documents Uploaded', value: documents.length, sub: 'Total uploaded', bg: '#eff6ff', icon: <FileText size={15} color="#3b82f6" /> },
+        { label: 'Approved Docs', value: approvedDocsCount, sub: 'Verified by HR', bg: '#dcfce7', icon: <CheckCircle size={15} color="#16a34a" /> },
     ];
 
     return (
@@ -94,8 +95,8 @@ export default function EmployeeOnboardingDashboardPage() {
             <div style={{ background: 'linear-gradient(135deg, #7c3aed, #4f46e5)', borderRadius: '16px', padding: '24px 28px', marginBottom: '20px', color: 'white' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div>
-                        <div style={{ fontSize: '22px', fontWeight: '800', marginBottom: '4px' }}>
-                            Welcome, {firstName}! 👋
+                        <div style={{ fontSize: '22px', fontWeight: '800', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            Welcome, {firstName}! <Hand size={22} color="#fbbf24" />
                         </div>
                         <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.8)' }}>
                             {onboarding.employeeDesignation || '—'} · {onboarding.department || '—'}
@@ -175,8 +176,8 @@ export default function EmployeeOnboardingDashboardPage() {
                                 padding: '13px 14px', marginBottom: '8px', borderRadius: '10px',
                                 background: 'var(--bg-primary)', border: '1px solid var(--card-border)',
                             }}>
-                                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px', flexShrink: 0 }}>
-                                    📄
+                                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4f46e5', flexShrink: 0 }}>
+                                    <FileText size={16} />
                                 </div>
                                 <span style={{ flex: 1, fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)' }}>
                                     {DOC_KEY_LABELS[doc.documentKey] || doc.documentKey}

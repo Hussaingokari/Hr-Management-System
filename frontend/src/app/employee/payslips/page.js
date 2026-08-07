@@ -1,8 +1,9 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getMyPayslips, downloadPayslipPdf } from '@/lib/employeeApi';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
+import { Banknote, Download, Loader2 } from 'lucide-react';
 
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -75,7 +76,7 @@ function PayslipListView({ loading, payslips, selected, onSelect, page, totalPag
     if (payslips.length === 0) {
       return (
         <div style={{ padding: '60px', textAlign: 'center' }}>
-          <div style={{ fontSize: '40px', marginBottom: '12px' }}>💰</div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px', color: '#4f46e5' }}><Banknote size={40} strokeWidth={1.5} /></div>
           <div style={{ fontSize: '15px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '4px' }}>
             No payslips yet
           </div>
@@ -334,7 +335,7 @@ function PayslipDetailView({ selected, loadingDetail, formatCurrency }) {
             justifyContent: 'center', gap: '8px',
           }}
         >
-          ⬇ {downloading ? 'Downloading...' : 'Download Payslip PDF'}
+          {downloading ? <><Loader2 size={16} className="animate-spin" style={{ display: 'inline', marginRight: '6px' }} /> Downloading...</> : <><Download size={16} style={{ display: 'inline', marginRight: '6px' }} /> Download Payslip PDF</>}
         </button>
       </div>
     </div>

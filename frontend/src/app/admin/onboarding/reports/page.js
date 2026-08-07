@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
+import { Users, CheckCircle, FileText, AlertTriangle } from 'lucide-react';
 
 const DEPT_COLORS = ['#4f46e5', '#3b82f6', '#eda100', '#1baf7a', '#e34948', '#e87ba4'];
 
@@ -28,10 +29,10 @@ export default function OnboardingReportsPage() {
     }
 
     const STATS = [
-        { label: 'Total Employees', value: data.totalEmployees, bg: '#eef2ff', color: '#4f46e5', icon: '👥' },
-        { label: 'Approved Docs', value: data.approvedDocs, bg: '#dcfce7', color: '#16a34a', icon: '✅' },
-        { label: 'Pending Docs', value: data.pendingDocs, bg: '#fef9c3', color: '#ca8a04', icon: '📄' },
-        { label: 'Rejected Docs', value: data.rejectedDocs, bg: '#fee2e2', color: '#dc2626', icon: '⚠️' },
+        { label: 'Total Employees', value: data.totalEmployees, bg: '#eef2ff', color: '#4f46e5', icon: <Users size={16} color="#4f46e5" /> },
+        { label: 'Approved Docs', value: data.approvedDocs, bg: '#dcfce7', color: '#16a34a', icon: <CheckCircle size={16} color="#16a34a" /> },
+        { label: 'Pending Docs', value: data.pendingDocs, bg: '#fef9c3', color: '#ca8a04', icon: <FileText size={16} color="#ca8a04" /> },
+        { label: 'Rejected Docs', value: data.rejectedDocs, bg: '#fee2e2', color: '#dc2626', icon: <AlertTriangle size={16} color="#dc2626" /> },
     ];
 
     const deptEntries = Object.entries(data.employeesByDepartment || {});

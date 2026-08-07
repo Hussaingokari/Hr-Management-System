@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
+import { Shield, Lock, Loader2 } from 'lucide-react';
 
 function EyeIcon({ show, toggle }) {
   return (
@@ -103,8 +104,8 @@ export default function AdminSettingsPage() {
 
         {/* Profile Info */}
         <div style={{ background: 'var(--card-bg)', borderRadius: '14px', border: '1px solid var(--card-border)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', overflow: 'hidden' }}>
-          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--card-border)', background: 'linear-gradient(135deg, #1e3a5f, #2563eb)', color: 'white' }}>
-            <h3 style={{ fontSize: '15px', fontWeight: '700' }}>🛡️ Admin Profile</h3>
+          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--card-border)', background: 'linear-gradient(135deg, #1e3a5f, #2563eb)', color: 'white', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Shield size={16} /> <h3 style={{ fontSize: '15px', fontWeight: '700' }}>Admin Profile</h3>
           </div>
           <div style={{ padding: '20px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px', padding: '16px', background: 'var(--bg-primary)', borderRadius: '12px' }}>
@@ -138,8 +139,8 @@ export default function AdminSettingsPage() {
             ))}
 
             <div style={{ marginTop: '16px', padding: '12px', background: '#fdf4ff', borderRadius: '8px', border: '1px solid #e9d5ff' }}>
-              <div style={{ fontSize: '12px', color: '#9333ea', fontWeight: '600' }}>
-                🛡️ You have full system access as {user?.role}
+              <div style={{ fontSize: '12px', color: '#9333ea', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Shield size={14} /> You have full system access as {user?.role}
               </div>
             </div>
           </div>
@@ -147,8 +148,8 @@ export default function AdminSettingsPage() {
 
         {/* Change Password */}
         <div style={{ background: 'var(--card-bg)', borderRadius: '14px', border: '1px solid var(--card-border)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', overflow: 'hidden' }}>
-          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--card-border)', background: 'linear-gradient(135deg, #1e3a5f, #2563eb)', color: 'white' }}>
-            <h3 style={{ fontSize: '15px', fontWeight: '700' }}>🔒 Change Password</h3>
+          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--card-border)', background: 'linear-gradient(135deg, #1e3a5f, #2563eb)', color: 'white', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Lock size={16} /> <h3 style={{ fontSize: '15px', fontWeight: '700' }}>Change Password</h3>
           </div>
           <div style={{ padding: '20px' }}>
             <form onSubmit={handleChangePassword}>
@@ -247,7 +248,7 @@ export default function AdminSettingsPage() {
                   display: 'flex', alignItems: 'center',
                   justifyContent: 'center', gap: '8px',
                 }}>
-                {changing ? '⏳ Changing...' : (
+                {changing ? <><Loader2 size={16} className="animate-spin" /> Changing...</> : (
                   <>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                       stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
