@@ -6,7 +6,7 @@ const puppeteer = require('puppeteer');
   await page.setViewport({ width: 1440, height: 900 });
 
   console.log('Navigating to login...');
-  await page.goto('http://localhost:3000/login');
+  await page.goto('http://localhost:3000/login/employee');
 
   console.log('Logging in...');
   await page.type('input[type="email"]', 'emp@hrms.com');
