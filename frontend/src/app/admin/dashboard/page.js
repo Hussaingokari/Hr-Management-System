@@ -5,7 +5,18 @@ import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import { Users, CheckCircle, Clock, Bell, PartyPopper, XCircle, Loader2, Check, X, Calendar, UserPlus, Banknote, Briefcase } from 'lucide-react';
 
-function StatCard({ label, value, sub, color, bg, icon, sparklineId, sparklinePath }) {
+function generateSparkline(value, id) {
+  if (!value || value === 0) return "M 0 40 L 200 40";
+  const seed = (id || '').length + (typeof value === 'number' ? value : 10);
+  const p1y = 35 - (seed % 10);
+  const p2y = 15 + ((seed * 2) % 15);
+  const p3y = 30 - ((seed * 3) % 15);
+  const p4y = 10 + ((seed * 5) % 10);
+  return `M 0 40 Q 25 ${p1y} 50 ${p2y} T 100 ${p3y} T 150 ${p4y} T 200 15`;
+}
+
+function StatCard({ label, value, sub, color, bg, icon, sparklineId }) {
+  const sparklinePath = generateSparkline(value, sparklineId);
   return (
     <div style={{
       background: `linear-gradient(145deg, ${color}10, var(--card-bg))`, 
@@ -195,28 +206,28 @@ export default function AdminDashboard() {
               value={employees.length}
               sub={`${activeEmployees.length} active`}
               color="#3b82f6" icon={<Users size={20} />}
-              sparklineId="emp" sparklinePath="M 0 35 Q 20 20 40 30 T 80 25 T 120 30 T 160 20 T 200 25"
+              sparklineId="emp"
             />
             <StatCard
               label="Present Today"
               value={presentToday}
               sub={`of ${todayAttendance.length} checked in`}
               color="#14b8a6" icon={<Calendar size={20} />}
-              sparklineId="present" sparklinePath="M 0 25 Q 30 35 60 20 T 120 30 T 180 15 T 200 20"
+              sparklineId="present"
             />
             <StatCard
               label="Pending Leaves"
               value={pendingLeaves.filter(l => l.status === 'PENDING').length}
               sub="Awaiting approval"
               color="#f59e0b" icon={<Clock size={20} />}
-              sparklineId="pending" sparklinePath="M 0 30 Q 40 10 80 25 T 150 15 T 200 25"
+              sparklineId="pending"
             />
             <StatCard
               label="Notifications"
               value={unreadCount}
               sub="Unread messages"
               color="#8b5cf6" icon={<Bell size={20} />}
-              sparklineId="notif" sparklinePath="M 0 20 Q 25 35 50 25 T 100 20 T 150 30 T 200 15"
+              sparklineId="notif"
             />
           </div>
 
@@ -283,6 +294,10 @@ export default function AdminDashboard() {
                             }}
                           >
                             <XCircle size={14} /> Leave was cancelled by the employee
+                          </div>
+                        ) : l.status !== 'PENDING' ? (
+                          <div style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)' }}>
+                            Actioned ({l.status})
                           </div>
                         ) : (
                           <>
