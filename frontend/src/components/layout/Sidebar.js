@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTheme } from 'next-themes';
 import { logout } from '@/store/authSlice';
@@ -125,10 +126,11 @@ export default function Sidebar({ role }) {
           {/* Main Menu */}
           <div style={{ padding: '16px 16px 0', flexShrink: 0 }}>
             {menu.map((item) => (
-              <div
+              <Link
                 key={item.key}
-                onClick={() => { setIsMobileOpen(false); router.push(item.key); }}
-                style={{...navItemStyle(item.key), position: 'relative'}}
+                href={item.key}
+                onClick={() => setIsMobileOpen(false)}
+                style={{...navItemStyle(item.key), position: 'relative', textDecoration: 'none'}}
                 onMouseEnter={e => {
                   if (!isItemActive(item.key)) e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.03)' : '#f8fafc';
                 }}
@@ -155,7 +157,7 @@ export default function Sidebar({ role }) {
                     {item.badge}
                   </div>
                 )}
-              </div>
+              </Link>
             ))}
           </div>
 
@@ -185,12 +187,13 @@ export default function Sidebar({ role }) {
         <div style={{ padding: '16px 16px 20px', borderTop: `1px solid ${borderColor}`, background: sidebarBg, zIndex: 2, flexShrink: 0 }}>
 
           {/* Settings */}
-          <div
-            onClick={() => { setIsMobileOpen(false); router.push(settingsRoute); }}
+          <Link
+            href={settingsRoute}
+            onClick={() => setIsMobileOpen(false)}
             style={{
               display: 'flex', alignItems: 'center', gap: '14px',
               padding: '12px 16px', borderRadius: '10px',
-              cursor: 'pointer', marginBottom: '8px',
+              cursor: 'pointer', marginBottom: '8px', textDecoration: 'none',
               color: isItemActive(settingsRoute) ? (isDark ? '#ffffff' : '#0f172a') : (isDark ? '#cbd5e1' : '#475569'),
               background: isItemActive(settingsRoute) ? (isDark ? 'linear-gradient(90deg, rgba(16, 185, 129, 0.25) 0%, rgba(16, 185, 129, 0.02) 100%)' : '#f8fafc') : 'transparent',
               border: isItemActive(settingsRoute) ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid transparent',
@@ -207,7 +210,7 @@ export default function Sidebar({ role }) {
               <Settings size={18} strokeWidth={2} />
             </div>
             Settings
-          </div>
+          </Link>
 
           {/* Logout */}
           <div
