@@ -80,7 +80,7 @@ export default function Sidebar({ role }) {
       display: 'flex', alignItems: 'center', gap: '14px',
       padding: '12px 16px', borderRadius: '10px',
       cursor: 'pointer', marginBottom: '8px',
-      background: active ? 'linear-gradient(90deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.05) 100%)' : 'transparent',
+      background: active ? 'linear-gradient(90deg, rgba(16, 185, 129, 0.25) 0%, rgba(16, 185, 129, 0.02) 100%)' : 'transparent',
       color: active ? '#ffffff' : '#94a3b8',
       border: active ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid transparent',
       fontSize: '13.5px', fontWeight: active ? '600' : '500',
@@ -109,10 +109,9 @@ export default function Sidebar({ role }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <div style={{
               width: '42px', height: '42px',
-              background: 'linear-gradient(135deg, #0d9488 0%, #047857 100%)', 
+              background: '#064e3b', 
               borderRadius: '12px', display: 'flex', alignItems: 'center',
-              justifyContent: 'center', fontSize: '20px', fontWeight: '800', color: '#ffffff',
-              boxShadow: '0 4px 14px rgba(16, 185, 129, 0.25)'
+              justifyContent: 'center', fontSize: '20px', fontWeight: '800', color: '#ffffff'
             }}>H</div>
             <div>
               <div style={{ color: isDark ? '#ffffff' : '#0f172a', fontSize: '18px', fontWeight: '800', lineHeight: 1.1, letterSpacing: '0.5px' }}>HRMS</div>
@@ -122,7 +121,7 @@ export default function Sidebar({ role }) {
         </div>
 
         {/* Scrollable Middle Container (Menu + Spacer + Mountain) */}
-        <div className="hide-scrollbar" style={{ flex: 1, overflowY: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        <div className="hide-scrollbar" style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
           {/* Main Menu */}
           <div style={{ padding: '16px 16px 0', flexShrink: 0 }}>
             {menu.map((item) => (
@@ -137,7 +136,7 @@ export default function Sidebar({ role }) {
                   if (!isItemActive(item.key)) e.currentTarget.style.background = 'transparent';
                 }}
               >
-                <div style={{ color: isItemActive(item.key) ? '#34d399' : '#64748b', display: 'flex' }}>
+                <div style={{ color: isItemActive(item.key) ? '#34d399' : (isDark ? '#cbd5e1' : '#64748b'), display: 'flex' }}>
                   {item.icon}
                 </div>
                 <span style={{ color: isItemActive(item.key) ? (isDark ? '#ffffff' : '#0f172a') : (isDark ? '#cbd5e1' : '#475569') }}>
@@ -193,7 +192,8 @@ export default function Sidebar({ role }) {
               padding: '12px 16px', borderRadius: '10px',
               cursor: 'pointer', marginBottom: '8px',
               color: isItemActive(settingsRoute) ? (isDark ? '#ffffff' : '#0f172a') : (isDark ? '#cbd5e1' : '#475569'),
-              background: isItemActive(settingsRoute) ? (isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc') : 'transparent',
+              background: isItemActive(settingsRoute) ? (isDark ? 'linear-gradient(90deg, rgba(16, 185, 129, 0.25) 0%, rgba(16, 185, 129, 0.02) 100%)' : '#f8fafc') : 'transparent',
+              border: isItemActive(settingsRoute) ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid transparent',
               fontSize: '13.5px', fontWeight: '500', transition: 'all 0.2s',
             }}
             onMouseEnter={e => {
@@ -203,7 +203,9 @@ export default function Sidebar({ role }) {
               if (!isItemActive(settingsRoute)) e.currentTarget.style.background = 'transparent';
             }}
           >
-            <Settings size={18} strokeWidth={2} color={isDark ? "#94a3b8" : "#64748b"} />
+            <div style={{ color: isItemActive(settingsRoute) ? '#34d399' : (isDark ? '#cbd5e1' : '#64748b'), display: 'flex' }}>
+              <Settings size={18} strokeWidth={2} />
+            </div>
             Settings
           </div>
 
@@ -213,13 +215,15 @@ export default function Sidebar({ role }) {
             style={{
               display: 'flex', alignItems: 'center', gap: '14px',
               padding: '12px 16px', borderRadius: '10px',
-              cursor: 'pointer', color: '#ef4444',
+              cursor: 'pointer', color: '#ef4444', border: '1px solid transparent',
               fontSize: '13.5px', fontWeight: '600', transition: 'all 0.2s',
             }}
             onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.1)'}
             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
           >
-            <LogOut size={18} strokeWidth={2} />
+            <div style={{ display: 'flex', color: '#ef4444' }}>
+              <LogOut size={18} strokeWidth={2} />
+            </div>
             Logout
           </div>
         </div>
