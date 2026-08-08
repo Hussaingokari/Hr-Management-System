@@ -88,10 +88,13 @@ export default function AdminDashboard() {
 
   const fetchDashboardData = useCallback(async () => {
     try {
+      const today = new Date();
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
       const [empRes, leaveRes, attRes] = await Promise.allSettled([
-        api.get('/api/users'),
-        api.get('/api/leaves?status=PENDING'),
-        api.get('/api/attendance/today')
+        api.get('/api/employees?size=1000'),
+        api.get('/api/leaves/pending?size=1000'),
+        api.get(`/api/attendance/date/${todayStr}?size=1000`)
       ]);
 
       if (empRes.status === 'fulfilled') {
@@ -105,7 +108,10 @@ export default function AdminDashboard() {
         else if (d?.content) setPendingLeaves(d.content);
       }
       if (attRes.status === 'fulfilled') {
-        setTodayAttendance(attRes.value.data?.data || []);
+        const d = attRes.value.data?.data;
+        if (Array.isArray(d)) setTodayAttendance(d);
+        else if (d?.content) setTodayAttendance(d.content);
+        else setTodayAttendance([]);
       }
 
     } catch (err) {
@@ -123,7 +129,7 @@ export default function AdminDashboard() {
   const handleLeaveAction = async (id, status) => {
     setActioning(id + status);
     try {
-      await api.put(`/api/leaves/${id}/status`, { status, reviewRemarks: `Automatically ${status.toLowerCase()} from dashboard` });
+      await api.put(`/api/leaves/${id}/action`, { action: status, remarks: `Automatically ${status.toLowerCase()} from dashboard` });
       toast.success(`Leave ${status.toLowerCase()} successfully`);
       fetchDashboardData();
     } catch (err) {
