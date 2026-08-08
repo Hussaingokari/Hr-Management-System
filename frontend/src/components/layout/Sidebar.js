@@ -122,7 +122,7 @@ export default function Sidebar({ role }) {
         </div>
 
         {/* Scrollable Middle Container (Menu + Spacer + Mountain) */}
-        <div className="hide-scrollbar" style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+        <div className="hide-scrollbar" style={{ flex: 1, overflowY: (role === 'ADMIN' || role === 'HR') ? 'auto' : 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
           {/* Main Menu */}
           <div style={{ padding: '16px 16px 0', flexShrink: 0 }}>
             {menu.map((item) => (

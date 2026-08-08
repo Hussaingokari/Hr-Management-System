@@ -8,11 +8,20 @@ import { Users, CheckCircle, Clock, Bell, PartyPopper, XCircle, Loader2, Check, 
 function generateSparkline(value, id) {
   if (!value || value === 0) return "M 0 40 L 200 40";
   const seed = (id || '').length + (typeof value === 'number' ? value : 10);
+  
+  // Constrain Y between 10 and 35 to prevent clipping (viewBox height is 45, stroke width is 2)
   const p1y = 35 - (seed % 10);
-  const p2y = 15 + ((seed * 2) % 15);
-  const p3y = 30 - ((seed * 3) % 15);
+  const p2y = 15 + ((seed * 2) % 10);
+  const p3y = 35 - ((seed * 3) % 10);
   const p4y = 10 + ((seed * 5) % 10);
-  return `M 0 40 Q 25 ${p1y} 50 ${p2y} T 100 ${p3y} T 150 ${p4y} T 200 15`;
+  
+  // Use cubic beziers with horizontal tangents so the curve never overshoots the Y values
+  const dx = 20; 
+  return `M 0 40 ` +
+         `C ${0 + dx} 40, ${50 - dx} ${p1y}, 50 ${p1y} ` +
+         `C ${50 + dx} ${p1y}, ${100 - dx} ${p2y}, 100 ${p2y} ` +
+         `C ${100 + dx} ${p2y}, ${150 - dx} ${p3y}, 150 ${p3y} ` +
+         `C ${150 + dx} ${p3y}, ${200 - dx} ${p4y}, 200 ${p4y}`;
 }
 
 function StatCard({ label, value, sub, color, bg, icon, sparklineId }) {
