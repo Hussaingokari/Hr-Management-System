@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import api from "@/lib/axios";
 
 export default function JobDetails() {
     const params = useParams();
@@ -14,16 +15,9 @@ export default function JobDetails() {
     useEffect(() => {
         if (!params.id) return;
 
-        fetch(`http://localhost:8080/api/recruitment/jobs/${params.id}`)
+        api.get(`/api/recruitment/jobs/${params.id}`)
             .then((res) => {
-                if (!res.ok) {
-                    throw new Error("Failed to fetch job details");
-                }
-
-                return res.json();
-            })
-            .then((data) => {
-                setJob(data.data);
+                setJob(res.data.data);
                 setLoading(false);
             })
             .catch((error) => {
