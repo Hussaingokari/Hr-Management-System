@@ -368,8 +368,8 @@ html.dark .app-navbar {
   -webkit-overflow-scrolling: touch !important;
   border-radius: 12px;
   display: block !important;
-  border: 1px solid #e2e8f0;
-  background: #ffffff;
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
   box-sizing: border-box !important;
 }
 
