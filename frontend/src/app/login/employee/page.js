@@ -82,7 +82,7 @@ export default function EmployeeLogin() {
             <div className="w-8 h-8 rounded bg-transparent border-2 border-[#10b981] dark:border-[#ccf000] flex items-center justify-center transition-colors">
               <span className="text-[#10b981] dark:text-[#ccf000] font-bold text-lg leading-none">H</span>
             </div>
-            <span className="text-white font-bold text-[17px] tracking-tight">HRMS Employee</span>
+            <span className="text-white font-bold text-[17px] tracking-tight">Saiteja Infotech Private Limited Employee</span>
           </div>
           <h1 className="text-white text-4xl xl:text-5xl font-bold leading-[1.1] mb-4 tracking-tight">
             Let's empower your<br/><span className="dark:text-[#ccf000] text-white">employees</span> today.
