@@ -106,7 +106,7 @@ export default function JobOpenings() {
     // =========================
     if (loading) {
         return (
-            <div className="p-6 text-gray-500">
+            <div className="p-6 text-gray-500 dark:text-gray-400">
                 Loading job openings...
             </div>
         );
@@ -119,53 +119,53 @@ export default function JobOpenings() {
             {/* JOB OPENINGS */}
             {/* ========================= */}
 
-            <h1 className="text-2xl font-bold text-slate-900 mb-2">
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
                 Job Openings
             </h1>
 
-            <p className="text-gray-500 mb-8">
+            <p className="text-gray-500 dark:text-gray-400 mb-8">
                 View all job openings posted by HR.
             </p>
 
             <div className="space-y-4">
 
                 {jobs.length === 0 ? (
-                    <div className="bg-white rounded-xl shadow p-6 text-gray-500">
+                    <div className="bg-white dark:bg-[#151d2d] rounded-xl shadow p-6 text-gray-500 dark:text-gray-400 border border-gray-100 dark:border-slate-800/80">
                         No job openings available.
                     </div>
                 ) : (
                     jobs.map((job) => (
                         <div
                             key={job.id}
-                            className="bg-white rounded-xl shadow p-6 border border-gray-100"
+                            className="bg-white dark:bg-[#151d2d] rounded-xl shadow p-6 border border-gray-100 dark:border-slate-800/80 transition-all hover:border-emerald-500/30 dark:hover:border-emerald-500/30"
                         >
 
                             {/* JOB TITLE */}
 
-                            <h2 className="text-xl font-bold text-slate-900 mb-3">
+                            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-3 group-hover:text-emerald-500 transition-colors">
                                 {job.title}
                             </h2>
 
                             {/* JOB DETAILS */}
 
-                            <p className="text-gray-600 mb-1">
-                                Department: {job.department}
+                            <p className="text-gray-600 dark:text-gray-400 mb-1">
+                                <span className="font-medium dark:text-slate-300">Department:</span> {job.department}
                             </p>
 
-                            <p className="text-gray-600 mb-1">
-                                Location: {job.location}
+                            <p className="text-gray-600 dark:text-gray-400 mb-1">
+                                <span className="font-medium dark:text-slate-300">Location:</span> {job.location}
                             </p>
 
-                            <p className="text-gray-600 mb-1">
-                                Employment Type: {job.employmentType}
+                            <p className="text-gray-600 dark:text-gray-400 mb-1">
+                                <span className="font-medium dark:text-slate-300">Employment Type:</span> {job.employmentType}
                             </p>
 
-                            <p className="text-gray-600 mb-1">
-                                Experience: {job.experienceRequired}
+                            <p className="text-gray-600 dark:text-gray-400 mb-1">
+                                <span className="font-medium dark:text-slate-300">Experience:</span> {job.experienceRequired}
                             </p>
 
-                            <p className="text-gray-600 mb-4">
-                                Salary: {job.salaryRange}
+                            <p className="text-gray-600 dark:text-gray-400 mb-4">
+                                <span className="font-medium dark:text-slate-300">Salary:</span> {job.salaryRange}
                             </p>
 
                             {/* VIEW DETAILS */}
@@ -174,7 +174,7 @@ export default function JobOpenings() {
                                 onClick={() =>
                                     router.push(`/employee/jobs/details?id=${job.id}`)
                                 }
-                                className="text-blue-600 hover:underline font-semibold"
+                                className="text-[#10b981] dark:text-[#ccf000] hover:underline font-semibold"
                             >
                                 View Details →
                             </button>

@@ -81,7 +81,7 @@ export default function MyReferrals() {
     // =========================
     if (loading) {
         return (
-            <div className="p-6 text-gray-500">
+            <div className="p-6 text-gray-500 dark:text-gray-400">
                 Loading referrals...
             </div>
         );
@@ -94,11 +94,11 @@ export default function MyReferrals() {
             {/* HEADER */}
             {/* ========================= */}
 
-            <h1 className="text-2xl font-bold text-slate-900 mb-2">
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
                 My Referrals
             </h1>
 
-            <p className="text-gray-500 mb-8">
+            <p className="text-gray-500 dark:text-gray-400 mb-8">
                 Track the candidates you have referred.
             </p>
 
@@ -108,7 +108,7 @@ export default function MyReferrals() {
 
             {referrals.length === 0 ? (
 
-                <div className="bg-white rounded-xl shadow p-6 text-gray-500">
+                <div className="bg-white dark:bg-[#151d2d] rounded-xl shadow p-6 text-gray-500 dark:text-gray-400 border border-gray-100 dark:border-slate-800/80">
                     You have not referred any candidates yet.
                 </div>
 
@@ -125,7 +125,7 @@ export default function MyReferrals() {
 
                             <div
                                 key={referral.id}
-                                className="bg-white rounded-xl shadow p-6 border border-gray-100"
+                                className="bg-white dark:bg-[#151d2d] rounded-xl shadow p-6 border border-gray-100 dark:border-slate-800/80"
                             >
 
                                 {/* ========================= */}
@@ -136,11 +136,11 @@ export default function MyReferrals() {
 
                                     <div>
 
-                                        <h3 className="text-lg font-bold text-slate-900">
+                                        <h3 className="text-lg font-bold text-slate-900 dark:text-white">
                                             {referral.candidateName}
                                         </h3>
 
-                                        <p className="text-sm text-gray-500">
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">
                                             Job: {referral.jobTitle}
                                         </p>
 
@@ -164,20 +164,20 @@ export default function MyReferrals() {
                                 {/* CANDIDATE DETAILS */}
                                 {/* ========================= */}
 
-                                <div className="space-y-2 text-sm text-gray-600">
+                                <div className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
 
                                     <p>
-                                        <strong>Email:</strong>{" "}
+                                        <strong className="dark:text-slate-400">Email:</strong>{" "}
                                         {referral.candidateEmail}
                                     </p>
 
                                     <p>
-                                        <strong>Phone:</strong>{" "}
+                                        <strong className="dark:text-slate-400">Phone:</strong>{" "}
                                         {referral.candidatePhone}
                                     </p>
 
                                     <p>
-                                        <strong>Experience:</strong>{" "}
+                                        <strong className="dark:text-slate-400">Experience:</strong>{" "}
                                         {referral.experienceYears ?? 0}{" "}
                                         {(referral.experienceYears ?? 0) === 1
                                             ? "year"
@@ -206,7 +206,7 @@ export default function MyReferrals() {
                                             }
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="text-blue-600 font-semibold text-sm hover:underline"
+                                            className="text-emerald-600 dark:text-emerald-400 font-semibold text-sm hover:underline"
                                         >
                                             📄 View Resume →
                                         </a>
@@ -219,7 +219,7 @@ export default function MyReferrals() {
                                 {/* STATUS MESSAGE */}
                                 {/* ========================= */}
 
-                                <div className="mt-4 pt-4 border-t border-gray-100">
+                                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-slate-800">
 
                                     {/* PENDING */}
 

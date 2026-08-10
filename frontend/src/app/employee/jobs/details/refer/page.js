@@ -124,24 +124,24 @@ function ReferPersonContent() {
     };
 
     return (
-        <div className="min-h-screen p-8 bg-slate-50">
+        <div className="min-h-screen p-8 bg-slate-50 dark:bg-transparent">
 
             {/* Back Button */}
             <button
                 onClick={() => router.back()}
-                className="mb-6 text-blue-600 hover:underline"
+                className="mb-6 text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1 font-medium"
             >
                 ← Back to Job
             </button>
 
             {/* Referral Card */}
-            <div className="bg-white rounded-xl shadow p-8 max-w-2xl">
+            <div className="bg-white dark:bg-[#151d2d] rounded-xl shadow-sm border border-slate-100 dark:border-slate-800/80 p-8 max-w-2xl">
 
-                <h1 className="text-2xl font-bold text-slate-900 mb-2">
+                <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
                     Refer a Person
                 </h1>
 
-                <p className="text-gray-500 mb-6">
+                <p className="text-gray-500 dark:text-gray-400 mb-6">
                     Refer someone for this job opening.
                 </p>
 
@@ -166,7 +166,7 @@ function ReferPersonContent() {
 
                     {/* Candidate Name */}
                     <div>
-                        <label>Candidate Name</label>
+                        <label className="block font-semibold text-sm mb-2 text-slate-700 dark:text-slate-300">Candidate Name</label>
 
                         <input
                             type="text"
@@ -182,13 +182,13 @@ function ReferPersonContent() {
                             }}
                             required
                             placeholder="Enter candidate name"
-                            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-emerald-500"
+                            className="w-full bg-white dark:bg-[#0f1522] border border-gray-300 dark:border-slate-700 rounded-lg px-4 py-3 focus:outline-none focus:border-emerald-500 dark:focus:border-emerald-500 text-slate-900 dark:text-white"
                         />
                     </div>
 
                     {/* Candidate Email */}
                     <div>
-                        <label className="block font-semibold text-sm mb-2">
+                        <label className="block font-semibold text-sm mb-2 text-slate-700 dark:text-slate-300">
                             Candidate Email
                         </label>
 
@@ -199,13 +199,13 @@ function ReferPersonContent() {
                             onChange={handleChange}
                             required
                             placeholder="Enter candidate email"
-                            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-emerald-500"
+                            className="w-full bg-white dark:bg-[#0f1522] border border-gray-300 dark:border-slate-700 rounded-lg px-4 py-3 focus:outline-none focus:border-emerald-500 dark:focus:border-emerald-500 text-slate-900 dark:text-white"
                         />
                     </div>
 
                     {/* Candidate Phone */}
                     <div>
-                        <label>Candidate Phone</label>
+                        <label className="block font-semibold text-sm mb-2 text-slate-700 dark:text-slate-300">Candidate Phone</label>
 
                         <input
                             type="tel"
@@ -226,13 +226,13 @@ function ReferPersonContent() {
                             required
                             maxLength={10}
                             placeholder="Enter candidate phone"
-                            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:border-emerald-500"
+                            className="w-full bg-white dark:bg-[#0f1522] border border-gray-300 dark:border-slate-700 rounded-lg px-4 py-3 focus:outline-none focus:border-emerald-500 dark:focus:border-emerald-500 text-slate-900 dark:text-white"
                         />
                     </div>
 
                     {/*expierence*/}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block font-semibold text-sm mb-2 text-slate-700 dark:text-slate-300">
                             Experience
                         </label>
 
@@ -249,9 +249,9 @@ function ReferPersonContent() {
                                     }}
                                     placeholder="Years"
                                     required
-                                    className="w-full border border-gray-300 rounded-lg px-4 py-3"
+                                    className="w-full bg-white dark:bg-[#0f1522] border border-gray-300 dark:border-slate-700 rounded-lg px-4 py-3 focus:outline-none focus:border-emerald-500 dark:focus:border-emerald-500 text-slate-900 dark:text-white"
                                 />
-                                <p className="text-xs text-gray-500 mt-1">Years</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Years</p>
                             </div>
 
                             <div className="flex-1">
@@ -271,23 +271,23 @@ function ReferPersonContent() {
                                     }}
                                     placeholder="Months"
                                     required
-                                    className="w-full border border-gray-300 rounded-lg px-4 py-3"
+                                    className="w-full bg-white dark:bg-[#0f1522] border border-gray-300 dark:border-slate-700 rounded-lg px-4 py-3 focus:outline-none focus:border-emerald-500 dark:focus:border-emerald-500 text-slate-900 dark:text-white"
                                 />
-                                <p className="text-xs text-gray-500 mt-1">Months</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Months</p>
                             </div>
                         </div>
                     </div>
 
                     {/* Resume */}
                     <div>
-                        <label>Resume</label>
+                        <label className="block font-semibold text-sm mb-2 text-slate-700 dark:text-slate-300">Resume</label>
 
                         <input
                             type="file"
                             accept=".pdf,.doc,.docx"
                             onChange={handleFileChange}
                             required
-                            className="w-full border border-gray-300 rounded-lg px-4 py-3"
+                            className="w-full bg-white dark:bg-[#0f1522] border border-gray-300 dark:border-slate-700 rounded-lg px-4 py-3 focus:outline-none focus:border-emerald-500 dark:focus:border-emerald-500 text-slate-900 dark:text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 dark:file:bg-emerald-900/30 dark:file:text-emerald-400"
                         />
 
                         {resume && (
