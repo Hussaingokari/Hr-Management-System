@@ -5,9 +5,9 @@ import Link from 'next/link';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTheme } from 'next-themes';
 import { logout } from '@/store/authSlice';
-import { 
-  Home, Calendar, ClipboardList, CircleDollarSign, 
-  Star, BadgeCheck, Bell, Settings, LogOut, ShieldCheck, Users, Wallet, GraduationCap, Send, FileText
+import {
+  Home, Calendar, ClipboardList, CircleDollarSign,
+  Star, BadgeCheck, Briefcase, Bell, Settings, LogOut, ShieldCheck, Users, Wallet, GraduationCap, Send, FileText
 } from 'lucide-react';
 
 const EMP_MENU = [
@@ -17,6 +17,8 @@ const EMP_MENU = [
   { key: '/employee/payslips', label: 'Payslips', icon: <CircleDollarSign size={18} strokeWidth={2} /> },
   { key: '/employee/performance', label: 'Performance', icon: <Star size={18} strokeWidth={2} /> },
   { key: '/employee/onboarding', label: 'Onboarding', icon: <BadgeCheck size={18} strokeWidth={2} /> },
+  { key: '/employee/jobs', label: 'Job Openings', icon: <Briefcase size={18} strokeWidth={2} /> },
+  { key: '/employee/referrals', label: 'My Referrals', icon: <Users size={18} strokeWidth={2} /> },
   { key: '/employee/notifications', label: 'Notifications', icon: <Bell size={18} strokeWidth={2} /> },
 ];
 
@@ -90,7 +92,6 @@ export default function Sidebar({ role }) {
     };
   };
 
-  // We only render the 1:1 image style on dark mode, otherwise fallback to standard light mode styling
   const sidebarBg = isDark ? '#0A0E17' : '#ffffff';
   const borderColor = isDark ? 'rgba(255,255,255,0.05)' : '#e2e8f0';
 
@@ -99,7 +100,7 @@ export default function Sidebar({ role }) {
       {isMobileOpen && (
         <div className="mobile-overlay" onClick={() => setIsMobileOpen(false)} />
       )}
-      <div className={`app-sidebar ${isMobileOpen ? 'mobile-open' : ''}`} style={{ 
+      <div className={`app-sidebar ${isMobileOpen ? 'mobile-open' : ''}`} style={{
         backgroundColor: sidebarBg,
         borderRight: `1px solid ${borderColor}`,
         display: 'flex', flexDirection: 'column',
@@ -110,7 +111,7 @@ export default function Sidebar({ role }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <div style={{
               width: '42px', height: '42px',
-              background: '#064e3b', 
+              background: '#064e3b',
               borderRadius: '12px', display: 'flex', alignItems: 'center',
               justifyContent: 'center', fontSize: '20px', fontWeight: '800', color: '#ffffff'
             }}>H</div>
@@ -122,7 +123,14 @@ export default function Sidebar({ role }) {
         </div>
 
         {/* Scrollable Middle Container (Menu + Spacer + Mountain) */}
-        <div className="hide-scrollbar" style={{ flex: 1, overflowY: (role === 'ADMIN' || role === 'HR') ? 'auto' : 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+        <div className="hide-scrollbar" style={{
+          flex: 1,
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: 0
+        }}>
           {/* Main Menu */}
           <div style={{ padding: '16px 16px 0', flexShrink: 0 }}>
             {menu.map((item) => (
@@ -130,7 +138,7 @@ export default function Sidebar({ role }) {
                 key={item.key}
                 href={item.key}
                 onClick={() => setIsMobileOpen(false)}
-                style={{...navItemStyle(item.key), position: 'relative', textDecoration: 'none'}}
+                style={{ ...navItemStyle(item.key), position: 'relative', textDecoration: 'none' }}
                 onMouseEnter={e => {
                   if (!isItemActive(item.key)) e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.03)' : '#f8fafc';
                 }}
@@ -144,9 +152,9 @@ export default function Sidebar({ role }) {
                 <span style={{ color: isItemActive(item.key) ? (isDark ? '#ffffff' : '#0f172a') : (isDark ? '#cbd5e1' : '#475569') }}>
                   {item.label}
                 </span>
-                
+
                 {item.badge && (
-                  <div style={{ 
+                  <div style={{
                     position: 'absolute', right: '12px',
                     background: '#8b5cf6', color: 'white',
                     fontSize: '11px', fontWeight: '700',
@@ -164,28 +172,26 @@ export default function Sidebar({ role }) {
           {/* Spacer to push Mountain Vector to the bottom of the scrollable area */}
           <div style={{ flex: 1, minHeight: '20px' }} />
 
-          {/* Decorative Mountain Vector exactly matching the user's image */}
+          {/* Decorative Mountain Vector */}
           {isDark && (
             <div style={{ position: 'relative', width: '100%', flexShrink: 0, overflow: 'hidden' }}>
               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '40px', background: 'linear-gradient(to bottom, #0A0E17, transparent)', zIndex: 1 }} />
-              <img 
-                src="/bottom.png" 
+              <img
+                src="/bottom.png"
                 alt="Landscape"
-                style={{ 
-                  width: '100%', 
-                  height: 'auto', 
+                style={{
+                  width: '100%',
+                  height: 'auto',
                   display: 'block',
-                  opacity: 0.9 
-                }} 
+                  opacity: 0.9
+                }}
               />
             </div>
           )}
         </div>
 
-        {/* Fixed Bottom — Settings + Logout exactly like the image */}
-        {/* Extra paddingBottom added to prevent Next.js dev overlay from hiding the Logout icon! */}
+        {/* Fixed Bottom — Settings + Logout */}
         <div style={{ padding: '16px 16px 20px', borderTop: `1px solid ${borderColor}`, background: sidebarBg, zIndex: 2, flexShrink: 0 }}>
-
           {/* Settings */}
           <Link
             href={settingsRoute}
@@ -230,7 +236,6 @@ export default function Sidebar({ role }) {
             Logout
           </div>
         </div>
-
       </div>
     </>
   );

@@ -14,8 +14,10 @@ public class RecruitmentDTOs {
     // ---- Job Posting ----
     @Data
     public static class CreateJobRequest {
-        @NotBlank private String title;
-        @NotBlank private String department;
+        @NotBlank
+        private String title;
+        @NotBlank
+        private String department;
         private String location;
         private String employmentType;
         private String description;
@@ -55,14 +57,33 @@ public class RecruitmentDTOs {
     // ---- Job Application ----
     @Data
     public static class ApplyRequest {
-        @NotBlank private String candidateName;
-        @NotBlank private String candidateEmail;
+        @NotBlank
+        private String candidateName;
+        @NotBlank
+        private String candidateEmail;
         private String candidatePhone;
         private String resumeUrl;
         private String coverLetter;
         private Integer experienceYears;
+        private Integer experienceMonths;
         private String currentCompany;
         private String currentDesignation;
+    }
+
+    @Data
+    public static class ReferralRequest {
+        @NotBlank
+        private String candidateName;
+
+        @NotBlank
+        private String candidateEmail;
+
+        private String candidatePhone;
+
+        private Integer experienceYears;
+        private Integer experienceMonths;
+
+        private String resumeUrl;
     }
 
     @Data
@@ -86,7 +107,9 @@ public class RecruitmentDTOs {
         private String candidateEmail;
         private String candidatePhone;
         private String resumeUrl;
+        private String referredByName;
         private Integer experienceYears;
+        private Integer experienceMonths;
         private String currentCompany;
         private ApplicationStatus status;
         private LocalDate interviewDate;

@@ -2,7 +2,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
-import { Briefcase, MapPin, Banknote, Inbox, Building2, Calendar, Loader2 } from 'lucide-react';
 
 const STATUSES = [
   'APPLIED', 'SHORTLISTED', 'INTERVIEW_SCHEDULED',
@@ -12,19 +11,19 @@ const STATUSES = [
 
 function Badge({ status }) {
   const map = {
-    OPEN:               { bg: '#dcfce7', color: '#16a34a' },
-    CLOSED:             { bg: '#fee2e2', color: '#dc2626' },
-    DRAFT:              { bg: '#f1f5f9', color: 'var(--text-secondary)' },
-    APPLIED:            { bg: '#eff6ff', color: '#3b82f6' },
-    SHORTLISTED:        { bg: '#fdf4ff', color: '#9333ea' },
-    INTERVIEW_SCHEDULED:{ bg: '#fff7ed', color: '#f59e0b' },
-    INTERVIEWED:        { bg: '#fef9c3', color: '#ca8a04' },
-    OFFER_SENT:         { bg: '#f0fdf4', color: '#16a34a' },
-    OFFER_ACCEPTED:     { bg: '#dcfce7', color: '#16a34a' },
-    OFFER_REJECTED:     { bg: '#fee2e2', color: '#dc2626' },
-    REJECTED:           { bg: '#fee2e2', color: '#dc2626' },
+    OPEN: { bg: '#dcfce7', color: '#16a34a' },
+    CLOSED: { bg: '#fee2e2', color: '#dc2626' },
+    DRAFT: { bg: '#f1f5f9', color: '#64748b' },
+    APPLIED: { bg: '#eff6ff', color: '#3b82f6' },
+    SHORTLISTED: { bg: '#fdf4ff', color: '#9333ea' },
+    INTERVIEW_SCHEDULED: { bg: '#fff7ed', color: '#f59e0b' },
+    INTERVIEWED: { bg: '#fef9c3', color: '#ca8a04' },
+    OFFER_SENT: { bg: '#f0fdf4', color: '#16a34a' },
+    OFFER_ACCEPTED: { bg: '#dcfce7', color: '#16a34a' },
+    OFFER_REJECTED: { bg: '#fee2e2', color: '#dc2626' },
+    REJECTED: { bg: '#fee2e2', color: '#dc2626' },
   };
-  const s = map[status] || { bg: '#f1f5f9', color: 'var(--text-secondary)' };
+  const s = map[status] || { bg: '#f1f5f9', color: '#64748b' };
   return (
     <span style={{
       background: s.bg, color: s.color,
@@ -45,17 +44,18 @@ const EMPTY_JOB = {
 };
 
 export default function RecruitmentPage() {
-  const [jobs, setJobs]                   = useState([]);
-  const [selectedJob, setSelectedJob]     = useState(null);
-  const [applications, setApplications]   = useState([]);
-  const [loading, setLoading]             = useState(true);
-  const [loadingApps, setLoadingApps]     = useState(false);
-  const [showJobForm, setShowJobForm]     = useState(false);
-  const [jobForm, setJobForm]             = useState(EMPTY_JOB);
-  const [submitting, setSubmitting]       = useState(false);
-  const [updatingApp, setUpdatingApp]     = useState(null);
-  const [selectedApp, setSelectedApp]     = useState(null);
-  const [newStatus, setNewStatus]         = useState('');
+  const [jobs, setJobs] = useState([]);
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [applications, setApplications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingApps, setLoadingApps] = useState(false);
+  const [showJobForm, setShowJobForm] = useState(false);
+  const [jobForm, setJobForm] = useState(EMPTY_JOB);
+  const [submitting, setSubmitting] = useState(false);
+  const [updatingApp, setUpdatingApp] = useState(null);
+  const [togglingJob, setTogglingJob] = useState(null);
+  const [selectedApp, setSelectedApp] = useState(null);
+  const [newStatus, setNewStatus] = useState('');
   const [interviewDate, setInterviewDate] = useState('');
   const [interviewScore, setInterviewScore] = useState('');
   const [interviewNotes, setInterviewNotes] = useState('');
@@ -104,42 +104,106 @@ export default function RecruitmentPage() {
     } finally { setSubmitting(false); }
   };
 
-  const handleUpdateApplication = async (appId) => {
-    if (!newStatus) { toast.error('Select a status'); return; }
-    setUpdatingApp(appId);
+  const handleToggleJobStatus = async (job) => {
+    const newJobStatus = job.status === 'OPEN' ? 'CLOSED' : 'OPEN';
+    setTogglingJob(job.id);
+
     try {
-      const payload = { status: newStatus };
-      if (newStatus === 'INTERVIEW_SCHEDULED') {
-        payload.interviewDate  = interviewDate;
-        payload.interviewMode  = 'VIDEO';
-        payload.interviewerId  = 2;
+      await api.put(`/api/recruitment/jobs/${job.id}`, {
+        status: newJobStatus,
+      });
+
+      toast.success(
+        newJobStatus === 'OPEN'
+          ? 'Job reopened successfully!'
+          : 'Job closed successfully!'
+      );
+
+      setJobs((prev) =>
+        prev.map((j) => (j.id === job.id ? { ...j, status: newJobStatus } : j))
+      );
+
+      if (selectedJob?.id === job.id) {
+        setSelectedJob({ ...selectedJob, status: newJobStatus });
       }
-      if (newStatus === 'INTERVIEWED') {
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update job status');
+    } finally {
+      setTogglingJob(null);
+    }
+  };
+
+  const handleUpdateApplication = async (appId, statusOverride = null) => {
+    const status = statusOverride || newStatus;
+
+    if (!status) {
+      toast.error('Select a status');
+      return;
+    }
+
+    setUpdatingApp(appId);
+
+    try {
+      const payload = {
+        status: status,
+      };
+
+      if (status === 'INTERVIEW_SCHEDULED') {
+        payload.interviewDate = interviewDate;
+        payload.interviewMode = 'VIDEO';
+        payload.interviewerId = 2;
+      }
+
+      if (status === 'INTERVIEWED') {
         payload.interviewScore = parseInt(interviewScore) || 0;
         payload.interviewNotes = interviewNotes;
       }
-      if (newStatus === 'REJECTED') {
+
+      if (status === 'REJECTED') {
         payload.rejectionReason = rejectionReason;
       }
-      await api.put(`/api/recruitment/applications/${appId}`, payload);
-      toast.success('Application updated!');
+
+      await api.put(
+        `/api/recruitment/applications/${appId}`,
+        payload
+      );
+
+      if (status === 'SHORTLISTED') {
+        toast.success('Candidate approved successfully!');
+      } else if (status === 'REJECTED') {
+        toast.success('Candidate rejected.');
+      } else {
+        toast.success('Application updated!');
+      }
+
       setSelectedApp(null);
       setNewStatus('');
+      setInterviewDate('');
+      setInterviewScore('');
+      setInterviewNotes('');
+      setRejectionReason('');
+
       fetchApplications(selectedJob.id);
+
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Update failed');
-    } finally { setUpdatingApp(null); }
+      console.error(err);
+      toast.error(
+        err.response?.data?.message ||
+        'Update failed'
+      );
+    } finally {
+      setUpdatingApp(null);
+    }
   };
 
   return (
     <div>
-      {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <div>
-          <h1 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px' }}>
+          <h1 style={{ fontSize: '22px', fontWeight: '800', color: '#1e293b', marginBottom: '4px' }}>
             Recruitment
           </h1>
-          <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+          <p style={{ fontSize: '13px', color: '#94a3b8' }}>
             Manage job postings and candidate applications
           </p>
         </div>
@@ -150,38 +214,37 @@ export default function RecruitmentPage() {
             color: 'white', border: 'none', borderRadius: '10px',
             fontSize: '13px', fontWeight: '700', cursor: 'pointer',
           }}
-        >+ Post Job</button>
+        >
+          + Post Job
+        </button>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: selectedJob ? '1fr 1.5fr' : '1fr', gap: '20px' }}>
-
-        {/* Jobs List */}
+        {/* Left Column: Job List */}
         <div style={{
-          background: 'var(--card-bg)', borderRadius: '12px',
-          border: '1px solid var(--card-border)',
+          background: 'white', borderRadius: '12px',
+          border: '1px solid #e2e8f0',
           boxShadow: '0 1px 4px rgba(0,0,0,0.04)', overflow: 'hidden',
         }}>
-          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--card-border)' }}>
-            <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)' }}>
+          <div style={{ padding: '16px 20px', borderBottom: '1px solid #e2e8f0' }}>
+            <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b' }}>
               Job Postings ({jobs.length})
             </h3>
           </div>
 
           {loading ? (
-            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</div>
+            <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>Loading...</div>
           ) : jobs.length === 0 ? (
             <div style={{ padding: '60px', textAlign: 'center' }}>
-              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px', color: '#1e3a5f' }}>
-                <Briefcase size={40} strokeWidth={1.5} />
-              </div>
-              <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '8px' }}>No jobs posted yet</div>
+              <div style={{ fontSize: '40px', marginBottom: '12px' }}>💼</div>
+              <div style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', marginBottom: '8px' }}>No jobs posted yet</div>
               <button onClick={() => setShowJobForm(true)}
                 style={{ padding: '8px 18px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>
                 + Post First Job
               </button>
             </div>
           ) : (
-            jobs.map((job, i) => (
+            jobs.map((job) => (
               <div key={job.id}
                 onClick={() => handleSelectJob(job)}
                 style={{
@@ -195,16 +258,39 @@ export default function RecruitmentPage() {
                 onMouseLeave={e => { if (selectedJob?.id !== job.id) e.currentTarget.style.background = 'white'; }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                  <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)' }}>{job.title}</div>
-                  <Badge status={job.status}/>
+                  <div style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b' }}>{job.title}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Badge status={job.status} />
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleToggleJobStatus(job);
+                      }}
+                      disabled={togglingJob === job.id}
+                      style={{
+                        padding: '4px 10px',
+                        background: job.status === 'OPEN' ? '#fee2e2' : '#dcfce7',
+                        color: job.status === 'OPEN' ? '#dc2626' : '#16a34a',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontSize: '11px',
+                        fontWeight: '700',
+                        cursor: togglingJob === job.id ? 'not-allowed' : 'pointer',
+                        opacity: togglingJob === job.id ? 0.6 : 1,
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {togglingJob === job.id ? '...' : job.status === 'OPEN' ? 'Close' : 'Reopen'}
+                    </button>
+                  </div>
                 </div>
-                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <MapPin size={12} /> {job.location} · {job.department} · {job.employmentType}
+                <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>
+                  📍 {job.location} · {job.department} · {job.employmentType}
                 </div>
-                <div style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <Banknote size={12} /> {job.salaryRange} · Exp: {job.experienceRequired}
+                <div style={{ fontSize: '12px', color: '#94a3b8' }}>
+                  💰 {job.salaryRange} · Exp: {job.experienceRequired}
                 </div>
-                <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '4px' }}>
                   Deadline: {job.applicationDeadline}
                 </div>
               </div>
@@ -212,36 +298,58 @@ export default function RecruitmentPage() {
           )}
         </div>
 
-        {/* Applications */}
+        {/* Right Column: Applications */}
         {selectedJob && (
           <div style={{
-            background: 'var(--card-bg)', borderRadius: '12px',
-            border: '1px solid var(--card-border)',
+            background: 'white', borderRadius: '12px',
+            border: '1px solid #e2e8f0',
             boxShadow: '0 1px 4px rgba(0,0,0,0.04)', overflow: 'hidden',
           }}>
-            <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--card-border)', background: 'var(--bg-primary)' }}>
-              <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '2px' }}>
-                {selectedJob.title}
-              </h3>
-              <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                {applications.length} application(s) received
-              </p>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b', marginBottom: '2px' }}>
+                    {selectedJob.title}
+                  </h3>
+                  <p style={{ fontSize: '12px', color: '#94a3b8' }}>
+                    {applications.length} application(s) received
+                  </p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Badge status={selectedJob.status} />
+                  <button
+                    onClick={() => handleToggleJobStatus(selectedJob)}
+                    disabled={togglingJob === selectedJob.id}
+                    style={{
+                      padding: '6px 12px',
+                      background: selectedJob.status === 'OPEN' ? '#fee2e2' : '#dcfce7',
+                      color: selectedJob.status === 'OPEN' ? '#dc2626' : '#16a34a',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontSize: '12px',
+                      fontWeight: '700',
+                      cursor: togglingJob === selectedJob.id ? 'not-allowed' : 'pointer',
+                      opacity: togglingJob === selectedJob.id ? 0.6 : 1,
+                    }}
+                  >
+                    {togglingJob === selectedJob.id ? '...' : selectedJob.status === 'OPEN' ? 'Close Job' : 'Reopen Job'}
+                  </button>
+                </div>
+              </div>
             </div>
 
             {loadingApps ? (
-              <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading applications...</div>
+              <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>Loading applications...</div>
             ) : applications.length === 0 ? (
               <div style={{ padding: '60px', textAlign: 'center' }}>
-                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px', color: '#94a3b8' }}>
-                  <Inbox size={40} strokeWidth={1.5} />
-                </div>
-                <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-primary)' }}>No applications yet</div>
-                <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                <div style={{ fontSize: '40px', marginBottom: '12px' }}>📭</div>
+                <div style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b' }}>No applications yet</div>
+                <div style={{ fontSize: '13px', color: '#94a3b8', marginTop: '4px' }}>
                   Applications will appear here when candidates apply
                 </div>
               </div>
             ) : (
-              applications.map((app, i) => (
+              applications.map((app) => (
                 <div key={app.id} style={{ padding: '16px 20px', borderBottom: '1px solid #f1f5f9' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -254,101 +362,87 @@ export default function RecruitmentPage() {
                         {app.candidateName?.split(' ').map(n => n[0]).join('').slice(0, 2)}
                       </div>
                       <div>
-                        <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)' }}>
+                        <div style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b', marginBottom: '3px' }}>
                           {app.candidateName}
                         </div>
-                        <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                          {app.candidateEmail} · {app.candidatePhone}
+                        <div style={{ fontSize: '11px', color: '#94a3b8', marginBottom: '2px' }}>
+                          {app.candidateEmail}
+                        </div>
+                        <div style={{ fontSize: '11px', color: '#94a3b8' }}>
+                          {app.candidatePhone}
+                        </div>
+                        <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>
+                          {app.experienceYears ?? 0}{" "}
+                          {(app.experienceYears ?? 0) === 1 ? "year" : "years"}{" "}
+                          {app.experienceMonths ?? 0}{" "}
+                          {(app.experienceMonths ?? 0) === 1 ? "month" : "months"}{" "}
+                          experience
                         </div>
                       </div>
                     </div>
-                    <Badge status={app.status}/>
+                    <Badge status={app.status} />
                   </div>
 
-                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <Building2 size={12} /> {app.currentCompany} · {app.currentDesignation} · {app.experienceYears} yrs exp
-                  </div>
-
-                  {app.interviewDate && (
-                    <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <Calendar size={12} /> Interview: {app.interviewDate} · {app.interviewMode}
-                      {app.interviewScore && ` · Score: ${app.interviewScore}/100`}
+                  {app.resumeUrl && (
+                    <div style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '12px', color: '#64748b' }}>
+                        📄 Resume:
+                      </span>
+                      <a
+                        href={app.resumeUrl.startsWith('http') ? app.resumeUrl : `http://localhost:8080${app.resumeUrl}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ fontSize: '12px', color: '#2563eb', fontWeight: '700', textDecoration: 'none' }}
+                      >
+                        View Resume →
+                      </a>
                     </div>
                   )}
 
-                  {/* Update Status */}
-                  {selectedApp === app.id ? (
-                    <div style={{ background: 'var(--bg-primary)', borderRadius: '8px', padding: '12px', marginTop: '8px' }}>
-                      <div style={{ marginBottom: '10px' }}>
-                        <select
-                          value={newStatus}
-                          onChange={e => setNewStatus(e.target.value)}
-                          style={{ width: '100%', padding: '8px 12px', border: '1.5px solid #e2e8f0', borderRadius: '8px', fontSize: '13px', outline: 'none', background: 'var(--card-bg)', marginBottom: '8px' }}
-                        >
-                          <option value="">Select new status...</option>
-                          {STATUSES.map(s => <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>)}
-                        </select>
+                  {/* Referred By Section */}
+                  <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px' }}>
+                    👤 Referred By:{' '}
+                    <strong style={{ color: '#1e293b' }}>
+                      {app.referredByName || app.referrerName || 'Direct Application'}
+                    </strong>
+                  </div>
 
-                        {newStatus === 'INTERVIEW_SCHEDULED' && (
-                          <input type="date" value={interviewDate}
-                            onChange={e => setInterviewDate(e.target.value)}
-                            placeholder="Interview Date"
-                            style={{ width: '100%', padding: '8px 12px', border: '1.5px solid #e2e8f0', borderRadius: '8px', fontSize: '13px', outline: 'none', boxSizing: 'border-box', marginBottom: '8px' }}
-                          />
-                        )}
-
-                        {newStatus === 'INTERVIEWED' && (
-                          <>
-                            <input type="number" value={interviewScore}
-                              onChange={e => setInterviewScore(e.target.value)}
-                              placeholder="Score (0-100)"
-                              style={{ width: '100%', padding: '8px 12px', border: '1.5px solid #e2e8f0', borderRadius: '8px', fontSize: '13px', outline: 'none', boxSizing: 'border-box', marginBottom: '8px' }}
-                            />
-                            <input value={interviewNotes}
-                              onChange={e => setInterviewNotes(e.target.value)}
-                              placeholder="Interview notes..."
-                              style={{ width: '100%', padding: '8px 12px', border: '1.5px solid #e2e8f0', borderRadius: '8px', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}
-                            />
-                          </>
-                        )}
-
-                        {newStatus === 'REJECTED' && (
-                          <input value={rejectionReason}
-                            onChange={e => setRejectionReason(e.target.value)}
-                            placeholder="Rejection reason..."
-                            style={{ width: '100%', padding: '8px 12px', border: '1.5px solid #e2e8f0', borderRadius: '8px', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}
-                          />
-                        )}
-                      </div>
-
-                      <div style={{ display: 'flex', gap: '8px' }}>
-                        <button
-                          onClick={() => handleUpdateApplication(app.id)}
-                          disabled={updatingApp === app.id}
-                          style={{ flex: 1, padding: '8px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '7px', fontSize: '12px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                        >
-                          {updatingApp === app.id ? <Loader2 size={14} className="animate-spin" /> : 'Update'}
-                        </button>
-                        <button
-                          onClick={() => { setSelectedApp(null); setNewStatus(''); }}
-                          style={{ padding: '8px 14px', background: 'var(--card-border)', color: 'var(--text-secondary)', border: 'none', borderRadius: '7px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}
-                        >
-                          Cancel
-                        </button>
-                      </div>
+                  {app.status === 'APPLIED' && (
+                    <div style={{ display: 'flex', gap: '10px', marginTop: '10px', marginBottom: '12px' }}>
+                      <button
+                        onClick={() => handleUpdateApplication(app.id, 'SHORTLISTED')}
+                        disabled={updatingApp === app.id}
+                        style={{
+                          flex: 1, padding: '10px',
+                          background: updatingApp === app.id ? '#86efac' : '#16a34a',
+                          color: 'white', border: 'none', borderRadius: '7px',
+                          fontSize: '12px', fontWeight: '700',
+                          cursor: updatingApp === app.id ? 'not-allowed' : 'pointer',
+                        }}
+                      >
+                        ✓ Approve
+                      </button>
+                      <button
+                        onClick={() => handleUpdateApplication(app.id, 'REJECTED')}
+                        disabled={updatingApp === app.id}
+                        style={{
+                          flex: 1, padding: '10px',
+                          background: updatingApp === app.id ? '#fca5a5' : '#dc2626',
+                          color: 'white', border: 'none', borderRadius: '7px',
+                          fontSize: '12px', fontWeight: '700',
+                          cursor: updatingApp === app.id ? 'not-allowed' : 'pointer',
+                        }}
+                      >
+                        ✕ Reject
+                      </button>
                     </div>
-                  ) : (
-                    <button
-                      onClick={() => setSelectedApp(app.id)}
-                      style={{
-                        marginTop: '8px', padding: '6px 14px',
-                        background: '#eff6ff', color: '#3b82f6',
-                        border: '1px solid #bfdbfe', borderRadius: '6px',
-                        fontSize: '11px', fontWeight: '700', cursor: 'pointer',
-                      }}
-                    >
-                      Update Status →
-                    </button>
+                  )}
+
+                  {app.interviewDate && (
+                    <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '8px' }}>
+                      📅 Interview: {app.interviewDate} · {app.interviewMode}
+                      {app.interviewScore && ` · Score: ${app.interviewScore}/100`}
+                    </div>
                   )}
                 </div>
               ))
@@ -365,14 +459,14 @@ export default function RecruitmentPage() {
           zIndex: 100, padding: '20px',
         }}>
           <div style={{
-            background: 'var(--card-bg)', borderRadius: '16px', padding: '28px',
+            background: 'white', borderRadius: '16px', padding: '28px',
             width: '100%', maxWidth: '560px', maxHeight: '90vh',
             overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h2 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-primary)' }}>Post New Job</h2>
+              <h2 style={{ fontSize: '18px', fontWeight: '800', color: '#1e293b' }}>Post New Job</h2>
               <button onClick={() => setShowJobForm(false)}
-                style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: 'var(--text-muted)' }}>✕</button>
+                style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#94a3b8' }}>✕</button>
             </div>
 
             <form onSubmit={handleCreateJob}>
@@ -407,7 +501,7 @@ export default function RecruitmentPage() {
                 </label>
                 <select value={jobForm.employmentType}
                   onChange={e => setJobForm({ ...jobForm, employmentType: e.target.value })}
-                  style={{ width: '100%', padding: '9px 12px', border: '1.5px solid #e2e8f0', borderRadius: '8px', fontSize: '13px', outline: 'none', background: 'var(--card-bg)' }}>
+                  style={{ width: '100%', padding: '9px 12px', border: '1.5px solid #e2e8f0', borderRadius: '8px', fontSize: '13px', outline: 'none', background: 'white' }}>
                   <option value="FULL_TIME">Full Time</option>
                   <option value="PART_TIME">Part Time</option>
                   <option value="CONTRACT">Contract</option>
@@ -439,12 +533,12 @@ export default function RecruitmentPage() {
 
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button type="button" onClick={() => setShowJobForm(false)}
-                  style={{ flex: 1, padding: '12px', background: 'var(--card-bg)', color: '#374151', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
+                  style={{ flex: 1, padding: '12px', background: 'white', color: '#374151', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
                   Cancel
                 </button>
                 <button type="submit" disabled={submitting}
-                  style={{ flex: 1, padding: '12px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.7 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                  {submitting ? <><Loader2 size={16} className="animate-spin" /> Posting...</> : 'Post Job'}
+                  style={{ flex: 1, padding: '12px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.7 : 1 }}>
+                  {submitting ? '⏳ Posting...' : 'Post Job'}
                 </button>
               </div>
             </form>
