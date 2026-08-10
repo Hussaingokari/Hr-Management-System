@@ -389,7 +389,7 @@ export default function RecruitmentPage() {
                         📄 Resume:
                       </span>
                       <a
-                        href={app.resumeUrl.startsWith('http') ? app.resumeUrl : `http://localhost:8080${app.resumeUrl}`}
+                        href={app.resumeUrl.startsWith('http') ? app.resumeUrl : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'}${app.resumeUrl}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         style={{ fontSize: '12px', color: '#2563eb', fontWeight: '700', textDecoration: 'none' }}

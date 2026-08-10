@@ -202,7 +202,7 @@ export default function MyReferrals() {
                                             href={
                                                 referral.resumeUrl.startsWith("http")
                                                     ? referral.resumeUrl
-                                                    : `http://localhost:8080${referral.resumeUrl}`
+                                                    : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'}${referral.resumeUrl}`
                                             }
                                             target="_blank"
                                             rel="noopener noreferrer"

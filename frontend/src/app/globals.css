@@ -11,6 +11,7 @@
   --text-secondary: #64748b;
   --text-muted: #94a3b8;
   --card-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  --primary: #6366f1;
 }
 
 html.dark {
@@ -22,6 +23,7 @@ html.dark {
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
   --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --primary: #6366f1;
 }
 
 /* =========================================================
