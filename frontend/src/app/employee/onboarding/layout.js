@@ -24,7 +24,7 @@ export default function EmployeeOnboardingLayout({ children }) {
 
     return (
         <div className="flex flex-col md:flex-row gap-5 items-start">
-            <div className="w-full md:w-[260px] shrink-0 bg-white rounded-xl border border-slate-200 shadow-sm p-3 md:p-4 md:sticky md:top-5 flex flex-row md:flex-col overflow-x-auto md:overflow-visible gap-2 md:gap-1 no-scrollbar">
+            <div className="w-full md:w-[260px] shrink-0 bg-white dark:bg-[#151d2d] rounded-xl border border-slate-200 dark:border-slate-800/80 shadow-sm p-3 md:p-4 md:sticky md:top-5 flex flex-row md:flex-col overflow-x-auto md:overflow-visible gap-2 md:gap-1 no-scrollbar">
                 {SUB_NAV.map(item => {
                     const active = pathname === item.key;
                     return (
@@ -33,8 +33,8 @@ export default function EmployeeOnboardingLayout({ children }) {
                             onClick={() => router.push(item.key)}
                             className={`flex items-center gap-2 md:gap-3 px-3 py-2 md:px-4 md:py-3 rounded-lg cursor-pointer transition-all duration-150 whitespace-nowrap ${
                                 active 
-                                    ? 'bg-indigo-50 text-slate-900 font-bold' 
-                                    : 'bg-transparent text-slate-500 hover:bg-slate-50 font-normal'
+                                    ? 'bg-indigo-50 dark:bg-indigo-500/10 text-slate-900 dark:text-indigo-400 font-bold' 
+                                    : 'bg-transparent text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 font-normal'
                             }`}
                         >
                             <NavIcon path={item.icon} />
