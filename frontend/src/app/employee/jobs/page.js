@@ -172,7 +172,7 @@ export default function JobOpenings() {
 
                             <button
                                 onClick={() =>
-                                    router.push(`/employee/jobs/${job.id}`)
+                                    router.push(`/employee/jobs/details?id=${job.id}`)
                                 }
                                 className="text-blue-600 hover:underline font-semibold"
                             >

@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useState, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import api from "@/lib/axios";
 
-
-export default function ReferPerson() {
-    const params = useParams();
+function ReferPersonContent() {
+    const searchParams = useSearchParams();
     const router = useRouter();
+    const id = searchParams.get("id");
     const [experienceYears, setExperienceYears] = useState('');
     const [experienceMonths, setExperienceMonths] = useState('');
 
@@ -43,6 +43,11 @@ export default function ReferPerson() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!id) {
+            setError("Job ID is missing.");
+            return;
+        }
 
         setLoading(true);
         setError("");
@@ -85,7 +90,7 @@ export default function ReferPerson() {
             const employeeId = 3;
 
             const referralResponse = await api.post(
-                `/api/recruitment/jobs/${params.id}/refer?employeeId=${employeeId}`,
+                `/api/recruitment/jobs/${id}/refer?employeeId=${employeeId}`,
                 {
                     candidateName: form.candidateName,
                     candidateEmail: form.candidateEmail,
@@ -101,7 +106,7 @@ export default function ReferPerson() {
             setSuccess("Candidate referred successfully!");
 
             setTimeout(() => {
-                router.push(`/employee/jobs/${params.id}`);
+                router.push(`/employee/jobs/details?id=${id}`);
             }, 1500);
 
         } catch (err) {
@@ -308,5 +313,13 @@ export default function ReferPerson() {
                 </form>
             </div>
         </div>
+    );
+}
+
+export default function ReferPerson() {
+    return (
+        <Suspense fallback={<div className="min-h-screen p-8 bg-slate-50">Loading referral form...</div>}>
+            <ReferPersonContent />
+        </Suspense>
     );
 }

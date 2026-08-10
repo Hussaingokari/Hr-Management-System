@@ -1,21 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import api from "@/lib/axios";
 
-export default function JobDetails() {
-    const params = useParams();
+function JobDetailsContent() {
+    const searchParams = useSearchParams();
     const router = useRouter();
+    const id = searchParams.get("id");
 
     const [job, setJob] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
     useEffect(() => {
-        if (!params.id) return;
+        if (!id) return;
 
-        api.get(`/api/recruitment/jobs/${params.id}`)
+        api.get(`/api/recruitment/jobs/${id}`)
             .then((res) => {
                 setJob(res.data.data);
                 setLoading(false);
@@ -25,7 +26,7 @@ export default function JobDetails() {
                 setError("Unable to load job details");
                 setLoading(false);
             });
-    }, [params.id]);
+    }, [id]);
 
     if (loading) {
         return (
@@ -56,7 +57,7 @@ export default function JobDetails() {
 
             {/* Back Button */}
             <button
-                onClick={() => router.back()}
+                onClick={() => router.push("/employee/jobs")}
                 className="mb-6 text-blue-600 hover:underline"
             >
                 ← Back to Jobs
@@ -138,7 +139,7 @@ export default function JobDetails() {
 
                 {/* Apply Button */}
                 <button
-                    onClick={() => router.push(`/employee/jobs/${params.id}/refer`)}
+                    onClick={() => router.push(`/employee/jobs/details/refer?id=${id}`)}
                     className="bg-emerald-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-emerald-600"
                 >
                     Refer a Person
@@ -147,5 +148,13 @@ export default function JobDetails() {
             </div>
 
         </div>
+    );
+}
+
+export default function JobDetails() {
+    return (
+        <Suspense fallback={<div className="p-8">Loading job details...</div>}>
+            <JobDetailsContent />
+        </Suspense>
     );
 }
