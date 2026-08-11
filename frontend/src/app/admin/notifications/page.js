@@ -1,4 +1,5 @@
 'use client';
+
 import { useState, useEffect, useCallback } from 'react';
 import {
   getAdminNotifications,
@@ -12,23 +13,23 @@ import toast from 'react-hot-toast';
 function formatTimeAgo(dateStr, now) {
   if (!dateStr) return '';
   const diff = now - new Date(dateStr).getTime();
-  const mins  = Math.floor(diff / 60000);
+  const mins = Math.floor(diff / 60000);
   const hours = Math.floor(diff / 3600000);
-  const days  = Math.floor(diff / 86400000);
-  if (mins < 1)   return 'Just now';
-  if (mins < 60)  return `${mins}m ago`;
+  const days = Math.floor(diff / 86400000);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return `${mins}m ago`;
   if (hours < 24) return `${hours}h ago`;
   return `${days}d ago`;
 }
 
 export default function AdminNotificationsPage() {
   const [notifications, setNotifications] = useState([]);
-  const [unreadCount, setUnreadCount]     = useState(0);
-  const [loading, setLoading]             = useState(true);
-  const [filter, setFilter]               = useState('ALL');
-  const [markingAll, setMarkingAll]       = useState(false);
-  const [page, setPage]                   = useState(0);
-  const [totalPages, setTotalPages]       = useState(0);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('ALL');
+  const [markingAll, setMarkingAll] = useState(false);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
   const [now, setNow] = useState(() => Date.now());
 
@@ -71,10 +72,10 @@ export default function AdminNotificationsPage() {
   const handleMarkRead = async (id) => {
     try {
       await markAdminNotificationRead(id);
-      setNotifications(prev =>
-        prev.map(n => n.id === id ? { ...n, isRead: true } : n)
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
       );
-      setUnreadCount(prev => Math.max(0, prev - 1));
+      setUnreadCount((prev) => Math.max(0, prev - 1));
       window.dispatchEvent(new Event('notificationsUpdated'));
     } catch {
       toast.error('Failed to mark as read');
@@ -85,7 +86,7 @@ export default function AdminNotificationsPage() {
     setMarkingAll(true);
     try {
       await markAllAdminNotificationsRead();
-      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
       setUnreadCount(0);
       toast.success('All notifications marked as read!');
       window.dispatchEvent(new Event('notificationsUpdated'));
@@ -99,196 +100,173 @@ export default function AdminNotificationsPage() {
   const getNotifIcon = (title) => {
     if (!title) return '📢';
     const t = title.toLowerCase();
-    if (t.includes('leave'))       return '🌴';
+    if (t.includes('leave')) return '🌴';
     if (t.includes('payroll') || t.includes('salary')) return '💰';
     if (t.includes('performance')) return '⭐';
-    if (t.includes('training'))    return '📚';
-    if (t.includes('attendance'))  return '📅';
-    if (t.includes('onboarding'))  return '📋';
+    if (t.includes('training')) return '📚';
+    if (t.includes('attendance')) return '📅';
+    if (t.includes('onboarding')) return '📋';
     if (t.includes('recruitment')) return '💼';
-    if (t.includes('approved'))    return '✅';
-    if (t.includes('rejected'))    return '❌';
-    if (t.includes('cancelled'))   return '🚫';
-    if (t.includes('employee'))    return '👤';
+    if (t.includes('approved')) return '✅';
+    if (t.includes('rejected')) return '❌';
+    if (t.includes('cancelled')) return '🚫';
+    if (t.includes('employee')) return '👤';
     return '🔔';
   };
 
   return (
-    <div>
+    <div className="max-w-6xl mx-auto space-y-6 text-slate-900 dark:text-slate-100">
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 style={{
-            fontSize: '22px', fontWeight: '800', color: 'var(--text-primary)',
-            marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '10px',
-          }}>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white flex items-center gap-3">
             Notifications
             {unreadCount > 0 && (
-              <span style={{
-                background: '#ef4444', color: 'white',
-                borderRadius: '20px', padding: '2px 10px',
-                fontSize: '13px', fontWeight: '700',
-              }}>
+              <span className="bg-rose-500 text-white text-xs font-bold px-3 py-1 rounded-full">
                 {unreadCount} unread
               </span>
             )}
           </h1>
-          <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+          <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 mt-1">
             System alerts and activity updates
           </p>
         </div>
 
         {unreadCount > 0 && (
-          <button onClick={handleMarkAll} disabled={markingAll}
-            style={{
-              padding: '10px 18px', background: '#eff6ff',
-              color: '#3b82f6', border: '1px solid #bfdbfe',
-              borderRadius: '10px', fontSize: '13px', fontWeight: '700',
-              cursor: 'pointer',
-            }}>
+          <button
+            onClick={handleMarkAll}
+            disabled={markingAll}
+            className="px-4 py-2.5 rounded-xl text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-900/50 hover:bg-blue-100 dark:hover:bg-blue-900/80 transition cursor-pointer disabled:opacity-50"
+          >
             {markingAll ? '⏳ Marking...' : '✓ Mark all as read'}
           </button>
         )}
       </div>
 
       {/* Filter Tabs */}
-      <div style={{
-        display: 'flex', gap: '4px', background: 'var(--card-border)',
-        borderRadius: '10px', padding: '4px',
-        width: 'fit-content', marginBottom: '20px',
-      }}>
-        {['ALL', 'UNREAD'].map(f => (
-          <button key={f} onClick={() => { setFilter(f); setPage(0); }}
-            style={{
-              padding: '8px 20px',
-              background: filter === f ? 'white' : 'transparent',
-              color: filter === f ? '#1e293b' : '#64748b',
-              border: 'none', borderRadius: '8px',
-              fontSize: '13px', fontWeight: filter === f ? '700' : '400',
-              cursor: 'pointer',
-              boxShadow: filter === f ? '0 1px 4px rgba(0,0,0,0.08)' : 'none',
-              transition: 'all 0.15s',
-            }}>
+      <div className="flex gap-1.5 p-1.5 bg-slate-100 dark:bg-slate-800/80 rounded-2xl w-fit">
+        {['ALL', 'UNREAD'].map((f) => (
+          <button
+            key={f}
+            onClick={() => {
+              setFilter(f);
+              setPage(0);
+            }}
+            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition ${filter === f
+                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+              }`}
+          >
             {f === 'ALL' ? 'All Notifications' : `Unread (${unreadCount})`}
           </button>
         ))}
       </div>
 
-      {/* Notifications List */}
-      <div style={{
-        background: 'var(--card-bg)', borderRadius: '12px',
-        border: '1px solid var(--card-border)',
-        boxShadow: '0 1px 4px rgba(0,0,0,0.04)', overflow: 'hidden',
-      }}>
+      {/* Notifications Container */}
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
         {loading ? (
-          <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)' }}>
+          <div className="p-16 text-center text-sm font-medium text-slate-400 dark:text-slate-500">
             Loading notifications...
           </div>
         ) : notifications.length === 0 ? (
-          <div style={{ padding: '80px', textAlign: 'center' }}>
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔔</div>
-            <div style={{ fontSize: '16px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '8px' }}>
+          <div className="p-16 text-center space-y-3">
+            <div className="text-5xl">🔔</div>
+            <div className="text-base font-bold text-slate-900 dark:text-slate-100">
               {filter === 'UNREAD' ? 'All caught up!' : 'No notifications yet'}
             </div>
-            <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               {filter === 'UNREAD'
                 ? 'No unread notifications'
                 : 'System notifications will appear here'}
-            </div>
+            </p>
             {filter === 'UNREAD' && (
-              <button onClick={() => setFilter('ALL')}
-                style={{ marginTop: '16px', padding: '8px 20px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
+              <button
+                onClick={() => setFilter('ALL')}
+                className="mt-2 px-4 py-2 rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-sm font-semibold hover:opacity-90 transition"
+              >
                 View All
               </button>
             )}
           </div>
         ) : (
           <>
-            {notifications.map((n, i) => (
-              <div key={n.id} style={{
-                display: 'flex', gap: '14px', alignItems: 'flex-start',
-                padding: '16px 20px',
-                borderBottom: i < notifications.length - 1 ? '1px solid #f1f5f9' : 'none',
-                background: n.isRead ? 'white' : '#f8fbff',
-                transition: 'background 0.2s',
-              }}
-                onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
-                onMouseLeave={e => e.currentTarget.style.background = n.isRead ? 'white' : '#f8fbff'}
-              >
-                {/* Unread dot */}
-                <div style={{ paddingTop: '6px', flexShrink: 0 }}>
-                  <div style={{
-                    width: '8px', height: '8px', borderRadius: '50%',
-                    background: n.isRead ? '#e2e8f0' : '#3b82f6',
-                  }}/>
-                </div>
-
-                {/* Icon */}
-                <div style={{
-                  width: '40px', height: '40px', flexShrink: 0,
-                  background: 'var(--card-border)', borderRadius: '10px',
-                  display: 'flex', alignItems: 'center',
-                  justifyContent: 'center', fontSize: '20px',
-                }}>
-                  {getNotifIcon(n.title)}
-                </div>
-
-                {/* Content */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{
-                    fontSize: '14px',
-                    fontWeight: n.isRead ? '500' : '700',
-                    color: 'var(--text-primary)', marginBottom: '4px',
-                  }}>
-                    {n.title}
+            <div className="divide-y divide-slate-100 dark:divide-slate-800/80">
+              {notifications.map((n) => (
+                <div
+                  key={n.id}
+                  className={`flex items-start gap-3.5 sm:gap-4 p-4 sm:p-5 transition ${n.isRead
+                      ? 'bg-white dark:bg-slate-900 hover:bg-slate-50/80 dark:hover:bg-slate-800/50'
+                      : 'bg-blue-50/40 dark:bg-slate-800/60 hover:bg-blue-50/70 dark:hover:bg-slate-800/80'
+                    }`}
+                >
+                  {/* Unread dot */}
+                  <div className="pt-2 shrink-0">
+                    <div
+                      className={`w-2.5 h-2.5 rounded-full ${n.isRead
+                          ? 'bg-slate-200 dark:bg-slate-700'
+                          : 'bg-blue-600 dark:bg-blue-400'
+                        }`}
+                    />
                   </div>
-                  <div style={{
-                    fontSize: '13px', color: 'var(--text-secondary)',
-                    lineHeight: '1.5', marginBottom: '6px',
-                  }}>
-                    {n.message}
-                  </div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                    {formatTimeAgo(n.createdAt, now)}
-                  </div>
-                </div>
 
-                {/* Mark read */}
-                {!n.isRead && (
-                  <button onClick={() => handleMarkRead(n.id)}
-                    style={{
-                      flexShrink: 0, padding: '6px 14px',
-                      background: '#eff6ff', color: '#3b82f6',
-                      border: '1px solid #bfdbfe', borderRadius: '6px',
-                      fontSize: '11px', fontWeight: '700',
-                      cursor: 'pointer', whiteSpace: 'nowrap',
-                    }}>
-                    Mark read
-                  </button>
-                )}
-              </div>
-            ))}
+                  {/* Icon */}
+                  <div className="w-11 h-11 rounded-xl bg-slate-100 dark:bg-slate-800 shrink-0 flex items-center justify-center text-xl">
+                    {getNotifIcon(n.title)}
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <div
+                      className={`text-sm sm:text-base ${n.isRead
+                          ? 'font-medium text-slate-800 dark:text-slate-200'
+                          : 'font-bold text-slate-900 dark:text-white'
+                        }`}
+                    >
+                      {n.title}
+                    </div>
+                    {n.message && (
+                      <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                        {n.message}
+                      </p>
+                    )}
+                    <span className="inline-block text-xs text-slate-400 dark:text-slate-500 mt-1.5">
+                      {formatTimeAgo(n.createdAt, now)}
+                    </span>
+                  </div>
+
+                  {/* Mark Read Action */}
+                  {!n.isRead && (
+                    <button
+                      onClick={() => handleMarkRead(n.id)}
+                      className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-900/50 hover:bg-blue-100 dark:hover:bg-blue-900/80 transition whitespace-nowrap"
+                    >
+                      Mark read
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div style={{
-                padding: '14px 20px', display: 'flex',
-                justifyContent: 'center', gap: '8px',
-                borderTop: '1px solid var(--card-border)',
-              }}>
+              <div className="p-4 flex items-center justify-center gap-3 border-t border-slate-100 dark:border-slate-800">
                 <button
-                  onClick={() => setPage(p => Math.max(0, p - 1))}
+                  onClick={() => setPage((p) => Math.max(0, p - 1))}
                   disabled={page === 0}
-                  style={{ padding: '6px 14px', border: '1px solid var(--card-border)', borderRadius: '6px', fontSize: '12px', fontWeight: '600', color: page === 0 ? '#cbd5e1' : '#374151', background: 'var(--card-bg)', cursor: page === 0 ? 'not-allowed' : 'pointer' }}>
+                  className="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+                >
                   ← Prev
                 </button>
-                <span style={{ padding: '6px 14px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
                   {page + 1} / {totalPages}
                 </span>
                 <button
-                  onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+                  onClick={() =>
+                    setPage((p) => Math.min(totalPages - 1, p + 1))
+                  }
                   disabled={page >= totalPages - 1}
-                  style={{ padding: '6px 14px', border: '1px solid var(--card-border)', borderRadius: '6px', fontSize: '12px', fontWeight: '600', color: page >= totalPages - 1 ? '#cbd5e1' : '#374151', background: 'var(--card-bg)', cursor: page >= totalPages - 1 ? 'not-allowed' : 'pointer' }}>
+                  className="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+                >
                   Next →
                 </button>
               </div>
