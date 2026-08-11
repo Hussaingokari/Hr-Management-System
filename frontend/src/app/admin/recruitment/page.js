@@ -5,26 +5,22 @@ import toast from 'react-hot-toast';
 
 function Badge({ status }) {
   const map = {
-    OPEN: { bg: 'rgba(34, 197, 94, 0.15)', color: '#4ade80' },
-    CLOSED: { bg: 'rgba(239, 68, 68, 0.15)', color: '#f87171' },
-    DRAFT: { bg: 'rgba(148, 163, 184, 0.15)', color: '#94a3b8' },
-    APPLIED: { bg: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa' },
-    SHORTLISTED: { bg: 'rgba(168, 85, 247, 0.15)', color: '#c084fc' },
-    INTERVIEW_SCHEDULED: { bg: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24' },
-    INTERVIEWED: { bg: 'rgba(234, 179, 8, 0.15)', color: '#fde047' },
-    OFFER_SENT: { bg: 'rgba(34, 197, 94, 0.15)', color: '#4ade80' },
-    OFFER_ACCEPTED: { bg: 'rgba(34, 197, 94, 0.15)', color: '#4ade80' },
-    OFFER_REJECTED: { bg: 'rgba(239, 68, 68, 0.15)', color: '#f87171' },
-    REJECTED: { bg: 'rgba(239, 68, 68, 0.15)', color: '#f87171' },
+    OPEN: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400',
+    CLOSED: 'bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-400',
+    DRAFT: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+    APPLIED: 'bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-400',
+    SHORTLISTED: 'bg-purple-100 text-purple-700 dark:bg-purple-950/60 dark:text-purple-400',
+    INTERVIEW_SCHEDULED: 'bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400',
+    INTERVIEWED: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950/60 dark:text-yellow-400',
+    OFFER_SENT: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400',
+    OFFER_ACCEPTED: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400',
+    OFFER_REJECTED: 'bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-400',
+    REJECTED: 'bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-400',
   };
-  const s = map[status] || { bg: 'rgba(148, 163, 184, 0.15)', color: '#94a3b8' };
+  const style = map[status] || 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300';
+
   return (
-    <span style={{
-      background: s.bg, color: s.color,
-      padding: '3px 10px', borderRadius: '20px',
-      fontSize: '11px', fontWeight: '700',
-      whiteSpace: 'nowrap',
-    }}>
+    <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap ${style}`}>
       {status?.replace(/_/g, ' ')}
     </span>
   );
@@ -47,22 +43,15 @@ export default function RecruitmentPage() {
   const [jobForm, setJobForm] = useState(EMPTY_JOB);
   const [submitting, setSubmitting] = useState(false);
   const [updatingApp, setUpdatingApp] = useState(null);
-  const [togglingJob, setTogglingJob] = useState(null);
-  const [newStatus, setNewStatus] = useState('');
-  const [interviewDate, setInterviewDate] = useState('');
-  const [interviewScore, setInterviewScore] = useState('');
-  const [interviewNotes, setInterviewNotes] = useState('');
-  const [rejectionReason, setRejectionReason] = useState('');
+  const [closingJobId, setClosingJobId] = useState(null);
 
   const fetchJobs = useCallback(async () => {
     setLoading(true);
     try {
       const res = await api.get('/api/recruitment/jobs/all');
-      const jobData = res.data?.data?.content || res.data?.data || res.data || [];
-      setJobs(Array.isArray(jobData) ? jobData : []);
-    } catch (err) {
-      console.error('Fetch Jobs Error:', err);
-      toast.error(err.response?.data?.message || 'Failed to load jobs');
+      setJobs(res.data?.data?.content || res.data?.data || []);
+    } catch {
+      toast.error('Failed to load jobs');
     } finally {
       setLoading(false);
     }
@@ -76,11 +65,9 @@ export default function RecruitmentPage() {
     setLoadingApps(true);
     try {
       const res = await api.get(`/api/recruitment/jobs/${jobId}/applications`);
-      const appData = res.data?.data?.content || res.data?.data || res.data || [];
-      setApplications(Array.isArray(appData) ? appData : []);
-    } catch (err) {
-      console.error('Fetch Applications Error:', err);
-      toast.error(err.response?.data?.message || 'Failed to load applications');
+      setApplications(res.data?.data?.content || res.data?.data || []);
+    } catch {
+      toast.error('Failed to load applications');
     } finally {
       setLoadingApps(false);
     }
@@ -107,56 +94,50 @@ export default function RecruitmentPage() {
     }
   };
 
-  const handleToggleJobStatus = async (job) => {
-    const newJobStatus = job.status === 'OPEN' ? 'CLOSED' : 'OPEN';
-    setTogglingJob(job.id);
+  const handleCloseJob = async (e, jobId) => {
+    e.stopPropagation();
+    if (!confirm('Are you sure you want to close this job opening?')) return;
 
+    setClosingJobId(jobId);
     try {
-      await api.put(`/api/recruitment/jobs/${job.id}`, { status: newJobStatus });
-      toast.success(newJobStatus === 'OPEN' ? 'Job reopened!' : 'Job closed!');
+      await api.put(`/api/recruitment/jobs/${jobId}/close`);
+      toast.success('Job posting closed!');
 
-      setJobs((prev) =>
-        prev.map((j) => (j.id === job.id ? { ...j, status: newJobStatus } : j))
+      setJobs((prevJobs) =>
+        prevJobs.map((j) => (j.id === jobId ? { ...j, status: 'CLOSED' } : j))
       );
-
-      if (selectedJob?.id === job.id) {
-        setSelectedJob({ ...selectedJob, status: newJobStatus });
+      if (selectedJob?.id === jobId) {
+        setSelectedJob((prev) => (prev ? { ...prev, status: 'CLOSED' } : null));
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to update status');
+      toast.error(err.response?.data?.message || 'Failed to close job posting');
     } finally {
-      setTogglingJob(null);
+      setClosingJobId(null);
     }
   };
 
-  const handleUpdateApplication = async (appId, statusOverride = null) => {
-    const status = statusOverride || newStatus;
-    if (!status) return toast.error('Select a status');
+  const handleUpdateApplication = async (appId, status) => {
+    if (!status) {
+      toast.error('Select a status');
+      return;
+    }
 
     setUpdatingApp(appId);
+
     try {
-      const payload = { status };
-      if (status === 'INTERVIEW_SCHEDULED') {
-        payload.interviewDate = interviewDate;
-        payload.interviewMode = 'VIDEO';
-        payload.interviewerId = 2;
+      await api.put(`/api/recruitment/applications/${appId}`, { status });
+
+      if (status === 'SHORTLISTED') {
+        toast.success('Candidate approved successfully!');
+      } else if (status === 'REJECTED') {
+        toast.success('Candidate rejected.');
+      } else {
+        toast.success('Application updated!');
       }
-      if (status === 'INTERVIEWED') {
-        payload.interviewScore = parseInt(interviewScore, 10) || 0;
-        payload.interviewNotes = interviewNotes;
+
+      if (selectedJob?.id) {
+        fetchApplications(selectedJob.id);
       }
-      if (status === 'REJECTED') payload.rejectionReason = rejectionReason;
-
-      await api.put(`/api/recruitment/applications/${appId}`, payload);
-      toast.success('Application updated!');
-
-      setNewStatus('');
-      setInterviewDate('');
-      setInterviewScore('');
-      setInterviewNotes('');
-      setRejectionReason('');
-
-      if (selectedJob) fetchApplications(selectedJob.id);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Update failed');
     } finally {
@@ -165,190 +146,221 @@ export default function RecruitmentPage() {
   };
 
   return (
-    <div style={{ padding: '8px' }}>
-      {/* Header with high contrast readable text */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+    <div className="w-full text-slate-900 dark:text-slate-100">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--foreground, #f8fafc)', marginBottom: '4px' }}>
+          <h1 className="text-xl font-extrabold text-slate-900 dark:text-white mb-1">
             Recruitment
           </h1>
-          <p style={{ fontSize: '14px', color: 'var(--muted-foreground, #94a3b8)' }}>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             Manage job postings and candidate applications
           </p>
         </div>
         <button
           onClick={() => setShowJobForm(true)}
-          style={{
-            padding: '10px 20px', background: '#2563eb',
-            color: 'white', border: 'none', borderRadius: '10px',
-            fontSize: '13px', fontWeight: '700', cursor: 'pointer',
-            boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)',
-          }}
+          className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded-xl text-xs font-bold cursor-pointer shadow-sm transition-all"
         >
           + Post Job
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: selectedJob ? '1fr 1.5fr' : '1fr', gap: '20px' }}>
-        {/* Left Column: Job List */}
-        <div style={{
-          background: 'var(--card-bg, #1e293b)',
-          borderRadius: '12px',
-          border: '1px solid var(--border-color, #334155)',
-          overflow: 'hidden',
-        }}>
-          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-color, #334155)' }}>
-            <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--foreground, #f8fafc)' }}>
+      <div className={`grid gap-5 ${selectedJob ? 'grid-cols-1 lg:grid-cols-5' : 'grid-cols-1'}`}>
+
+        {/* Jobs List */}
+        <div className={`bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden ${selectedJob ? 'lg:col-span-2' : ''}`}>
+          <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white">
               Job Postings ({jobs.length})
             </h3>
           </div>
 
           {loading ? (
-            <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>Loading...</div>
+            <div className="p-10 text-center text-slate-400">Loading...</div>
           ) : jobs.length === 0 ? (
-            <div style={{ padding: '60px', textAlign: 'center' }}>
-              <div style={{ fontSize: '40px', marginBottom: '12px' }}>💼</div>
-              <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--foreground, #f8fafc)', marginBottom: '8px' }}>No jobs posted yet</div>
-              <button onClick={() => setShowJobForm(true)}
-                style={{ padding: '8px 18px', background: '#2563eb', color: 'white', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>
+            <div className="p-14 text-center">
+              <div className="text-4xl mb-3">💼</div>
+              <div className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">No jobs posted yet</div>
+              <button
+                onClick={() => setShowJobForm(true)}
+                className="px-4 py-2 bg-slate-900 dark:bg-blue-600 text-white rounded-lg text-xs font-bold"
+              >
                 + Post First Job
               </button>
             </div>
           ) : (
-            jobs.map((job) => (
-              <div key={job.id}
-                onClick={() => handleSelectJob(job)}
-                style={{
-                  padding: '16px 20px',
-                  borderBottom: '1px solid var(--border-color, #334155)',
-                  cursor: 'pointer',
-                  background: selectedJob?.id === job.id ? 'rgba(37, 99, 235, 0.15)' : 'transparent',
-                  borderLeft: selectedJob?.id === job.id ? '3px solid #3b82f6' : '3px solid transparent',
-                  transition: 'all 0.15s',
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                  <div style={{ fontSize: '15px', fontWeight: '700', color: 'var(--foreground, #f8fafc)' }}>{job.title}</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Badge status={job.status} />
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleToggleJobStatus(job);
-                      }}
-                      disabled={togglingJob === job.id}
-                      style={{
-                        padding: '4px 10px',
-                        background: job.status === 'OPEN' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(34, 197, 94, 0.2)',
-                        color: job.status === 'OPEN' ? '#f87171' : '#4ade80',
-                        border: 'none',
-                        borderRadius: '6px',
-                        fontSize: '11px',
-                        fontWeight: '700',
-                        cursor: togglingJob === job.id ? 'not-allowed' : 'pointer',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {togglingJob === job.id ? '...' : job.status === 'OPEN' ? 'Close' : 'Reopen'}
-                    </button>
+            <div className="divide-y divide-slate-100 dark:divide-slate-800">
+              {jobs.map((job) => {
+                const isSelected = selectedJob?.id === job.id;
+                const isClosed = job.status === 'CLOSED';
+                return (
+                  <div
+                    key={job.id}
+                    onClick={() => handleSelectJob(job)}
+                    className={`p-4 cursor-pointer transition-colors ${isSelected
+                        ? 'bg-blue-50/80 dark:bg-blue-950/40 border-l-4 border-blue-600 dark:border-blue-500'
+                        : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                      }`}
+                  >
+                    <div className="flex justify-between items-start mb-2 gap-2">
+                      <div className="text-sm font-bold text-slate-900 dark:text-white">
+                        {job.title}
+                      </div>
+                      <Badge status={job.status} />
+                    </div>
+                    <div className="text-xs text-slate-600 dark:text-slate-400 mb-1">
+                      📍 {job.location} · {job.department} · {job.employmentType}
+                    </div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400">
+                      💰 {job.salaryRange} · Exp: {job.experienceRequired}
+                    </div>
+
+                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/60">
+                      <div className="text-[11px] text-slate-400 dark:text-slate-500">
+                        Deadline: {job.applicationDeadline}
+                      </div>
+
+                      {!isClosed && (
+                        <button
+                          type="button"
+                          onClick={(e) => handleCloseJob(e, job.id)}
+                          disabled={closingJobId === job.id}
+                          className="text-[11px] font-semibold text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:underline cursor-pointer disabled:opacity-50"
+                        >
+                          {closingJobId === job.id ? 'Closing...' : 'Close Job'}
+                        </button>
+                      )}
+                    </div>
                   </div>
-                </div>
-                <div style={{ fontSize: '13px', color: 'var(--muted-foreground, #cbd5e1)', marginBottom: '4px' }}>
-                  📍 {job.location} · {job.department} · {job.employmentType}
-                </div>
-                <div style={{ fontSize: '12px', color: 'var(--muted-foreground, #94a3b8)' }}>
-                  💰 {job.salaryRange} · Exp: {job.experienceRequired}
-                </div>
-                <div style={{ fontSize: '11px', color: 'var(--muted-foreground, #94a3b8)', marginTop: '4px' }}>
-                  Deadline: {job.applicationDeadline}
-                </div>
-              </div>
-            ))
+                );
+              })}
+            </div>
           )}
         </div>
 
-        {/* Right Column: Applications */}
+        {/* Applications Panel */}
         {selectedJob && (
-          <div style={{
-            background: 'var(--card-bg, #1e293b)', borderRadius: '12px',
-            border: '1px solid var(--border-color, #334155)',
-            overflow: 'hidden',
-          }}>
-            <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-color, #334155)', background: 'rgba(0,0,0,0.1)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--foreground, #f8fafc)', marginBottom: '2px' }}>
-                    {selectedJob.title}
-                  </h3>
-                  <p style={{ fontSize: '12px', color: '#94a3b8' }}>
-                    {applications.length} application(s) received
-                  </p>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Badge status={selectedJob.status} />
-                </div>
+          <div className="lg:col-span-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
+            <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 flex justify-between items-center">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-0.5">
+                  {selectedJob.title}
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {applications.length} application(s) received
+                </p>
               </div>
+
+              {selectedJob.status !== 'CLOSED' && (
+                <button
+                  type="button"
+                  onClick={(e) => handleCloseJob(e, selectedJob.id)}
+                  disabled={closingJobId === selectedJob.id}
+                  className="px-3 py-1.5 bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 rounded-lg text-xs font-bold border border-red-200 dark:border-red-900 transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  {closingJobId === selectedJob.id ? 'Closing...' : '🚫 Close Job'}
+                </button>
+              )}
             </div>
 
             {loadingApps ? (
-              <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>Loading applications...</div>
+              <div className="p-10 text-center text-slate-400">Loading applications...</div>
             ) : applications.length === 0 ? (
-              <div style={{ padding: '60px', textAlign: 'center' }}>
-                <div style={{ fontSize: '40px', marginBottom: '12px' }}>📭</div>
-                <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--foreground, #f8fafc)' }}>No applications yet</div>
+              <div className="p-14 text-center">
+                <div className="text-4xl mb-3">📭</div>
+                <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">No applications yet</div>
+                <div className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                  Applications will appear here when candidates apply
+                </div>
               </div>
             ) : (
-              applications.map((app) => (
-                <div key={app.id} style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-color, #334155)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <div style={{
-                        width: '38px', height: '38px', borderRadius: '50%',
-                        background: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: '13px', fontWeight: '700', color: 'white', flexShrink: 0,
-                      }}>
-                        {app.candidateName?.split(' ').map(n => n[0]).join('').slice(0, 2) || 'NA'}
-                      </div>
-                      <div>
-                        <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--foreground, #f8fafc)' }}>
-                          {app.candidateName}
+              <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                {applications.map((app) => (
+                  <div key={app.id} className="p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-9.5 h-9.5 rounded-full bg-gradient-to-br from-slate-800 to-blue-600 flex items-center justify-center text-xs font-bold text-white shrink-0">
+                          {app.candidateName?.split(' ').map((n) => n[0]).join('').slice(0, 2)}
                         </div>
-                        <div style={{ fontSize: '12px', color: '#94a3b8' }}>
-                          {app.candidateEmail} · {app.candidatePhone}
+                        <div>
+                          <div className="text-sm font-bold text-slate-900 dark:text-white mb-0.5">
+                            {app.candidateName}
+                          </div>
+                          <div className="text-[11px] text-slate-500 dark:text-slate-400 mb-0.5">
+                            {app.candidateEmail}
+                          </div>
+                          <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                            {app.candidatePhone}
+                          </div>
+                          <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                            {app.experienceYears ?? 0}{" "}
+                            {(app.experienceYears ?? 0) === 1 ? "year" : "years"}{" "}
+                            {app.experienceMonths ?? 0}{" "}
+                            {(app.experienceMonths ?? 0) === 1 ? "month" : "months"}{" "}
+                            experience
+                          </div>
                         </div>
                       </div>
+                      <Badge status={app.status} />
                     </div>
-                    <Badge status={app.status} />
-                  </div>
 
-                  {app.status === 'APPLIED' && (
-                    <div style={{ display: 'flex', gap: '10px', marginTop: '12px' }}>
-                      <button
-                        onClick={() => handleUpdateApplication(app.id, 'SHORTLISTED')}
-                        disabled={updatingApp === app.id}
-                        style={{
-                          flex: 1, padding: '8px',
-                          background: '#16a34a', color: 'white', border: 'none', borderRadius: '6px',
-                          fontSize: '12px', fontWeight: '700', cursor: 'pointer',
-                        }}
-                      >
-                        ✓ Approve
-                      </button>
-                      <button
-                        onClick={() => handleUpdateApplication(app.id, 'REJECTED')}
-                        disabled={updatingApp === app.id}
-                        style={{
-                          flex: 1, padding: '8px',
-                          background: '#dc2626', color: 'white', border: 'none', borderRadius: '6px',
-                          fontSize: '12px', fontWeight: '700', cursor: 'pointer',
-                        }}
-                      >
-                        ✕ Reject
-                      </button>
+                    {app.resumeUrl && (
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs text-slate-500 dark:text-slate-400">
+                          📄 Resume:
+                        </span>
+                        <a
+                          href={
+                            app.resumeUrl.startsWith('http')
+                              ? app.resumeUrl
+                              : `http://localhost:8080${app.resumeUrl}`
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-blue-600 dark:text-blue-400 font-bold hover:underline"
+                        >
+                          View Resume →
+                        </a>
+                      </div>
+                    )}
+
+                    <div className="text-xs text-slate-500 dark:text-slate-400 mb-2">
+                      👤 Referred By:{' '}
+                      <strong className="text-slate-800 dark:text-slate-200">
+                        {app.referredByName || 'Direct Application'}
+                      </strong>
                     </div>
-                  )}
-                </div>
-              ))
+
+                    {app.status === 'APPLIED' && (
+                      <div className="flex gap-2.5 mt-2.5 mb-3">
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateApplication(app.id, 'SHORTLISTED')}
+                          disabled={updatingApp === app.id}
+                          className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                        >
+                          ✓ Approve
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateApplication(app.id, 'REJECTED')}
+                          disabled={updatingApp === app.id}
+                          className="flex-1 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                        >
+                          ✕ Reject
+                        </button>
+                      </div>
+                    )}
+
+                    {app.interviewDate && (
+                      <div className="text-xs text-slate-500 dark:text-slate-400 mb-2">
+                        📅 Interview: {app.interviewDate} · {app.interviewMode}
+                        {app.interviewScore && ` · Score: ${app.interviewScore}/100`}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         )}
@@ -356,25 +368,21 @@ export default function RecruitmentPage() {
 
       {/* Post Job Modal */}
       {showJobForm && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          zIndex: 100, padding: '20px',
-        }}>
-          <div style={{
-            background: 'var(--card-bg, #1e293b)', borderRadius: '16px', padding: '28px',
-            width: '100%', maxWidth: '560px', maxHeight: '90vh',
-            overflowY: 'auto', border: '1px solid var(--border-color, #334155)',
-            color: 'var(--foreground, #f8fafc)'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h2 style={{ fontSize: '18px', fontWeight: '800' }}>Post New Job</h2>
-              <button onClick={() => setShowJobForm(false)}
-                style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#94a3b8' }}>✕</button>
+        <div className="fixed inset-0 bg-slate-900/50 dark:bg-black/70 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-7 w-full max-w-xl max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="flex justify-between items-center mb-5">
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white">Post New Job</h2>
+              <button
+                type="button"
+                onClick={() => setShowJobForm(false)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xl font-bold cursor-pointer"
+              >
+                ✕
+              </button>
             </div>
 
             <form onSubmit={handleCreateJob}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mb-3.5">
                 {[
                   { label: 'Job Title', name: 'title', required: true, placeholder: 'e.g. Java Developer' },
                   { label: 'Department', name: 'department', required: true, placeholder: 'e.g. Engineering' },
@@ -382,40 +390,32 @@ export default function RecruitmentPage() {
                   { label: 'Salary Range', name: 'salaryRange', placeholder: 'e.g. 6-10 LPA' },
                   { label: 'Experience Required', name: 'experienceRequired', placeholder: 'e.g. 2-4 years' },
                   { label: 'Application Deadline', name: 'applicationDeadline', type: 'date' },
-                ].map(f => (
+                ].map((f) => (
                   <div key={f.name}>
-                    <label style={{ fontSize: '12px', fontWeight: '600', display: 'block', marginBottom: '5px' }}>
-                      {f.label} {f.required && <span style={{ color: '#ef4444' }}>*</span>}
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                      {f.label} {f.required && <span className="text-red-500">*</span>}
                     </label>
                     <input
                       type={f.type || 'text'}
                       value={jobForm[f.name]}
-                      onChange={e => setJobForm({ ...jobForm, [f.name]: e.target.value })}
+                      onChange={(e) => setJobForm({ ...jobForm, [f.name]: e.target.value })}
                       placeholder={f.placeholder}
                       required={f.required}
-                      style={{
-                        width: '100%', padding: '9px 12px',
-                        background: 'rgba(0,0,0,0.2)', color: 'inherit',
-                        border: '1px solid var(--border-color, #475569)',
-                        borderRadius: '8px', fontSize: '13px', outline: 'none', boxSizing: 'border-box'
-                      }}
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/60 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
                     />
                   </div>
                 ))}
               </div>
 
-              <div style={{ marginBottom: '14px' }}>
-                <label style={{ fontSize: '12px', fontWeight: '600', display: 'block', marginBottom: '5px' }}>
+              <div className="mb-3.5">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Employment Type
                 </label>
-                <select value={jobForm.employmentType}
-                  onChange={e => setJobForm({ ...jobForm, employmentType: e.target.value })}
-                  style={{
-                    width: '100%', padding: '9px 12px',
-                    background: 'var(--card-bg, #1e293b)', color: 'inherit',
-                    border: '1px solid var(--border-color, #475569)',
-                    borderRadius: '8px', fontSize: '13px', outline: 'none'
-                  }}>
+                <select
+                  value={jobForm.employmentType}
+                  onChange={(e) => setJobForm({ ...jobForm, employmentType: e.target.value })}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                >
                   <option value="FULL_TIME">Full Time</option>
                   <option value="PART_TIME">Part Time</option>
                   <option value="CONTRACT">Contract</option>
@@ -423,29 +423,46 @@ export default function RecruitmentPage() {
                 </select>
               </div>
 
-              <div style={{ marginBottom: '14px' }}>
-                <label style={{ fontSize: '12px', fontWeight: '600', display: 'block', marginBottom: '5px' }}>
-                  Description <span style={{ color: '#ef4444' }}>*</span>
+              <div className="mb-3.5">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Description <span className="text-red-500">*</span>
                 </label>
-                <textarea value={jobForm.description}
-                  onChange={e => setJobForm({ ...jobForm, description: e.target.value })}
-                  placeholder="Job description..." required rows={3}
-                  style={{
-                    width: '100%', padding: '9px 12px',
-                    background: 'rgba(0,0,0,0.2)', color: 'inherit',
-                    border: '1px solid var(--border-color, #475569)',
-                    borderRadius: '8px', fontSize: '13px', outline: 'none', resize: 'vertical', boxSizing: 'border-box'
-                  }}
+                <textarea
+                  value={jobForm.description}
+                  onChange={(e) => setJobForm({ ...jobForm, description: e.target.value })}
+                  placeholder="Job description..."
+                  required
+                  rows={3}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/60 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none resize-y"
                 />
               </div>
 
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button type="button" onClick={() => setShowJobForm(false)}
-                  style={{ flex: 1, padding: '12px', background: 'transparent', color: '#94a3b8', border: '1px solid #475569', borderRadius: '10px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
+              <div className="mb-6">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Requirements
+                </label>
+                <textarea
+                  value={jobForm.requirements}
+                  onChange={(e) => setJobForm({ ...jobForm, requirements: e.target.value })}
+                  placeholder="Job requirements..."
+                  rows={3}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/60 border border-slate-300 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none resize-y"
+                />
+              </div>
+
+              <div className="flex gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setShowJobForm(false)}
+                  className="flex-1 py-3 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                >
                   Cancel
                 </button>
-                <button type="submit" disabled={submitting}
-                  style={{ flex: 1, padding: '12px', background: '#2563eb', color: 'white', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: submitting ? 'not-allowed' : 'pointer' }}>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="flex-1 py-3 bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-colors disabled:opacity-70 cursor-pointer"
+                >
                   {submitting ? '⏳ Posting...' : 'Post Job'}
                 </button>
               </div>
