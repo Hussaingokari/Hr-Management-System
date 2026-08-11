@@ -1,16 +1,35 @@
 'use client';
-import { useState, useEffect, useCallback } from 'react';
+
+import { useState, useEffect } from 'react';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
-import { TrendingUp, MessageSquare, FileText, Loader2, Check, CheckCircle, MessageCircle } from 'lucide-react';
+import {
+  TrendingUp,
+  MessageSquare,
+  FileText,
+  Loader2,
+  Check,
+  CheckCircle,
+  MessageCircle,
+} from 'lucide-react';
 
 function StarRating({ value }) {
   return (
-    <div style={{ display: 'flex', gap: '3px', alignItems: 'center' }}>
-      {[1, 2, 3, 4, 5].map(s => (
-        <span key={s} style={{ fontSize: '18px', color: s <= Math.round(value) ? '#f59e0b' : '#e2e8f0' }}>★</span>
-      ))}
-      <span style={{ fontSize: '13px', color: 'var(--text-secondary)', marginLeft: '6px', fontWeight: '600' }}>
+    <div className="flex items-center gap-1.5">
+      <div className="flex gap-0.5">
+        {[1, 2, 3, 4, 5].map((s) => (
+          <span
+            key={s}
+            className={`text-lg ${s <= Math.round(value)
+                ? 'text-amber-400'
+                : 'text-slate-200 dark:text-slate-700'
+              }`}
+          >
+            ★
+          </span>
+        ))}
+      </div>
+      <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 ml-1">
         {value}/5
       </span>
     </div>
@@ -18,30 +37,38 @@ function StarRating({ value }) {
 }
 
 function Badge({ status }) {
-  const map = {
-    DRAFT: { bg: '#f1f5f9', color: 'var(--text-secondary)' },
-    SUBMITTED: { bg: '#eff6ff', color: '#3b82f6' },
-    ACKNOWLEDGED: { bg: '#dcfce7', color: '#16a34a' },
-    IN_PROGRESS: { bg: '#fff7ed', color: '#f59e0b' },
+  const styles = {
+    DRAFT:
+      'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700',
+    SUBMITTED:
+      'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-900/50',
+    ACKNOWLEDGED:
+      'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50',
+    IN_PROGRESS:
+      'bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-900/50',
   };
-  const s = map[status] || { bg: '#f1f5f9', color: 'var(--text-secondary)' };
+  const style = styles[status] || styles.DRAFT;
   return (
-    <span style={{ background: s.bg, color: s.color, padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: '700' }}>
+    <span className={`px-3 py-1 rounded-full text-xs font-bold ${style}`}>
       {status}
     </span>
   );
 }
 
-function getStatusBorderColor(status) {
-  if (status === 'ACKNOWLEDGED') return '#bbf7d0';
-  if (status === 'SUBMITTED') return '#bfdbfe';
-  return '#e2e8f0';
+function getCardBorderClass(status) {
+  if (status === 'ACKNOWLEDGED')
+    return 'border-emerald-200 dark:border-emerald-900/50';
+  if (status === 'SUBMITTED')
+    return 'border-blue-200 dark:border-blue-900/50';
+  return 'border-slate-200 dark:border-slate-800';
 }
 
-function getStatusHeaderBg(status) {
-  if (status === 'ACKNOWLEDGED') return '#f0fdf4';
-  if (status === 'SUBMITTED') return '#eff6ff';
-  return '#f8fafc';
+function getHeaderBgClass(status) {
+  if (status === 'ACKNOWLEDGED')
+    return 'bg-emerald-50/40 dark:bg-emerald-950/20';
+  if (status === 'SUBMITTED')
+    return 'bg-blue-50/40 dark:bg-blue-950/20';
+  return 'bg-slate-50/80 dark:bg-slate-800/40';
 }
 
 export default function EmployeePerformancePage() {
@@ -51,24 +78,19 @@ export default function EmployeePerformancePage() {
   const [comment, setComment] = useState('');
   const [acknowledging, setAcknowledging] = useState(false);
 
+  const fetchReviews = async () => {
+    try {
+      const res = await api.get('/api/performance/my');
+      setReviews(res.data?.data?.content || []);
+    } catch {
+      toast.error('Failed to load performance reviews');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    let active = true;
-    const fetchReviews = async () => {
-      try {
-        const res = await api.get('/api/performance/my');
-        if (active) {
-          setReviews(res.data?.data?.content || []);
-          setLoading(false);
-        }
-      } catch {
-        if (active) {
-          toast.error('Failed to load performance reviews');
-          setLoading(false);
-        }
-      }
-    };
     fetchReviews();
-    return () => { active = false; };
   }, []);
 
   const handleAcknowledge = async (reviewId) => {
@@ -92,169 +114,221 @@ export default function EmployeePerformancePage() {
     }
   };
 
-  const pendingCount = reviews.filter(r => r.status !== 'ACKNOWLEDGED').length;
+  const pendingCount = reviews.filter((r) => r.status !== 'ACKNOWLEDGED').length;
 
   const renderContent = () => {
     if (loading) {
-      return <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-muted)' }}>Loading...</div>;
-    }
-    if (reviews.length === 0) {
       return (
-        <div style={{ background: 'var(--card-bg)', borderRadius: '12px', padding: '80px', textAlign: 'center', border: '1px solid var(--card-border)' }}>
-          <div style={{ fontSize: '48px', marginBottom: '16px' }}>⭐</div>
-          <div style={{ fontSize: '16px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '8px' }}>
-            No performance reviews yet
-          </div>
-          <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-            Your manager will create a review for you
-          </div>
+        <div className="p-16 text-center text-sm font-medium text-slate-400 dark:text-slate-500">
+          Loading performance reviews...
         </div>
       );
     }
+
+    if (reviews.length === 0) {
+      return (
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-16 text-center space-y-3">
+          <div className="text-5xl">⭐</div>
+          <div className="text-base font-bold text-slate-900 dark:text-slate-100">
+            No performance reviews yet
+          </div>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Your manager will create a review for you
+          </p>
+        </div>
+      );
+    }
+
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <div className="space-y-6">
         {reviews.map((r) => (
-          <div key={r.id} style={{
-            background: 'var(--card-bg)', borderRadius: '14px',
-            border: `2px solid ${getStatusBorderColor(r.status)}`,
-            boxShadow: '0 1px 6px rgba(0,0,0,0.04)', overflow: 'hidden',
-          }}>
+          <div
+            key={r.id}
+            className={`bg-white dark:bg-slate-900 rounded-2xl border-2 shadow-xs overflow-hidden ${getCardBorderClass(
+              r.status
+            )}`}
+          >
             {/* Review Header */}
-            <div style={{
-              padding: '16px 20px', borderBottom: '1px solid #f1f5f9',
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              background: getStatusHeaderBg(r.status),
-            }}>
+            <div
+              className={`p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${getHeaderBgClass(
+                r.status
+              )}`}
+            >
               <div>
-                <div style={{ fontSize: '16px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px' }}>
+                <h3 className="text-lg font-extrabold text-slate-900 dark:text-white">
                   {r.reviewPeriod}
-                </div>
-                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                  Reviewed by: <strong style={{ color: '#374151' }}>{r.reviewerName}</strong> · {r.reviewDate}
-                </div>
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Reviewed by:{' '}
+                  <strong className="text-slate-700 dark:text-slate-300 font-semibold">
+                    {r.reviewerName}
+                  </strong>{' '}
+                  · {r.reviewDate}
+                </p>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px' }}>Overall Rating</div>
+
+              <div className="flex items-center gap-4 self-start sm:self-auto">
+                <div className="text-left sm:text-right">
+                  <span className="block text-[11px] text-slate-400 dark:text-slate-500 font-medium">
+                    Overall Rating
+                  </span>
                   <StarRating value={r.overallRating} />
                 </div>
                 <Badge status={r.status} />
               </div>
             </div>
 
-            {/* Ratings Grid */}
-            <div style={{ padding: '20px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px', marginBottom: '20px' }}>
+            {/* Content Body */}
+            <div className="p-4 sm:p-6 space-y-6">
+              {/* Ratings Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                 {[
                   { label: 'Technical', value: r.technicalSkills, color: '#3b82f6' },
                   { label: 'Communication', value: r.communication, color: '#8b5cf6' },
                   { label: 'Teamwork', value: r.teamwork, color: '#16a34a' },
                   { label: 'Productivity', value: r.productivity, color: '#f59e0b' },
                   { label: 'Leadership', value: r.leadership, color: '#ec4899' },
-                ].map(s => (
-                  <div key={s.label} style={{ background: 'var(--bg-primary)', borderRadius: '10px', padding: '12px', border: '1px solid var(--card-border)', textAlign: 'center' }}>
-                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '6px', fontWeight: '600' }}>{s.label}</div>
-                    <div style={{ fontSize: '22px', fontWeight: '900', color: s.color, marginBottom: '4px' }}>{s.value}</div>
-                    <div style={{ height: '4px', background: 'var(--card-border)', borderRadius: '2px', overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${(s.value / 5) * 100}%`, background: s.color, borderRadius: '2px' }} />
+                ].map((s) => (
+                  <div
+                    key={s.label}
+                    className="bg-slate-50 dark:bg-slate-800/60 rounded-xl p-3 border border-slate-200/80 dark:border-slate-700/60 text-center"
+                  >
+                    <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
+                      {s.label}
+                    </div>
+                    <div
+                      className="text-2xl font-black mb-1"
+                      style={{ color: s.color }}
+                    >
+                      {s.value}
+                    </div>
+                    <div className="h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-300"
+                        style={{
+                          width: `${(s.value / 5) * 100}%`,
+                          backgroundColor: s.color,
+                        }}
+                      />
                     </div>
                   </div>
                 ))}
               </div>
 
               {/* Feedback Sections */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '20px' }}>
-                {[
-                  { label: '💪 Strengths', value: r.strengths, color: '#16a34a', bg: '#f0fdf4' },
-                  { label: <><TrendingUp size={16} style={{ display: 'inline', marginRight: '4px' }} /> Improvements</>, value: r.improvements, color: '#f59e0b', bg: '#fff7ed' },
-                  { label: '🎯 Goals', value: r.goals, color: '#3b82f6', bg: '#eff6ff' },
-                ].map(d => d.value && (
-                  <div key={d.label} style={{ background: d.bg, borderRadius: '10px', padding: '14px', border: `1px solid ${d.color}30` }}>
-                    <div style={{ fontSize: '12px', fontWeight: '700', color: d.color, marginBottom: '8px' }}>{d.label}</div>
-                    <div style={{ fontSize: '13px', color: '#374151', lineHeight: 1.6 }}>{d.value}</div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {r.strengths && (
+                  <div className="bg-emerald-50/60 dark:bg-emerald-950/30 rounded-xl p-4 border border-emerald-200/80 dark:border-emerald-900/50">
+                    <div className="text-xs font-bold text-emerald-700 dark:text-emerald-400 mb-1.5 flex items-center gap-1">
+                      💪 Strengths
+                    </div>
+                    <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                      {r.strengths}
+                    </p>
                   </div>
-                ))}
+                )}
+
+                {r.improvements && (
+                  <div className="bg-amber-50/60 dark:bg-amber-950/30 rounded-xl p-4 border border-amber-200/80 dark:border-amber-900/50">
+                    <div className="text-xs font-bold text-amber-700 dark:text-amber-400 mb-1.5 flex items-center gap-1">
+                      <TrendingUp size={15} /> Improvements
+                    </div>
+                    <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                      {r.improvements}
+                    </p>
+                  </div>
+                )}
+
+                {r.goals && (
+                  <div className="bg-blue-50/60 dark:bg-blue-950/30 rounded-xl p-4 border border-blue-200/80 dark:border-blue-900/50">
+                    <div className="text-xs font-bold text-blue-700 dark:text-blue-400 mb-1.5 flex items-center gap-1">
+                      🎯 Goals
+                    </div>
+                    <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                      {r.goals}
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Employee Comments (if acknowledged) */}
               {r.employeeComments && (
-                <div style={{ background: '#f0fdf4', borderRadius: '10px', padding: '14px', border: '1px solid #bbf7d0', marginBottom: '16px' }}>
-                  <h4 style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '8px' }}>
-                    <MessageSquare size={16} style={{ display: 'inline', marginRight: '4px' }} /> Your Comments
+                <div className="bg-emerald-50/60 dark:bg-emerald-950/30 rounded-xl p-4 border border-emerald-200 dark:border-emerald-900/50">
+                  <h4 className="text-xs font-bold text-emerald-800 dark:text-emerald-300 mb-1.5 flex items-center gap-1.5">
+                    <MessageSquare size={15} /> Your Comments
                   </h4>
-                  <div style={{ fontSize: '13px', color: '#374151', lineHeight: 1.6 }}>
+                  <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
                     {r.employeeComments}
-                  </div>
+                  </p>
                 </div>
               )}
 
-              {/* Acknowledge Section */}
+              {/* Acknowledge Action Section */}
               {r.status === 'SUBMITTED' && (
-                <div style={{ background: '#eff6ff', borderRadius: '12px', padding: '16px', border: '1px solid #bfdbfe' }}>
-                  <h4 style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '12px' }}>
-                    <FileText size={16} style={{ display: 'inline', marginRight: '4px' }} /> Acknowledge This Review
-                  </h4>
-                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '12px' }}>
-                    Add your comments and acknowledge to complete the review process
+                <div className="bg-blue-50/60 dark:bg-blue-950/30 rounded-2xl p-4 sm:p-5 border border-blue-200 dark:border-blue-900/50 space-y-3">
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                      <FileText size={16} className="text-blue-600 dark:text-blue-400" />{' '}
+                      Acknowledge This Review
+                    </h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                      Add your comments and acknowledge to complete the review process
+                    </p>
                   </div>
 
                   {selected === r.id ? (
-                    <>
+                    <div className="space-y-3">
                       <textarea
                         value={comment}
-                        onChange={e => setComment(e.target.value)}
+                        onChange={(e) => setComment(e.target.value)}
                         placeholder="Add your comments about this review... (e.g. Thank you for the feedback, I will work on improving my communication skills)"
                         rows={4}
-                        style={{
-                          width: '100%', padding: '12px',
-                          border: '1.5px solid #bfdbfe', borderRadius: '10px',
-                          fontSize: '13px', outline: 'none', resize: 'vertical',
-                          boxSizing: 'border-box', fontFamily: 'inherit',
-                          marginBottom: '12px', background: 'var(--card-bg)',
-                        }}
+                        className="w-full p-3 rounded-xl border border-blue-200 dark:border-blue-900/80 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 text-xs sm:text-sm transition"
                       />
-                      <div style={{ display: 'flex', gap: '10px' }}>
+                      <div className="flex flex-col sm:flex-row gap-2">
                         <button
                           onClick={() => handleAcknowledge(r.id)}
                           disabled={acknowledging}
-                          style={{
-                            flex: 1, padding: '12px', background: '#1e3a5f',
-                            color: 'white', border: 'none', borderRadius: '10px',
-                            fontSize: '14px', fontWeight: '700',
-                            cursor: acknowledging ? 'not-allowed' : 'pointer',
-                            opacity: acknowledging ? 0.7 : 1,
-                          }}
+                          className="flex-1 px-4 py-2.5 rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs sm:text-sm font-bold hover:bg-slate-800 dark:hover:bg-white transition flex items-center justify-center gap-2 disabled:opacity-50"
                         >
-                          {acknowledging ? <><Loader2 size={16} className="animate-spin" style={{ display: 'inline', marginRight: '6px' }} /> Acknowledging...</> : <><Check size={16} style={{ display: 'inline', marginRight: '6px' }} /> Acknowledge Review</>}
+                          {acknowledging ? (
+                            <>
+                              <Loader2 size={16} className="animate-spin" />
+                              Acknowledging...
+                            </>
+                          ) : (
+                            <>
+                              <Check size={16} /> Acknowledge Review
+                            </>
+                          )}
                         </button>
                         <button
-                          onClick={() => { setSelected(null); setComment(''); }}
-                          style={{ padding: '12px 20px', background: 'var(--card-bg)', color: '#374151', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}
+                          onClick={() => {
+                            setSelected(null);
+                            setComment('');
+                          }}
+                          className="px-5 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition"
                         >
                           Cancel
                         </button>
                       </div>
-                    </>
+                    </div>
                   ) : (
                     <button
                       onClick={() => setSelected(r.id)}
-                      style={{
-                        padding: '10px 24px', background: '#1e3a5f',
-                        color: 'white', border: 'none', borderRadius: '10px',
-                        fontSize: '13px', fontWeight: '700', cursor: 'pointer',
-                      }}
+                      className="px-4 py-2.5 rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs sm:text-sm font-bold hover:bg-slate-800 dark:hover:bg-white transition flex items-center gap-2"
                     >
-                      <MessageCircle size={14} style={{ display: 'inline', marginRight: '4px' }} /> Add Comments & Acknowledge
+                      <MessageCircle size={15} /> Add Comments & Acknowledge
                     </button>
                   )}
                 </div>
               )}
 
-              {/* Already acknowledged message */}
+              {/* Already acknowledged state */}
               {r.status === 'ACKNOWLEDGED' && (
-                <div style={{ background: '#f0fdf4', borderRadius: '10px', padding: '12px 16px', border: '1px solid #bbf7d0', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span style={{ color: '#16a34a' }}><CheckCircle size={20} /></span>
-                  <span style={{ fontSize: '13px', color: '#16a34a', fontWeight: '600' }}>
+                <div className="bg-emerald-50/60 dark:bg-emerald-950/30 rounded-xl p-3 sm:p-4 border border-emerald-200 dark:border-emerald-900/50 flex items-center gap-2.5 text-emerald-700 dark:text-emerald-400">
+                  <CheckCircle size={18} className="shrink-0" />
+                  <span className="text-xs sm:text-sm font-semibold">
                     You have acknowledged this review
                   </span>
                 </div>
@@ -267,18 +341,18 @@ export default function EmployeePerformancePage() {
   };
 
   return (
-    <div>
-      {/* Header */}
-      <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+    <div className="max-w-6xl mx-auto space-y-6 text-slate-900 dark:text-slate-100">
+      {/* Page Header */}
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white flex items-center gap-3">
           My Performance Reviews
           {pendingCount > 0 && (
-            <span style={{ background: '#f59e0b', color: 'white', borderRadius: '20px', padding: '2px 10px', fontSize: '13px', fontWeight: '700' }}>
+            <span className="bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full">
               {pendingCount} pending
             </span>
           )}
         </h1>
-        <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+        <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 mt-1">
           View your performance reviews and acknowledge them
         </p>
       </div>
