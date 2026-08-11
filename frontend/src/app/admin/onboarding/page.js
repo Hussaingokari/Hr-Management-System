@@ -1,4 +1,5 @@
 'use client';
+
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/axios';
@@ -16,9 +17,9 @@ function timeAgo(dateStr) {
 }
 
 const ACTIVITY_ICON = {
-  PENDING_SUMMARY: <Clock size={16} />,
-  DOCUMENT_UPLOADED: <FileText size={16} />,
-  ONBOARDING_COMPLETED: <CheckCircle size={16} />,
+  PENDING_SUMMARY: <Clock size={18} className="text-amber-600 dark:text-amber-400" />,
+  DOCUMENT_UPLOADED: <FileText size={18} className="text-blue-600 dark:text-blue-400" />,
+  ONBOARDING_COMPLETED: <CheckCircle size={18} className="text-emerald-600 dark:text-emerald-400" />,
 };
 
 export default function OnboardingDashboardPage() {
@@ -31,24 +32,54 @@ export default function OnboardingDashboardPage() {
     try {
       const res = await api.get('/api/onboarding/dashboard-summary');
       setData(res.data?.data);
-    } catch (err) {
+    } catch {
       toast.error('Failed to load dashboard');
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => { fetchDashboard(); }, [fetchDashboard]);
+  useEffect(() => {
+    fetchDashboard();
+  }, [fetchDashboard]);
 
   if (loading || !data) {
-    return <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</div>;
+    return (
+      <div className="p-20 text-center text-sm font-medium text-slate-400 dark:text-slate-500">
+        Loading dashboard...
+      </div>
+    );
   }
 
   const STATS = [
-    { label: 'Total Employees', value: data.totalEmployees, sub: 'All time', color: '#1e3a5f', bg: '#eef2ff', icon: <Users size={16} color="#1e3a5f" /> },
-    { label: 'Pending Onboarding', value: data.pendingOnboarding, sub: 'In progress', color: '#ca8a04', bg: '#fef9c3', icon: <Clock size={16} color="#ca8a04" /> },
-    { label: 'Completed Onboarding', value: data.completedOnboarding, sub: 'Fully onboarded', color: '#16a34a', bg: '#dcfce7', icon: <CheckCircle size={16} color="#16a34a" /> },
-    { label: 'Pending Doc Verifications', value: data.pendingDocVerifications, sub: 'Awaiting review', color: '#dc2626', bg: '#fee2e2', icon: <FileText size={16} color="#dc2626" /> },
+    {
+      label: 'Total Employees',
+      value: data.totalEmployees,
+      sub: 'All time',
+      bg: 'bg-indigo-50 dark:bg-indigo-950/60',
+      icon: <Users size={20} className="text-indigo-600 dark:text-indigo-400" />,
+    },
+    {
+      label: 'Pending Onboarding',
+      value: data.pendingOnboarding,
+      sub: 'In progress',
+      bg: 'bg-amber-50 dark:bg-amber-950/60',
+      icon: <Clock size={20} className="text-amber-600 dark:text-amber-400" />,
+    },
+    {
+      label: 'Completed Onboarding',
+      value: data.completedOnboarding,
+      sub: 'Fully onboarded',
+      bg: 'bg-emerald-50 dark:bg-emerald-950/60',
+      icon: <CheckCircle size={20} className="text-emerald-600 dark:text-emerald-400" />,
+    },
+    {
+      label: 'Pending Doc Verifications',
+      value: data.pendingDocVerifications,
+      sub: 'Awaiting review',
+      bg: 'bg-rose-50 dark:bg-rose-950/60',
+      icon: <FileText size={20} className="text-rose-600 dark:text-rose-400" />,
+    },
   ];
 
   const QUICK_ACTIONS = [
@@ -59,86 +90,105 @@ export default function OnboardingDashboardPage() {
   ];
 
   return (
-    <div>
-      <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px' }}>
+    <div className="p-6 max-w-7xl mx-auto space-y-7 min-h-screen text-slate-900 dark:text-slate-100">
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-800 dark:text-white">
           HR Dashboard
         </h1>
-        <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+        <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 mt-1">
           Welcome back. Here's your onboarding overview.
         </p>
       </div>
 
-      {/* Stat cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px', marginBottom: '20px' }}>
+      {/* Stat Cards - Increased size & padding */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {STATS.map((s, i) => (
-          <div key={i} style={{ background: 'var(--card-bg)', borderRadius: '12px', padding: '18px', border: '1px solid var(--card-border)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-              <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: '500' }}>{s.label}</span>
-              <div style={{ width: '30px', height: '30px', background: s.bg, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px' }}>{s.icon}</div>
+          <div
+            key={i}
+            className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between"
+          >
+            <div className="flex justify-between items-start mb-3">
+              <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">
+                {s.label}
+              </span>
+              <div className={`w-10 h-10 rounded-xl ${s.bg} flex items-center justify-center shrink-0`}>
+                {s.icon}
+              </div>
             </div>
-            <div style={{ fontSize: '28px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px' }}>{s.value}</div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{s.sub}</div>
+            <div>
+              <div className="text-3xl font-black text-slate-800 dark:text-slate-100 mb-1">
+                {s.value}
+              </div>
+              <div className="text-xs font-medium text-slate-400 dark:text-slate-500">{s.sub}</div>
+            </div>
           </div>
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '20px' }}>
-        {/* Recent Activity */}
-        <div style={{ background: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--card-border)', padding: '18px 20px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-            <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <TrendingUp size={16} /> Recent Activity
+      {/* Content Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Recent Activity Section */}
+        <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-xs">
+          <div className="flex justify-between items-center mb-5">
+            <div className="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+              <TrendingUp size={20} className="text-blue-600 dark:text-blue-400" /> Recent Activity
             </div>
             <button
               onClick={() => router.push('/admin/onboarding/notifications')}
-              style={{ background: 'none', border: 'none', color: '#4f46e5', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>
+              className="text-sm font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition"
+            >
               View all
             </button>
           </div>
 
           {data.recentActivity.length === 0 ? (
-            <div style={{ padding: '30px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
+            <div className="p-10 text-center text-sm text-slate-400 dark:text-slate-500">
               No recent activity yet.
             </div>
           ) : (
-            data.recentActivity.map((item, i) => (
-              <div key={i} style={{
-                display: 'flex', gap: '12px', padding: '12px 8px',
-                borderRadius: '8px',
-                background: i === 0 ? '#f8fafc' : 'transparent',
-              }}>
-                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  {ACTIVITY_ICON[item.type] || <Activity size={16} />}
+            <div className="space-y-2">
+              {data.recentActivity.map((item, i) => (
+                <div
+                  key={i}
+                  className={`flex gap-3.5 p-3.5 rounded-xl items-start transition ${i === 0
+                      ? 'bg-slate-50 dark:bg-slate-800/60'
+                      : 'hover:bg-slate-50/60 dark:hover:bg-slate-800/40'
+                    }`}
+                >
+                  <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 flex items-center justify-center shrink-0 mt-0.5">
+                    {ACTIVITY_ICON[item.type] || <Activity size={18} className="text-indigo-600 dark:text-indigo-400" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">
+                      {item.title}
+                    </div>
+                    <div className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
+                      {item.description}
+                    </div>
+                  </div>
+                  <div className="text-xs font-medium text-slate-400 dark:text-slate-500 whitespace-nowrap">
+                    {timeAgo(item.timestamp)}
+                  </div>
                 </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-primary)' }}>{item.title}</div>
-                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{item.description}</div>
-                </div>
-                <div style={{ fontSize: '11px', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
-                  {timeAgo(item.timestamp)}
-                </div>
-              </div>
-            ))
+              ))}
+            </div>
           )}
         </div>
 
-        {/* Quick Actions */}
-        <div style={{ background: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--card-border)', padding: '18px 20px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-          <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '14px' }}>
+        {/* Quick Actions Section */}
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-xs h-fit space-y-4">
+          <div className="text-base font-bold text-slate-800 dark:text-slate-100 mb-2">
             Quick Actions
           </div>
           {QUICK_ACTIONS.map((a, i) => (
             <button
               key={i}
               onClick={() => router.push(a.route)}
-              style={{
-                width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                padding: '12px 14px', marginBottom: '8px',
-                background: 'var(--card-bg)', border: '1px solid var(--card-border)', borderRadius: '10px',
-                fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)', cursor: 'pointer',
-              }}>
-              {a.label} <ChevronRight size={14} />
+              className="w-full flex justify-between items-center p-3.5 bg-white dark:bg-slate-800/60 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 transition shadow-2xs group"
+            >
+              <span>{a.label}</span>
+              <ChevronRight size={16} className="text-slate-400 group-hover:translate-x-1 transition-transform" />
             </button>
           ))}
         </div>
