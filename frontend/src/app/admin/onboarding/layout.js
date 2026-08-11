@@ -1,4 +1,5 @@
 'use client';
+
 import { useRouter, usePathname } from 'next/navigation';
 
 const SUB_NAV = [
@@ -12,8 +13,17 @@ const SUB_NAV = [
 
 function NavIcon({ path }) {
     return (
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="shrink-0"
+        >
             <path d={path} />
         </svg>
     );
@@ -23,55 +33,42 @@ export default function OnboardingLayout({ children }) {
     const router = useRouter();
     const pathname = usePathname();
 
+    const bestMatch = SUB_NAV.reduce((best, nav) => {
+        if (pathname === nav.key || pathname.startsWith(nav.key + '/')) {
+            if (!best || nav.key.length > best.length) {
+                return nav.key;
+            }
+        }
+        return best;
+    }, null);
+
     return (
-        <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
-            {/* Secondary sidebar */}
-            <div style={{
-                width: '190px', flexShrink: 0, background: 'var(--card-bg)',
-                borderRadius: '12px', border: '1px solid var(--card-border)',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.04)', padding: '10px',
-                position: 'sticky', top: '20px',
-            }}>
-                {SUB_NAV.map(item => {
-                    const bestMatch = SUB_NAV.reduce((best, nav) => {
-                        if (pathname === nav.key || pathname.startsWith(nav.key + '/')) {
-                            if (!best || nav.key.length > best.length) {
-                                return nav.key;
-                            }
-                        }
-                        return best;
-                    }, null);
-                    
+        <div className="flex flex-col sm:flex-row gap-6 items-start">
+            {/* Secondary Sub-navigation Sidebar - Expanded width & size */}
+            <nav className="w-full sm:w-56 shrink-0 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-3 sticky top-6 space-y-1">
+                {SUB_NAV.map((item) => {
                     const active = item.key === bestMatch;
-                    
+
                     return (
-                        <div
+                        <button
                             key={item.key}
                             onClick={() => router.push(item.key)}
-                            style={{
-                                display: 'flex', alignItems: 'center', gap: '10px',
-                                padding: '9px 12px', borderRadius: '8px', cursor: 'pointer',
-                                marginBottom: '2px',
-                                background: active ? '#eef2ff' : 'transparent',
-                                color: active ? '#1e293b' : '#64748b',
-                                borderLeft: active ? '3px solid #3b82f6' : '3px solid transparent',
-                                fontSize: '13px', fontWeight: active ? '700' : '400',
-                                transition: 'all 0.15s',
-                            }}
-                            onMouseEnter={e => { if (!active) e.currentTarget.style.background = '#f8fafc'; }}
-                            onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent'; }}
+                            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm transition-all border-l-4 text-left ${active
+                                    ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border-blue-600 dark:border-blue-400 font-bold'
+                                    : 'text-slate-600 dark:text-slate-400 border-transparent hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-slate-200 font-medium'
+                                }`}
                         >
                             <NavIcon path={item.icon} />
-                            {item.label}
-                        </div>
+                            <span>{item.label}</span>
+                        </button>
                     );
                 })}
-            </div>
+            </nav>
 
-            {/* Page content */}
-            <div style={{ flex: 1, minWidth: 0 }}>
+            {/* Main Page Content */}
+            <main className="flex-1 min-w-0 w-full">
                 {children}
-            </div>
+            </main>
         </div>
     );
 }
