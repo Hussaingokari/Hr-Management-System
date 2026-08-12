@@ -13,36 +13,25 @@ import { Users, AlertTriangle, Loader2 } from 'lucide-react';
 
 function Badge({ status }) {
   const map = {
-    ACTIVE: { bg: '#dcfce7', color: '#16a34a' },
-    INACTIVE: { bg: '#fee2e2', color: '#dc2626' },
-    ADMIN: { bg: '#dbeafe', color: '#1d4ed8' },
-    HR: { bg: '#fdf4ff', color: '#9333ea' },
-    EMPLOYEE: { bg: '#f1f5f9', color: '#374151' },
+    ACTIVE: 'bg-green-100 text-green-700 border-green-200 dark:bg-[#173404] dark:text-[#97C459] dark:border-[#27500A]',
+    INACTIVE: 'bg-red-100 text-red-700 border-red-200 dark:bg-[#4A1313] dark:text-[#F09595] dark:border-[#791F1F]',
+    ADMIN: 'bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-[#0C447C] dark:text-[#B5D4F4] dark:border-[#185FA5]',
+    HR: 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-[#3C3489] dark:text-[#CECBF6] dark:border-[#534AB7]',
+    EMPLOYEE: 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-[#1B2740] dark:text-[#B5D4F4] dark:border-[#223148]',
   };
-  const style = map[status] || { bg: '#f1f5f9', color: '#64748b' };
+  const cls = map[status] || map.EMPLOYEE;
   return (
-    <span style={{ padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '700', background: style.bg, color: style.color }}>
+    <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${cls}`}>
       {status}
     </span>
   );
 }
 
-// Shared style object for all text/select inputs so they always render
-// with a light background + dark text, regardless of the page/browser
-// being in dark mode. Without this, dark mode UA styles can make the
-// typed value (and placeholder) nearly invisible against the input.
-const INPUT_BASE_STYLE = {
-  width: '100%',
-  padding: '9px 12px',
-  border: '1.5px solid #e2e8f0',
-  borderRadius: '8px',
-  fontSize: '13px',
-  outline: 'none',
-  boxSizing: 'border-box',
-  background: '#ffffff',
-  color: '#1e293b',
-  colorScheme: 'light', // stops the browser from re-theming the field (and its placeholder) for dark mode
-};
+const INPUT_BASE_CLASS =
+  'w-full px-3 py-2.5 rounded-lg text-[13px] outline-none box-border ' +
+  'bg-white border border-slate-200 text-slate-900 placeholder-slate-400 ' +
+  'dark:bg-[#111A2C] dark:border-[#223148] dark:text-[#E6F1FB] dark:placeholder-[#5F7590] ' +
+  'focus:border-indigo-500 dark:focus:border-[#378ADD] transition-colors';
 
 function InputField({
   label,
@@ -58,17 +47,15 @@ function InputField({
 }) {
   return (
     <div>
-      <label style={{ fontSize: '12px', fontWeight: '600', color: '#374151', display: 'block', marginBottom: '5px' }}>
-        {label} {required && <span style={{ color: '#ef4444' }}>*</span>}
+      <label className="text-xs font-semibold text-slate-700 dark:text-[#B5D4F4] block mb-1.5">
+        {label} {required && <span className="text-red-500 dark:text-[#F09595]">*</span>}
       </label>
       <input
-        className="hrms-input"
         type={type}
         value={value || ''}
         onChange={e => {
           let val = e.target.value;
           if (numericOnly) {
-            // Strip anything that isn't a digit — blocks letters and special characters
             val = val.replace(/[^0-9]/g, '');
           }
           if (maxLength) {
@@ -94,9 +81,7 @@ function InputField({
         max={max}
         maxLength={maxLength}
         inputMode={numericOnly ? 'numeric' : undefined}
-        style={INPUT_BASE_STYLE}
-        onFocus={e => e.target.style.borderColor = '#3b82f6'}
-        onBlur={e => e.target.style.borderColor = '#e2e8f0'}
+        className={INPUT_BASE_CLASS}
       />
     </div>
   );
@@ -257,162 +242,134 @@ export default function EmployeeManagementPage() {
   const handleFieldChange = (name, val) => setForm(prev => ({ ...prev, [name]: val }));
 
   return (
-    <div>
-      {/* Scoped style so the placeholder text also stays visible in dark mode
-          (::placeholder can't be set via inline style). */}
-      <style>{`
-        .hrms-input::placeholder {
-          color: #94a3b8;
-          opacity: 1;
-        }
-      `}</style>
-
+    <div className="min-h-screen p-6 bg-slate-50 text-slate-900 dark:bg-[#0B1220] dark:text-[#E6F1FB]">
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+      <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 style={{ fontSize: '22px', fontWeight: '800', color: '#1e293b', marginBottom: '4px' }}>
+          <h1 className="text-[22px] font-extrabold mb-1 text-slate-900 dark:text-[#E6F1FB]">
             Employee Management
           </h1>
-          <p style={{ fontSize: '13px', color: '#94a3b8' }}>
+          <p className="text-[13px] text-slate-500 dark:text-[#7C93B3]">
             {totalElements} total employees
           </p>
         </div>
         <button
           onClick={openAddForm}
-          style={{
-            padding: '10px 20px', background: '#1e3a5f',
-            color: 'white', border: 'none', borderRadius: '10px',
-            fontSize: '13px', fontWeight: '700', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', gap: '6px',
-          }}
+          className="px-5 py-2.5 rounded-xl text-[13px] font-bold flex items-center gap-1.5 cursor-pointer
+            bg-indigo-500 text-white shadow-[0_4px_12px_rgba(99,102,241,0.25)]
+            dark:bg-[#378ADD] dark:text-[#042C53] dark:shadow-none"
         >
           + Add Employee
         </button>
       </div>
 
       {/* Search Bar */}
-      <div style={{ position: 'relative', marginBottom: '20px', maxWidth: '400px' }}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2"
-          style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }}>
+      <div className="relative mb-5 max-w-[400px]">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" strokeWidth="2"
+          className="absolute left-3 top-1/2 -translate-y-1/2 stroke-slate-400 dark:stroke-[#5F7590]">
           <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
         </svg>
         <input
-          className="hrms-input"
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Search by name, email, department..."
-          style={{
-            width: '100%', paddingLeft: '38px', paddingRight: '16px',
-            height: '40px', border: '1.5px solid #e2e8f0',
-            borderRadius: '10px', fontSize: '13px', outline: 'none',
-            background: '#ffffff', color: '#1e293b', colorScheme: 'light',
-          }}
-          onFocus={e => e.target.style.borderColor = '#3b82f6'}
-          onBlur={e => e.target.style.borderColor = '#e2e8f0'}
+          className="w-full h-10 pl-[38px] pr-4 rounded-xl text-[13px] outline-none transition-colors
+            bg-white border border-slate-200 text-slate-900 shadow-[0_1px_2px_rgba(0,0,0,0.03)]
+            dark:bg-[#111A2C] dark:border-[#223148] dark:text-[#E6F1FB] dark:shadow-none
+            focus:border-indigo-500 dark:focus:border-[#378ADD]"
         />
         {(searching) && (
-          <span style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '12px', color: '#94a3b8' }}>
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 dark:text-[#5F7590]">
             Searching...
           </span>
         )}
       </div>
 
       {/* Table */}
-      <div className="table-responsive" style={{
-        background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0',
-        boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-      }}>
+      <div className="table-responsive rounded-xl border overflow-hidden
+        bg-white border-slate-200 shadow-[0_1px_3px_rgba(0,0,0,0.05)]
+        dark:bg-[#0F1728] dark:border-[#1B2740] dark:shadow-none">
         {/* Table Header */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '0.6fr 2fr 1.2fr 1.2fr 1fr 1fr 1fr',
-          gap: '16px',
-          padding: '10px 20px', background: '#f8fafc',
-          borderBottom: '1px solid #e2e8f0',
-        }}>
+        <div className="grid gap-4 px-5 py-3 border-b
+          bg-slate-50 border-slate-200
+          dark:bg-[#0B1220] dark:border-[#1B2740]"
+          style={{ gridTemplateColumns: '0.6fr 2fr 1.2fr 1.2fr 1fr 1fr 1fr' }}>
           {['Emp ID', 'Employee', 'Department', 'Designation', 'Role', 'Status', 'Actions'].map(h => (
-            <div key={h} style={{ fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            <div key={h} className="text-[11px] font-bold uppercase tracking-wide text-slate-500 dark:text-[#7C93B3]">
               {h}
             </div>
           ))}
         </div>
 
         {loading ? (
-          <div style={{ padding: '60px', textAlign: 'center', color: '#94a3b8' }}>Loading employees...</div>
+          <div className="p-16 text-center text-slate-400 dark:text-[#5F7590]">Loading employees...</div>
         ) : employees.length === 0 ? (
-          <div style={{ padding: '60px', textAlign: 'center' }}>
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px', color: '#94a3b8' }}>
+          <div className="p-16 text-center">
+            <div className="flex justify-center mb-3 text-slate-400 dark:text-[#5F7590]">
               <Users size={48} strokeWidth={1.5} />
             </div>
-            <div style={{ fontSize: '15px', fontWeight: '600', color: '#1e293b', marginBottom: '8px' }}>
+            <div className="text-[15px] font-semibold mb-2 text-slate-900 dark:text-[#E6F1FB]">
               {search ? 'No employees found' : 'No employees yet'}
             </div>
-            <div style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '16px' }}>
+            <div className="text-[13px] mb-4 text-slate-500 dark:text-[#7C93B3]">
               {search ? `No results for "${search}"` : 'Add your first employee'}
             </div>
             {!search && (
-              <button onClick={openAddForm} style={{ padding: '10px 20px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>
+              <button onClick={openAddForm} className="px-5 py-2.5 rounded-lg text-[13px] font-bold cursor-pointer
+                bg-indigo-500 text-white dark:bg-[#378ADD] dark:text-[#042C53]">
                 + Add Employee
               </button>
             )}
           </div>
         ) : (
           <>
-            {employees.map((emp, i) => (
-              <div key={emp.id} style={{
-                display: 'grid',
-                gridTemplateColumns: '0.6fr 2fr 1.2fr 1.2fr 1fr 1fr 1fr',
-                gap: '16px',
-                padding: '13px 20px', borderBottom: '1px solid #f1f5f9',
-                alignItems: 'center',
-              }}
-                onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
-                onMouseLeave={e => e.currentTarget.style.background = 'white'}
+            {employees.map((emp) => (
+              <div key={emp.id}
+                className="grid gap-4 px-5 py-3.5 items-center border-b transition-colors
+                  border-slate-100 hover:bg-slate-50
+                  dark:border-[#1B2740] dark:hover:bg-[#111A2C]"
+                style={{ gridTemplateColumns: '0.6fr 2fr 1.2fr 1.2fr 1fr 1fr 1fr' }}
               >
-                <div style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '600' }}>
+                <div className="text-xs font-semibold text-slate-500 dark:text-[#7C93B3]">
                   {emp.employeeId}
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
-                  <div style={{
-                    width: '34px', height: '34px', borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #1e3a5f, #3b82f6)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '12px', fontWeight: '700', color: 'white', flexShrink: 0,
-                  }}>
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-[34px] h-[34px] rounded-full flex items-center justify-center
+                    text-xs font-bold text-white flex-shrink-0
+                    bg-gradient-to-br from-indigo-500 to-indigo-400
+                    dark:bg-none dark:bg-[#185FA5] dark:text-[#E6F1FB]">
                     {emp.firstName?.[0]}{emp.lastName?.[0]}
                   </div>
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <div className="min-w-0">
+                    <div className="text-[13px] font-semibold whitespace-nowrap overflow-hidden text-ellipsis
+                      text-slate-900 dark:text-[#E6F1FB]">
                       {emp.firstName} {emp.lastName}
                     </div>
-                    <div style={{ fontSize: '11px', color: '#94a3b8', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{emp.email}</div>
+                    <div className="text-[11px] whitespace-nowrap overflow-hidden text-ellipsis
+                      text-slate-500 dark:text-[#5F7590]">{emp.email}</div>
                   </div>
                 </div>
 
-                <div style={{ fontSize: '13px', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{emp.department || '—'}</div>
-                <div style={{ fontSize: '13px', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{emp.designation || '—'}</div>
+                <div className="text-[13px] whitespace-nowrap overflow-hidden text-ellipsis
+                  text-slate-700 dark:text-[#B5D4F4]">{emp.department || '—'}</div>
+                <div className="text-[13px] whitespace-nowrap overflow-hidden text-ellipsis
+                  text-slate-700 dark:text-[#B5D4F4]">{emp.designation || '—'}</div>
                 <Badge status={emp.role} />
                 <Badge status={emp.active ? 'ACTIVE' : 'INACTIVE'} />
 
-                <div style={{ display: 'flex', gap: '6px' }}>
+                <div className="flex gap-1.5">
                   <button
                     onClick={() => openEditForm(emp)}
-                    style={{
-                      padding: '5px 12px', background: '#eff6ff',
-                      color: '#3b82f6', border: '1px solid #bfdbfe',
-                      borderRadius: '6px', fontSize: '11px', fontWeight: '700',
-                      cursor: 'pointer',
-                    }}
+                    className="px-3 py-1.5 rounded-md text-[11px] font-bold cursor-pointer border
+                      bg-indigo-100 text-indigo-700 border-indigo-200
+                      dark:bg-[#0C447C] dark:text-[#B5D4F4] dark:border-[#185FA5]"
                   >Edit</button>
                   <button
                     onClick={() => setShowDeleteConfirm(emp)}
-                    style={{
-                      padding: '5px 12px', background: '#fee2e2',
-                      color: '#dc2626', border: '1px solid #fecaca',
-                      borderRadius: '6px', fontSize: '11px', fontWeight: '700',
-                      cursor: 'pointer',
-                    }}
+                    className="px-3 py-1.5 rounded-md text-[11px] font-bold cursor-pointer border
+                      bg-red-100 text-red-700 border-red-200
+                      dark:bg-[#4A1313] dark:text-[#F09595] dark:border-[#791F1F]"
                   >Delete</button>
                 </div>
               </div>
@@ -420,16 +377,26 @@ export default function EmployeeManagementPage() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div style={{ padding: '14px 20px', display: 'flex', justifyContent: 'center', gap: '8px', borderTop: '1px solid #e2e8f0' }}>
+              <div className="px-5 py-3.5 flex justify-center gap-2 border-t
+                border-slate-200 bg-slate-50
+                dark:border-[#1B2740] dark:bg-[#0B1220]">
                 <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}
-                  style={{ padding: '6px 14px', border: '1px solid #e2e8f0', borderRadius: '6px', fontSize: '12px', fontWeight: '600', color: page === 0 ? '#cbd5e1' : '#374151', background: 'white', cursor: page === 0 ? 'not-allowed' : 'pointer' }}>
+                  className={`px-3.5 py-1.5 rounded-md text-xs font-semibold border
+                    bg-white border-slate-300 dark:bg-[#111A2C] dark:border-[#223148]
+                    ${page === 0
+                      ? 'text-slate-400 dark:text-[#3E4E68] cursor-not-allowed'
+                      : 'text-slate-700 dark:text-[#B5D4F4] cursor-pointer'}`}>
                   ← Prev
                 </button>
-                <span style={{ padding: '6px 14px', fontSize: '12px', color: '#64748b' }}>
+                <span className="px-3.5 py-1.5 text-xs text-slate-500 dark:text-[#7C93B3]">
                   Page {page + 1} of {totalPages}
                 </span>
                 <button onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page >= totalPages - 1}
-                  style={{ padding: '6px 14px', border: '1px solid #e2e8f0', borderRadius: '6px', fontSize: '12px', fontWeight: '600', color: page >= totalPages - 1 ? '#cbd5e1' : '#374151', background: 'white', cursor: page >= totalPages - 1 ? 'not-allowed' : 'pointer' }}>
+                  className={`px-3.5 py-1.5 rounded-md text-xs font-semibold border
+                    bg-white border-slate-300 dark:bg-[#111A2C] dark:border-[#223148]
+                    ${page >= totalPages - 1
+                      ? 'text-slate-400 dark:text-[#3E4E68] cursor-not-allowed'
+                      : 'text-slate-700 dark:text-[#B5D4F4] cursor-pointer'}`}>
                   Next →
                 </button>
               </div>
@@ -440,28 +407,22 @@ export default function EmployeeManagementPage() {
 
       {/* Add/Edit Employee Modal */}
       {showForm && (
-        <div style={{
-          position: 'fixed', inset: 0,
-          background: 'rgba(0,0,0,0.5)',
-          display: 'flex', alignItems: 'center',
-          justifyContent: 'center', zIndex: 100, padding: '20px',
-        }}>
-          <div style={{
-            background: 'white', borderRadius: '16px',
-            padding: '28px', width: '100%', maxWidth: '600px',
-            maxHeight: '90vh', overflowY: 'auto',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h2 style={{ fontSize: '18px', fontWeight: '800', color: '#1e293b' }}>
+        <div className="fixed inset-0 flex items-center justify-center z-[100] p-5
+          bg-slate-900/40 backdrop-blur-sm dark:bg-black/60">
+          <div className="rounded-2xl p-7 w-full max-w-[600px] max-h-[90vh] overflow-y-auto border
+            bg-white border-slate-200 shadow-[0_20px_25px_-5px_rgba(0,0,0,0.1),0_10px_10px_-5px_rgba(0,0,0,0.04)]
+            dark:bg-[#0F1728] dark:border-[#1B2740] dark:shadow-none">
+            <div className="flex justify-between items-center mb-5">
+              <h2 className="text-lg font-extrabold text-slate-900 dark:text-[#E6F1FB]">
                 {editMode ? 'Edit Employee' : 'Add New Employee'}
               </h2>
               <button onClick={() => setShowForm(false)}
-                style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#94a3b8' }}>✕</button>
+                className="bg-transparent border-none text-xl cursor-pointer
+                  text-slate-500 dark:text-[#7C93B3]">✕</button>
             </div>
 
             <form onSubmit={handleSubmit}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+              <div className="grid grid-cols-2 gap-3.5 mb-3.5">
                 <InputField
                   label="Employee ID"
                   name="employeeId"
@@ -469,10 +430,11 @@ export default function EmployeeManagementPage() {
                   placeholder="EMP0004"
                   value={form.employeeId}
                   onChange={handleFieldChange}
-                />                <InputField label="First Name" name="firstName" required placeholder="John" value={form.firstName} onChange={handleFieldChange} />
+                />
+                <InputField label="First Name" name="firstName" required placeholder="John" value={form.firstName} onChange={handleFieldChange} />
                 <InputField label="Last Name" name="lastName" required placeholder="Doe" value={form.lastName} onChange={handleFieldChange} />
                 <InputField label="Email" name="email" type="email" required placeholder="john@hrms.com" value={form.email} onChange={handleFieldChange} />
-                <div style={{ position: "relative" }}>
+                <div className="relative">
                   <InputField
                     label={editMode ? "Password (leave blank to keep)" : "Password"}
                     name="password"
@@ -485,14 +447,8 @@ export default function EmployeeManagementPage() {
 
                   <span
                     onClick={() => setShowPassword(!showPassword)}
-                    style={{
-                      position: "absolute",
-                      right: "12px",
-                      top: "38px",
-                      cursor: "pointer",
-                      color: "#64748b",
-                      fontSize: "16px"
-                    }}
+                    className="absolute right-3 top-[38px] cursor-pointer text-base
+                      text-slate-500 dark:text-[#7C93B3]"
                   >
                     {showPassword ? <FaEye /> : <FaEyeSlash />}
                   </span>
@@ -522,18 +478,17 @@ export default function EmployeeManagementPage() {
               </div>
 
               {/* Role */}
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ fontSize: '12px', fontWeight: '600', color: '#374151', display: 'block', marginBottom: '5px' }}>
-                  Role <span style={{ color: '#ef4444' }}>*</span>
+              <div className="mb-5">
+                <label className="text-xs font-semibold text-slate-700 dark:text-[#B5D4F4] block mb-1.5">
+                  Role <span className="text-red-500 dark:text-[#F09595]">*</span>
                 </label>
                 <select
                   value={form.role}
                   onChange={e => setForm({ ...form, role: e.target.value })}
-                  style={{
-                    width: '100%', padding: '9px 12px', border: '1.5px solid #e2e8f0',
-                    borderRadius: '8px', fontSize: '13px', outline: 'none',
-                    background: '#ffffff', color: '#1e293b', colorScheme: 'light',
-                  }}
+                  className="w-full px-3 py-2.5 rounded-lg text-[13px] outline-none
+                    bg-white border border-slate-200 text-slate-900
+                    dark:bg-[#111A2C] dark:border-[#223148] dark:text-[#E6F1FB]
+                    focus:border-indigo-500 dark:focus:border-[#378ADD]"
                 >
                   <option value="EMPLOYEE">EMPLOYEE</option>
                   <option value="HR">HR</option>
@@ -541,13 +496,17 @@ export default function EmployeeManagementPage() {
                 </select>
               </div>
 
-              <div style={{ display: 'flex', gap: '10px' }}>
+              <div className="flex gap-2.5">
                 <button type="button" onClick={() => setShowForm(false)}
-                  style={{ flex: 1, padding: '12px', background: 'white', color: '#374151', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
+                  className="flex-1 py-3 rounded-xl text-sm font-semibold cursor-pointer border
+                    bg-slate-100 text-slate-700 border-slate-300
+                    dark:bg-[#111A2C] dark:text-[#B5D4F4] dark:border-[#223148]">
                   Cancel
                 </button>
                 <button type="submit" disabled={submitting}
-                  style={{ flex: 1, padding: '12px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.7 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                  className={`flex-1 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2
+                    bg-indigo-500 text-white dark:bg-[#378ADD] dark:text-[#042C53]
+                    ${submitting ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'}`}>
                   {submitting ? <><Loader2 size={16} className="animate-spin" /> Saving...</> : editMode ? 'Update Employee' : 'Add Employee'}
                 </button>
               </div>
@@ -558,37 +517,35 @@ export default function EmployeeManagementPage() {
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          zIndex: 100, padding: '20px',
-        }}>
-          <div style={{
-            background: 'white', borderRadius: '16px', padding: '28px',
-            width: '100%', maxWidth: '400px',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.2)', textAlign: 'center',
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px', color: '#dc2626' }}>
+        <div className="fixed inset-0 flex items-center justify-center z-[100] p-5
+          bg-slate-900/40 backdrop-blur-sm dark:bg-black/60">
+          <div className="rounded-2xl p-7 w-full max-w-[400px] text-center border
+            bg-white border-slate-200 shadow-[0_20px_25px_-5px_rgba(0,0,0,0.1)]
+            dark:bg-[#0F1728] dark:border-[#1B2740] dark:shadow-none">
+            <div className="flex justify-center mb-4 text-red-500 dark:text-[#F09595]">
               <AlertTriangle size={48} strokeWidth={1.5} />
             </div>
-            <h2 style={{ fontSize: '18px', fontWeight: '800', color: '#1e293b', marginBottom: '8px' }}>
+            <h2 className="text-lg font-extrabold mb-2 text-slate-900 dark:text-[#E6F1FB]">
               Delete Employee?
             </h2>
-            <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '24px' }}>
-              Are you sure you want to delete <strong>{showDeleteConfirm.firstName} {showDeleteConfirm.lastName}</strong>?
+            <p className="text-[13px] mb-6 text-slate-500 dark:text-[#7C93B3]">
+              Are you sure you want to delete <strong className="text-slate-900 dark:text-[#E6F1FB]">{showDeleteConfirm.firstName} {showDeleteConfirm.lastName}</strong>?
               This action cannot be undone.
             </p>
-            <div style={{ display: 'flex', gap: '10px' }}>
+            <div className="flex gap-2.5">
               <button
                 onClick={() => setShowDeleteConfirm(null)}
-                style={{ flex: 1, padding: '12px', background: 'white', color: '#374151', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}
+                className="flex-1 py-3 rounded-xl text-sm font-semibold cursor-pointer border
+                  bg-slate-100 text-slate-700 border-slate-300
+                  dark:bg-[#111A2C] dark:text-[#B5D4F4] dark:border-[#223148]"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleDelete(showDeleteConfirm.id)}
                 disabled={deleting === showDeleteConfirm.id}
-                style={{ flex: 1, padding: '12px', background: '#dc2626', color: 'white', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                className="flex-1 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 cursor-pointer
+                  bg-red-600 text-white dark:bg-[#A32D2D]"
               >
                 {deleting === showDeleteConfirm.id ? <><Loader2 size={16} className="animate-spin" /> Deleting...</> : 'Yes, Delete'}
               </button>
