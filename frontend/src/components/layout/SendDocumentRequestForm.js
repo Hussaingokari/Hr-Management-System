@@ -39,15 +39,26 @@ export default function SendDocumentRequestForm() {
         setBanner(null);
 
         if (!/^[A-Za-z\s]+$/.test(candidateName)) {
-            setBanner({ type: "error", message: "Candidate name should only contain letters and spaces." });
+            setBanner({
+                type: "error",
+                message: "Candidate name should only contain letters and spaces."
+            });
             return;
         }
+
         if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
-            setBanner({ type: "error", message: "Please enter a valid email address." });
+            setBanner({
+                type: "error",
+                message: "Please enter a valid email address."
+            });
             return;
         }
+
         if (/^\d+$/.test(jobTitle) || !/[a-zA-Z]/.test(jobTitle)) {
-            setBanner({ type: "error", message: "Job Role must contain letters." });
+            setBanner({
+                type: "error",
+                message: "Job Role must contain letters."
+            });
             return;
         }
 
@@ -64,126 +75,174 @@ export default function SendDocumentRequestForm() {
                 adminName: user?.name,
             });
 
-            setBanner({ type: "success", message: response.data.message || "Document request email sent successfully." });
+            setBanner({
+                type: "success",
+                message:
+                    response.data.message ||
+                    "Document request email sent successfully."
+            });
+
             resetForm();
         } catch (err) {
-            const errorMessage = err.response?.data?.message || "Could not reach the server. Please try again.";
-            setBanner({ type: "error", message: errorMessage });
+            const errorMessage =
+                err.response?.data?.message ||
+                "Could not reach the server. Please try again.";
+
+            setBanner({
+                type: "error",
+                message: errorMessage
+            });
         } finally {
             setSubmitting(false);
         }
     };
 
+    const inputClass =
+        "w-full bg-white dark:bg-slate-950 text-gray-900 dark:text-slate-100 border border-gray-200 dark:border-slate-700 rounded-lg px-4 py-2.5 text-sm placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500";
+
+    const labelClass =
+        "block text-sm font-semibold text-gray-800 dark:text-slate-100 mb-1";
+
     return (
-        <div className="max-w-xl mx-auto bg-white rounded-2xl shadow-sm p-8" style={{ colorScheme: 'light' }}>
+        <div
+            className="max-w-xl mx-auto bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl shadow-sm p-8"
+            style={{ colorScheme: 'normal' }}
+        >
             <div className="flex items-center gap-3 mb-1">
-                <Mail className="text-blue-600" size={24} />
-                <h2 className="text-2xl font-bold text-gray-900 ">Send Document Request</h2>
+                <Mail className="text-blue-600 dark:text-blue-400" size={24} />
+
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    Send Document Request
+                </h2>
             </div>
-            <p className="text-gray-500 mb-6">Send onboarding document request email to the candidate.</p>
+
+            <p className="text-gray-500 dark:text-slate-400 mb-6">
+                Send onboarding document request email to the candidate.
+            </p>
 
             {banner && (
                 <div
-                    className={`mb-5 rounded-lg px-4 py-3 text-sm ${banner.type === "success"
-                        ? "bg-green-50 text-green-700"
-                        : "bg-amber-50 text-amber-800"
-                        }`}
+                    className={`mb-5 rounded-lg px-4 py-3 text-sm ${
+                        banner.type === "success"
+                            ? "bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800"
+                            : "bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
+                    }`}
                 >
                     {banner.message}
                 </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
+
                 <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-1">
+                    <label className={labelClass}>
                         Candidate Name
                     </label>
+
                     <input
                         type="text"
                         required
                         value={candidateName}
                         onChange={(e) => setCandidateName(e.target.value)}
                         placeholder="Enter Candidate Name"
-                        className="w-full bg-white text-gray-900 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className={inputClass}
                     />
                 </div>
 
                 <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-1">
+                    <label className={labelClass}>
                         Email Address
                     </label>
+
                     <input
                         type="email"
                         required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="Enter Email Address"
-                        className="w-full bg-white text-gray-900 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className={inputClass}
                     />
                 </div>
 
                 <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-1">
+                    <label className={labelClass}>
                         Job Role
                     </label>
+
                     <input
                         type="text"
                         required
                         value={jobTitle}
                         onChange={(e) => setJobTitle(e.target.value)}
                         placeholder="Enter Job Role"
-                        className="w-full bg-white text-gray-900 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className={inputClass}
                     />
                 </div>
 
                 <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-1">
+                    <label className={labelClass}>
                         Interview Date
                     </label>
+
                     <input
                         type="date"
                         required
                         max={today}
                         value={interviewDate}
                         onChange={(e) => setInterviewDate(e.target.value)}
-                        className="w-full bg-white text-gray-900 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className={inputClass}
                     />
                 </div>
 
                 <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-1">
+                    <label className={labelClass}>
                         Submission Deadline
                     </label>
+
                     <input
                         type="date"
                         required
                         min={today}
                         value={submissionDeadline}
                         onChange={(e) => setSubmissionDeadline(e.target.value)}
-                        className="w-full bg-white text-gray-900 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className={inputClass}
                     />
                 </div>
 
                 <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-2">
+                    <label className="block text-sm font-semibold text-gray-800 dark:text-slate-100 mb-2">
                         Email Preview
                     </label>
-                    <div className="border border-gray-200 rounded-lg bg-gray-50 p-4 max-h-64 overflow-y-auto text-sm text-gray-700 leading-relaxed">
-                        <p>Dear {candidateName || "Candidate"},</p>
+
+                    <div className="border border-gray-200 dark:border-slate-700 rounded-lg bg-gray-50 dark:bg-slate-950 p-4 max-h-64 overflow-y-auto text-sm text-gray-700 dark:text-slate-300 leading-relaxed">
+
+                        <p>
+                            Dear {candidateName || "Candidate"},
+                        </p>
+
                         <br />
-                        <p>Greetings from SAITEJA INFOTECH PVT LTD.</p>
+
+                        <p>
+                            Greetings from SAITEJA INFOTECH PVT LTD.
+                        </p>
+
                         <br />
+
                         <p>
                             We would like to thank you for attending the interview held on{" "}
-                            <strong>{formatDisplayDate(interviewDate)}</strong> for the position of{" "}
-                            <strong>{jobTitle || "[Job Title]"}</strong>. Following the interview, we
-                            request you to submit the necessary documents for verification and further
-                            processing of your application.
+                            <strong>{formatDisplayDate(interviewDate)}</strong>{" "}
+                            for the position of{" "}
+                            <strong>{jobTitle || "[Job Title]"}</strong>.
+                            Following the interview, we request you to submit the necessary
+                            documents for verification and further processing of your application.
                         </p>
+
                         <br />
+
                         <p>
                             <strong>Documents Required:</strong>
                         </p>
+
                         <ol className="list-decimal ml-5">
                             <li>Updated Resume / CV</li>
                             <li>Educational Certificates (10th, 12th, Graduation, etc.)</li>
@@ -191,19 +250,33 @@ export default function SendDocumentRequestForm() {
                             <li>Government-issued ID proof (Aadhar, Passport, Driving License, etc.)</li>
                             <li>Any other certificates relevant to the position</li>
                         </ol>
+
                         <br />
+
                         <p>
                             <strong>Submission Guidelines:</strong>
                         </p>
+
                         <ul className="list-disc ml-5">
-                            <li>Kindly send scanned copies of all documents in PDF format to hr@saitejainfotechprivatelimited.com.</li>
-                            <li>Ensure that all documents are clear and legible.</li>
+                            <li>
+                                Kindly send scanned copies of all documents in PDF format to
+                                hr@saitejainfotechprivatelimited.com.
+                            </li>
+
+                            <li>
+                                Ensure that all documents are clear and legible.
+                            </li>
+
                             <li>
                                 Please submit the documents by{" "}
-                                <strong>{formatDisplayDate(submissionDeadline)}</strong>.
+                                <strong>
+                                    {formatDisplayDate(submissionDeadline)}
+                                </strong>.
                             </li>
                         </ul>
+
                         <br />
+
                         <p>Yours faithfully,</p>
                         <p>Human Resources Department</p>
                         <p>SAITEJA INFOTECH PVT LTD</p>

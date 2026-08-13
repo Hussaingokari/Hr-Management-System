@@ -217,7 +217,8 @@ export default function LeavePage() {
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)', padding: '24px', margin: '-24px', borderRadius: '16px' }}>
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@600;700;800&display=swap');
-        .lm-date-input::-webkit-calendar-picker-indicator { opacity: 0.7; cursor: pointer; filter: invert(1); }
+        .lm-date-input { color-scheme: dark; }
+        .lm-date-input::-webkit-calendar-picker-indicator { opacity: 1; cursor: pointer; }
         .lm-reason-textarea, .lm-reason-textarea::placeholder {
           color: var(--text-primary) !important; background: var(--bg-primary) !important;
           -webkit-text-fill-color: var(--text-primary) !important;

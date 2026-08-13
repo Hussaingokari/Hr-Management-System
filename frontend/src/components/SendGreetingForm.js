@@ -40,13 +40,16 @@ export default function SendGreetingForm() {
                         'Expires': '0',
                     }
                 });
+
                 const data = response.data;
-                
+
                 if (Array.isArray(data)) {
                     setTemplates(data);
+
                     if (data.length > 0) {
                         const greetingTemplate =
                             data.find(t => t.templateName === 'Admission Greeting') || data[0];
+
                         if (greetingTemplate) {
                             setTemplateId(greetingTemplate.id);
                         }
@@ -65,8 +68,12 @@ export default function SendGreetingForm() {
 
     useEffect(() => {
         const template = templates.find(t => t.id === templateId);
+
         if (template && candidateName) {
-            const preview = template.templateBody.replace('{CANDIDATE_NAME}', candidateName);
+            const preview = template.templateBody.replace(
+                '{CANDIDATE_NAME}',
+                candidateName
+            );
             setGreetingPreview(preview);
         } else if (template) {
             setGreetingPreview(template.templateBody);
@@ -88,7 +95,10 @@ export default function SendGreetingForm() {
         }
 
         const adminId = currentUser?.id || 1;
-        const adminName = currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : 'System Admin';
+
+        const adminName = currentUser
+            ? `${currentUser.firstName} ${currentUser.lastName}`
+            : 'System Admin';
 
         const response = await sendGreeting({
             candidateName,
@@ -113,53 +123,74 @@ export default function SendGreetingForm() {
     };
 
     return (
-        <div style={{
-            width: '100%',
-            maxWidth: '600px',
-            margin: '0 auto',
-            padding: '32px 24px',
-            background: 'white',
-            borderRadius: '12px',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-        }}>
+        <div
+            style={{
+                width: '100%',
+                maxWidth: '600px',
+                margin: '0 auto',
+                padding: '32px 24px',
+                background: 'var(--card-bg)',
+                borderRadius: '12px',
+                border: '1px solid var(--card-border)',
+                boxShadow: 'var(--card-shadow)',
+            }}
+        >
             <div style={{ marginBottom: '32px' }}>
-                <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    marginBottom: '12px',
-                }}>
+                <div
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        marginBottom: '12px',
+                    }}
+                >
                     <Mail size={28} color="#3b82f6" strokeWidth={2} />
-                    <h1 style={{
-                        fontSize: '28px',
-                        fontWeight: '700',
-                        color: '#1e293b',
-                        margin: 0,
-                    }}>
+
+                    <h1
+                        style={{
+                            fontSize: '28px',
+                            fontWeight: '700',
+                            color: 'var(--text-primary)',
+                            margin: 0,
+                        }}
+                    >
                         Send Greeting to Candidate
                     </h1>
                 </div>
-                <p style={{
-                    fontSize: '13px',
-                    color: '#64748b',
-                    margin: '8px 0 0 0',
-                }}>
+
+                <p
+                    style={{
+                        fontSize: '13px',
+                        color: 'var(--text-secondary)',
+                        margin: '8px 0 0 0',
+                    }}
+                >
                     Send admission greetings directly to candidate email
                 </p>
             </div>
 
-            <form onSubmit={handleSendGreeting} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-
+            <form
+                onSubmit={handleSendGreeting}
+                style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '20px',
+                }}
+            >
                 <div>
-                    <label htmlFor="candidateName" style={{
-                        display: 'block',
-                        fontSize: '13px',
-                        fontWeight: '600',
-                        color: '#1e293b',
-                        marginBottom: '8px',
-                    }}>
+                    <label
+                        htmlFor="candidateName"
+                        style={{
+                            display: 'block',
+                            fontSize: '13px',
+                            fontWeight: '600',
+                            color: 'var(--text-primary)',
+                            marginBottom: '8px',
+                        }}
+                    >
                         Candidate Name
                     </label>
+
                     <input
                         type="text"
                         id="candidateName"
@@ -170,37 +201,39 @@ export default function SendGreetingForm() {
                         style={{
                             width: '100%',
                             padding: '10px 12px',
-                            border: '1.5px solid #e2e8f0',
+                            border: '1.5px solid var(--card-border)',
                             borderRadius: '8px',
                             fontSize: '13px',
                             outline: 'none',
                             boxSizing: 'border-box',
-                            background: '#f8fafc',
-                            color: '#1e293b',
+                            background: 'var(--bg-primary)',
+                            color: 'var(--text-primary)',
                             transition: 'all 0.2s',
                             opacity: loading ? 0.6 : 1,
                         }}
                         onFocusCapture={(e) => {
                             e.target.style.borderColor = '#3b82f6';
-                            e.target.style.background = 'white';
                         }}
                         onBlurCapture={(e) => {
-                            e.target.style.borderColor = '#e2e8f0';
-                            e.target.style.background = '#f8fafc';
+                            e.target.style.borderColor = 'var(--card-border)';
                         }}
                     />
                 </div>
 
                 <div>
-                    <label htmlFor="recipientEmail" style={{
-                        display: 'block',
-                        fontSize: '13px',
-                        fontWeight: '600',
-                        color: '#1e293b',
-                        marginBottom: '8px',
-                    }}>
+                    <label
+                        htmlFor="recipientEmail"
+                        style={{
+                            display: 'block',
+                            fontSize: '13px',
+                            fontWeight: '600',
+                            color: 'var(--text-primary)',
+                            marginBottom: '8px',
+                        }}
+                    >
                         Email Address
                     </label>
+
                     <input
                         type="email"
                         id="recipientEmail"
@@ -211,46 +244,46 @@ export default function SendGreetingForm() {
                         style={{
                             width: '100%',
                             padding: '10px 12px',
-                            border: '1.5px solid #e2e8f0',
+                            border: '1.5px solid var(--card-border)',
                             borderRadius: '8px',
                             fontSize: '13px',
                             outline: 'none',
                             boxSizing: 'border-box',
-                            background: '#f8fafc',
-                            color: '#1e293b',
+                            background: 'var(--bg-primary)',
+                            color: 'var(--text-primary)',
                             transition: 'all 0.2s',
                             opacity: loading ? 0.6 : 1,
                         }}
                         onFocusCapture={(e) => {
                             e.target.style.borderColor = '#3b82f6';
-                            e.target.style.background = 'white';
                         }}
                         onBlurCapture={(e) => {
-                            e.target.style.borderColor = '#e2e8f0';
-                            e.target.style.background = '#f8fafc';
+                            e.target.style.borderColor = 'var(--card-border)';
                         }}
                     />
                 </div>
 
                 <div>
-                    <label style={{
-                        display: 'block',
-                        fontSize: '13px',
-                        fontWeight: '600',
-                        color: '#1e293b',
-                        marginBottom: '8px',
-                    }}>
+                    <label
+                        style={{
+                            display: 'block',
+                            fontSize: '13px',
+                            fontWeight: '600',
+                            color: 'var(--text-primary)',
+                            marginBottom: '8px',
+                        }}
+                    >
                         Greeting Preview
                     </label>
-                    {/* FIX: sanitize the template body before rendering to prevent XSS. */}
+
                     <div
                         style={{
                             width: '100%',
                             padding: '12px 12px',
-                            border: '1.5px solid #e2e8f0',
+                            border: '1.5px solid var(--card-border)',
                             borderRadius: '8px',
-                            background: '#f8fafc',
-                            color: '#475569',
+                            background: 'var(--bg-primary)',
+                            color: 'var(--text-secondary)',
                             fontSize: '12px',
                             lineHeight: '1.6',
                             whiteSpace: 'pre-wrap',
@@ -259,126 +292,168 @@ export default function SendGreetingForm() {
                             boxSizing: 'border-box',
                         }}
                         dangerouslySetInnerHTML={{
-                            __html: greetingPreview ? DOMPurify.sanitize(greetingPreview) : 'Enter candidate name to see preview...',
+                            __html: greetingPreview
+                                ? DOMPurify.sanitize(greetingPreview)
+                                : 'Enter candidate name to see preview...',
                         }}
                     />
                 </div>
 
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
-                    gap: '16px',
-                }}>
-                    <div style={{
-                        border: '1.5px solid #e2e8f0',
-                        borderRadius: '8px',
-                        padding: '12px 14px',
-                        background: '#f8fafc',
-                    }}>
-                        <p style={{
-                            fontSize: '11px',
-                            color: '#94a3b8',
-                            margin: '0 0 6px 0',
-                            fontWeight: '500',
-                        }}>Name:</p>
-                        <p style={{
-                            fontSize: '13px',
-                            fontWeight: '600',
-                            color: '#1e293b',
-                            margin: 0,
-                        }}>
+                <div
+                    style={{
+                        display: 'grid',
+                        gridTemplateColumns: '1fr 1fr',
+                        gap: '16px',
+                    }}
+                >
+                    <div
+                        style={{
+                            border: '1.5px solid var(--card-border)',
+                            borderRadius: '8px',
+                            padding: '12px 14px',
+                            background: 'var(--bg-primary)',
+                        }}
+                    >
+                        <p
+                            style={{
+                                fontSize: '11px',
+                                color: 'var(--text-secondary)',
+                                margin: '0 0 6px 0',
+                                fontWeight: '500',
+                            }}
+                        >
+                            Name:
+                        </p>
+
+                        <p
+                            style={{
+                                fontSize: '13px',
+                                fontWeight: '600',
+                                color: 'var(--text-primary)',
+                                margin: 0,
+                            }}
+                        >
                             {candidateName || '[CANDIDATE_NAME]'}
                         </p>
                     </div>
-                    <div style={{
-                        border: '1.5px solid #e2e8f0',
-                        borderRadius: '8px',
-                        padding: '12px 14px',
-                        background: '#f8fafc',
-                    }}>
-                        <p style={{
-                            fontSize: '11px',
-                            color: '#94a3b8',
-                            margin: '0 0 6px 0',
-                            fontWeight: '500',
-                        }}>Email:</p>
-                        <p style={{
-                            fontSize: '13px',
-                            fontWeight: '600',
-                            color: '#1e293b',
-                            margin: 0,
-                            wordBreak: 'break-all',
-                        }}>
+
+                    <div
+                        style={{
+                            border: '1.5px solid var(--card-border)',
+                            borderRadius: '8px',
+                            padding: '12px 14px',
+                            background: 'var(--bg-primary)',
+                        }}
+                    >
+                        <p
+                            style={{
+                                fontSize: '11px',
+                                color: 'var(--text-secondary)',
+                                margin: '0 0 6px 0',
+                                fontWeight: '500',
+                            }}
+                        >
+                            Email:
+                        </p>
+
+                        <p
+                            style={{
+                                fontSize: '13px',
+                                fontWeight: '600',
+                                color: 'var(--text-primary)',
+                                margin: 0,
+                                wordBreak: 'break-all',
+                            }}
+                        >
                             {recipientEmail || '[EMAIL_ADDRESS]'}
                         </p>
                     </div>
                 </div>
 
                 {error && (
-                    <div style={{
-                        padding: '12px 14px',
-                        background: '#fee2e2',
-                        border: '1px solid #fecaca',
-                        borderRadius: '8px',
-                    }}>
-                        <p style={{
-                            fontSize: '12px',
-                            color: '#991b1b',
-                            margin: 0,
-                        }}>
-                            <AlertTriangle size={14} style={{ display: 'inline', marginRight: '4px' }} /> {error}
+                    <div
+                        style={{
+                            padding: '12px 14px',
+                            background: '#fee2e2',
+                            border: '1px solid #fecaca',
+                            borderRadius: '8px',
+                        }}
+                    >
+                        <p
+                            style={{
+                                fontSize: '12px',
+                                color: '#991b1b',
+                                margin: 0,
+                            }}
+                        >
+                            <AlertTriangle
+                                size={14}
+                                style={{
+                                    display: 'inline',
+                                    marginRight: '4px',
+                                }}
+                            />{' '}
+                            {error}
                         </p>
                     </div>
                 )}
 
                 {showSuccess && success && (
-                    <div style={{
-                        padding: '12px 14px',
-                        background: '#dcfce7',
-                        border: '1px solid #bbf7d0',
-                        borderRadius: '8px',
-                    }}>
-                        <p style={{
-                            fontSize: '12px',
-                            color: '#166534',
-                            margin: 0,
-                        }}>
-                            <CheckCircle size={14} style={{ display: 'inline', marginRight: '4px' }} /> {success}
+                    <div
+                        style={{
+                            padding: '12px 14px',
+                            background: '#dcfce7',
+                            border: '1px solid #bbf7d0',
+                            borderRadius: '8px',
+                        }}
+                    >
+                        <p
+                            style={{
+                                fontSize: '12px',
+                                color: '#166534',
+                                margin: 0,
+                            }}
+                        >
+                            <CheckCircle
+                                size={14}
+                                style={{
+                                    display: 'inline',
+                                    marginRight: '4px',
+                                }}
+                            />{' '}
+                            {success}
                         </p>
                     </div>
                 )}
 
-                <div style={{
-                    display: 'flex',
-                    gap: '12px',
-                    justifyContent: 'flex-end',
-                    paddingTop: '8px',
-                }}>
+                <div
+                    style={{
+                        display: 'flex',
+                        gap: '12px',
+                        justifyContent: 'flex-end',
+                        paddingTop: '8px',
+                    }}
+                >
                     <button
                         type="button"
                         onClick={handleCancel}
                         disabled={loading}
                         style={{
                             padding: '8px 16px',
-                            border: '1.5px solid #e2e8f0',
+                            border: '1.5px solid var(--card-border)',
                             borderRadius: '8px',
-                            background: 'white',
-                            color: '#475569',
+                            background: 'var(--bg-primary)',
+                            color: 'var(--text-secondary)',
                             fontSize: '13px',
                             fontWeight: '600',
                             cursor: loading ? 'not-allowed' : 'pointer',
                             transition: 'all 0.2s',
                             opacity: loading ? 0.6 : 1,
                         }}
-                        onMouseEnter={(e) => {
-                            if (!loading) e.target.style.background = '#f1f5f9';
-                        }}
-                        onMouseLeave={(e) => {
-                            if (!loading) e.target.style.background = 'white';
-                        }}
                     >
                         CANCEL
                     </button>
+
                     <button
                         type="submit"
                         disabled={loading}
@@ -398,15 +473,25 @@ export default function SendGreetingForm() {
                             opacity: loading ? 0.8 : 1,
                         }}
                         onMouseEnter={(e) => {
-                            if (!loading) e.target.style.background = '#2563eb';
+                            if (!loading) {
+                                e.target.style.background = '#2563eb';
+                            }
                         }}
                         onMouseLeave={(e) => {
-                            if (!loading) e.target.style.background = '#3b82f6';
+                            if (!loading) {
+                                e.target.style.background = '#3b82f6';
+                            }
                         }}
                     >
                         {loading ? (
                             <>
-                                <Loader size={16} strokeWidth={2} style={{ animation: 'spin 1s linear infinite' }} />
+                                <Loader
+                                    size={16}
+                                    strokeWidth={2}
+                                    style={{
+                                        animation: 'spin 1s linear infinite',
+                                    }}
+                                />
                                 Sending...
                             </>
                         ) : (
@@ -420,10 +505,16 @@ export default function SendGreetingForm() {
             </form>
 
             <style>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
+                @keyframes spin {
+                    to {
+                        transform: rotate(360deg);
+                    }
+                }
+
+                input::placeholder {
+                    color: var(--text-secondary);
+                }
+            `}</style>
         </div>
     );
 }
