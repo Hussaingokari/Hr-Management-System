@@ -48,7 +48,7 @@ public class LeaveBalanceService {
         return balanceRepo
                 .findByEmployeeAndLeaveTypeAndYear(
                         employee,
-                        leaveType,
+                        leaveType.toUpperCase(),
                         year)
                 .orElseGet(() -> {
 

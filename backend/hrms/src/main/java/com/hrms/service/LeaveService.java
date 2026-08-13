@@ -85,11 +85,11 @@ public class LeaveService {
 
                 int pendingDays = leaveRepo.sumPendingDaysByEmployeeAndLeaveType(
                                 emp,
-                                req.getLeaveType());
+                                req.getLeaveType().toUpperCase());
 
                 if (!leaveBalanceService.hasSufficientBalance(
                                 emp,
-                                req.getLeaveType(),
+                                req.getLeaveType().toUpperCase(),
                                 days + pendingDays)) {
 
                         throw new IllegalStateException(
@@ -104,7 +104,7 @@ public class LeaveService {
 
                 LeaveRequest leave = LeaveRequest.builder()
                                 .employee(emp)
-                                .leaveType(req.getLeaveType())
+                                .leaveType(req.getLeaveType().toUpperCase())
                                 .startDate(req.getStartDate())
                                 .endDate(req.getEndDate())
                                 .totalDays(days)
