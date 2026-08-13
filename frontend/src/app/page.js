@@ -144,7 +144,7 @@ export default function Home() {
       {/* ── CENTRAL CARD ── */}
       <div className="w-full max-w-[420px] relative z-10 backdrop-blur-md px-10 pt-9 pb-7 rounded-[22px] flex flex-col items-center mx-4"
         style={{
-          backgroundColor: 'var(--card-bg)',
+          ...(isDark ? {} : { backgroundColor: 'var(--card-bg)' }),
           border: '1px solid var(--card-border)',
           boxShadow: 'var(--card-shadow)',
           transition: 'background-color 0.5s, border-color 0.5s, box-shadow 0.5s',
