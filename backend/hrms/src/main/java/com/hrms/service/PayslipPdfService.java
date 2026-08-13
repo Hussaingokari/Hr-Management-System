@@ -21,6 +21,10 @@ import java.util.Locale;
  * Builds the employee payslip PDF - white background, bordered tables,
  * company letterhead (logo + address) at the top. Matches the formal
  * salary-statement template style.
+ *
+ * NOTE: Deductions (ESI / TDS / PF) are intentionally not rendered here.
+ * The underlying data still exists on the Payslip entity, but this PDF
+ * only shows Earnings, Gross Earnings, and Net Pay.
  */
 @Service
 public class PayslipPdfService {
@@ -172,27 +176,18 @@ public class PayslipPdfService {
 
                 y = infoBoxBottom - 18;
 
-                // ---------------- Earnings / Deductions table ----------------
-                // NOTE: simplified to two columns per side (LABEL + AMOUNT), right-aligned.
-                // The previous CURRENT MONTH / ARREAR / TOTAL three-column layout had no
-                // real arrear data to show and the columns were too tightly packed for the
-                // available width, which caused the header text to visually overlap/merge.
+                // ---------------- Earnings table (Deductions removed) ----------------
                 float tableTop = y;
                 float tableLeft = pageLeft;
                 float tableRight = pageRight;
-                float midX = tableLeft + (tableRight - tableLeft) * 0.55f;
 
                 float earnLabelX = tableLeft + 6;
-                float earnAmtRight = midX - 8; // right edge of earnings amount column
-                float dedLabelX = midX + 6;
-                float dedAmtRight = tableRight - 10; // right edge of deductions amount column
+                float earnAmtRight = tableRight - 10; // right edge of earnings amount column
 
                 float headerH = 20f;
                 float headerTextY = tableTop - 14;
                 drawText(cs, FONT_BOLD, 9, BLACK, earnLabelX, headerTextY, "EARNINGS");
                 drawTextRight(cs, FONT_BOLD, 9, BLACK, earnAmtRight, headerTextY, "AMOUNT");
-                drawText(cs, FONT_BOLD, 9, BLACK, dedLabelX, headerTextY, "DEDUCTIONS");
-                drawTextRight(cs, FONT_BOLD, 9, BLACK, dedAmtRight, headerTextY, "AMOUNT");
 
                 float headerBottomY = tableTop - headerH;
 
@@ -202,25 +197,14 @@ public class PayslipPdfService {
                         { "DA", fmt(p.getDa()) },
                         { "SPECIAL ALLOWANCE", fmt(p.getSpecialAllowance()) },
                 };
-                String[][] deductions = {
-                        { "ESI", fmt(p.getEsi()) },
-                        { "TDS", fmt(p.getTds()) },
-                        { "PF", "0" },
-                };
 
-                int maxRows = Math.max(earnings.length, deductions.length);
+                int maxRows = earnings.length;
                 float lineH = 26f;
                 float rowsTop = headerBottomY;
                 for (int i = 0; i < maxRows; i++) {
                     float ry = rowsTop - 16 - i * lineH;
-                    if (i < earnings.length) {
-                        drawText(cs, FONT_REG, 9, BLACK, earnLabelX, ry, earnings[i][0]);
-                        drawTextRight(cs, FONT_REG, 9, BLACK, earnAmtRight, ry, earnings[i][1]);
-                    }
-                    if (i < deductions.length) {
-                        drawText(cs, FONT_REG, 9, BLACK, dedLabelX, ry, deductions[i][0]);
-                        drawTextRight(cs, FONT_REG, 9, BLACK, dedAmtRight, ry, deductions[i][1]);
-                    }
+                    drawText(cs, FONT_REG, 9, BLACK, earnLabelX, ry, earnings[i][0]);
+                    drawTextRight(cs, FONT_REG, 9, BLACK, earnAmtRight, ry, earnings[i][1]);
                 }
 
                 float rowsBottomY = rowsTop - maxRows * lineH;
@@ -229,8 +213,6 @@ public class PayslipPdfService {
                 float summaryTextY = rowsBottomY - 15;
                 drawText(cs, FONT_BOLD, 10, BLACK, earnLabelX, summaryTextY, "GROSS EARNINGS");
                 drawTextRight(cs, FONT_BOLD, 10, BLACK, earnAmtRight, summaryTextY, fmt(p.getGrossSalary()));
-                drawText(cs, FONT_BOLD, 10, BLACK, dedLabelX, summaryTextY, "TOTAL DEDUCTIONS");
-                drawTextRight(cs, FONT_BOLD, 10, BLACK, dedAmtRight, summaryTextY, fmt(p.getTotalDeductions()));
 
                 float summaryBottomY = rowsBottomY - summaryH;
 
@@ -247,19 +229,14 @@ public class PayslipPdfService {
 
                 // ---- Table borders ----
                 cs.setLineWidth(1f);
-                // Outer rectangle around whole earnings/deductions + net pay block
+                // Outer rectangle around whole earnings + net pay block
                 cs.addRect(tableLeft, netBottomY, tableRight - tableLeft, tableTop - netBottomY);
-                cs.stroke();
-                // Vertical divider between earnings and deductions (down through the rows, not
-                // through net pay)
-                cs.moveTo(midX, tableTop);
-                cs.lineTo(midX, summaryBottomY);
                 cs.stroke();
                 // Line under header
                 cs.moveTo(tableLeft, headerBottomY);
                 cs.lineTo(tableRight, headerBottomY);
                 cs.stroke();
-                // Line under earning/deduction rows (above GROSS/TOTAL summary)
+                // Line under earning rows (above GROSS summary)
                 cs.moveTo(tableLeft, rowsBottomY);
                 cs.lineTo(tableRight, rowsBottomY);
                 cs.stroke();
