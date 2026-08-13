@@ -40,9 +40,9 @@ function DocStatusBadge({ status }) {
 
 function StatusPill({ status }) {
     const map = {
-        PENDING: { bg: '#f1f5f9', color: 'var(--text-secondary)', label: 'Pending' },
-        IN_PROGRESS: { bg: '#eff6ff', color: '#3b82f6', label: 'In Progress' },
-        COMPLETED: { bg: '#dcfce7', color: '#16a34a', label: 'Completed' },
+        PENDING: { bg: 'var(--card-border)', color: 'var(--text-secondary)', label: 'Pending' },
+        IN_PROGRESS: { bg: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6', label: 'In Progress' },
+        COMPLETED: { bg: 'rgba(22, 163, 74, 0.15)', color: '#16a34a', label: 'Completed' },
     };
     const s = map[status] || map.PENDING;
     return (
@@ -194,10 +194,10 @@ export default function OnboardingProfilePage() {
                                 htmlFor={`checklist-${item.key}`}
                                 style={{
                                     display: 'flex', alignItems: 'center', gap: '12px',
-                                    padding: '12px 8px', borderTop: i === 0 ? 'none' : '1px solid #f1f5f9',
-                                    cursor: 'pointer', borderRadius: '8px',
+                                    padding: '12px 8px', borderTop: i === 0 ? 'none' : '1px solid var(--card-border)',
+                                    cursor: 'pointer', borderRadius: '8px', backgroundColor: 'transparent'
                                 }}
-                                onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
+                                onMouseEnter={e => e.currentTarget.style.background = 'rgba(128,128,128,0.08)'}
                                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                             >
                                 <input
@@ -212,19 +212,19 @@ export default function OnboardingProfilePage() {
                                 />
                                 <div style={{
                                     width: '24px', height: '24px', borderRadius: '50%', flexShrink: 0,
-                                    background: checklist[item.key] ? '#16a34a' : '#f1f5f9',
-                                    color: checklist[item.key] ? 'white' : '#64748b',
+                                    background: checklist[item.key] ? '#16a34a' : 'var(--card-border)',
+                                    color: checklist[item.key] ? 'white' : 'var(--text-muted)',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                                     fontSize: '11px', fontWeight: '700',
                                 }}>
                                     {checklist[item.key] ? '✓' : i + 1}
                                 </div>
-                                <div style={{ flex: 1, fontSize: '13px', fontWeight: '600', color: checklist[item.key] ? '#16a34a' : '#1e293b' }}>
+                                <div style={{ flex: 1, fontSize: '13px', fontWeight: '600', color: checklist[item.key] ? '#16a34a' : 'var(--text-primary)' }}>
                                     {item.label}
                                 </div>
                                 <span style={{
-                                    background: checklist[item.key] ? '#dcfce7' : '#f1f5f9',
-                                    color: checklist[item.key] ? '#16a34a' : '#64748b',
+                                    background: checklist[item.key] ? 'rgba(22, 163, 74, 0.15)' : 'var(--card-border)',
+                                    color: checklist[item.key] ? '#16a34a' : 'var(--text-muted)',
                                     padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '700',
                                 }}>
                                     {checklist[item.key] ? 'Done' : 'Pending'}
@@ -233,7 +233,7 @@ export default function OnboardingProfilePage() {
                         ))}
 
                         <div style={{ marginTop: '16px' }}>
-                            <label style={{ fontSize: '12px', fontWeight: '600', color: '#374151', display: 'block', marginBottom: '6px' }}>
+                            <label style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px' }}>
                                 Remarks
                             </label>
                             <textarea
@@ -241,7 +241,7 @@ export default function OnboardingProfilePage() {
                                 onChange={e => setRemarks(e.target.value)}
                                 rows={2}
                                 placeholder="Add any remarks about the onboarding..."
-                                style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '13px', outline: 'none', resize: 'vertical', boxSizing: 'border-box', fontFamily: 'inherit' }}
+                                style={{ width: '100%', padding: '10px 12px', border: '1.5px solid var(--card-border)', borderRadius: '10px', fontSize: '13px', outline: 'none', resize: 'vertical', boxSizing: 'border-box', fontFamily: 'inherit', background: 'transparent', color: 'var(--text-primary)' }}
                             />
                         </div>
 

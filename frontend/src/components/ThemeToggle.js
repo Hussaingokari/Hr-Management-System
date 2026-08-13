@@ -16,8 +16,8 @@ export default function ThemeToggle({ className = '' }) {
     return <div className={`fixed bottom-8 right-8 w-12 h-12 ${className}`} />;
   }
 
-  // Hide the floating toggle on dashboard routes as they have their own pill switcher in the Navbar
-  if (pathname?.startsWith('/admin') || pathname?.startsWith('/employee')) {
+  // Hide the floating toggle on landing page and dashboard routes
+  if (pathname === '/' || pathname?.startsWith('/admin') || pathname?.startsWith('/employee')) {
     return null;
   }
 

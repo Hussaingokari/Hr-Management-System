@@ -144,8 +144,8 @@ export default function AdminChecklistPage() {
                             style={{
                                 padding: '5px 12px', borderRadius: '6px', fontSize: '12px',
                                 fontWeight: tab === t.key ? '700' : '400',
-                                background: tab === t.key ? 'white' : 'transparent',
-                                color: tab === t.key ? '#1e293b' : '#64748b',
+                                background: tab === t.key ? 'var(--text-primary)' : 'transparent',
+                                color: tab === t.key ? 'var(--bg-primary)' : 'var(--text-muted)',
                                 border: 'none', cursor: 'pointer',
                                 boxShadow: tab === t.key ? '0 1px 4px rgba(0,0,0,0.08)' : 'none',
                             }}>
@@ -165,11 +165,11 @@ export default function AdminChecklistPage() {
                     filtered.map((onb) => (
                         <div key={onb.id} onClick={() => router.push(`/admin/onboarding/checklist/view?id=${onb.id}`)}
                             style={{
-                                padding: '14px 20px', borderBottom: '1px solid #f1f5f9', cursor: 'pointer',
-                                transition: 'all 0.15s',
+                                padding: '14px 20px', borderBottom: '1px solid var(--card-border)', cursor: 'pointer',
+                                transition: 'all 0.15s', backgroundColor: 'transparent'
                             }}
-                            onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
-                            onMouseLeave={e => e.currentTarget.style.background = 'white'}
+                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(128,128,128,0.08)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                         >
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
