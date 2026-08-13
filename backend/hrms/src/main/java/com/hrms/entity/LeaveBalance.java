@@ -6,9 +6,16 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "leave_balance",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"employee_id", "leave_type", "\"year\""}))
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Table(name = "leave_balance", uniqueConstraints = @UniqueConstraint(columnNames = {
+        "employee_id",
+        "leave_type",
+        "\"year\""
+}))
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class LeaveBalance {
 
     @Id
@@ -23,13 +30,15 @@ public class LeaveBalance {
     private Employee employee;
 
     @Column(nullable = false)
-    private String leaveType;    //annual,sick,casual,maternity,paternity
+    private String leaveType;
 
     @Column(name = "\"year\"")
     private int year;
 
-    private double totalAllotted;  // example 18 days/year
+    private double totalAllotted;
+
     private double used;
+
     private double remaining;
 
     private LocalDateTime updatedAt;
@@ -37,7 +46,19 @@ public class LeaveBalance {
     @PreUpdate
     @PrePersist
     protected void onUpdate() {
+
         updatedAt = LocalDateTime.now();
-        remaining = totalAllotted - used;
+
+        /*
+         * Unpaid leave is unlimited.
+         * Its display is handled by the frontend.
+         */
+        if ("UNPAID".equalsIgnoreCase(leaveType)) {
+            remaining = 0;
+        } else {
+            remaining = Math.max(
+                    0,
+                    totalAllotted - used);
+        }
     }
 }

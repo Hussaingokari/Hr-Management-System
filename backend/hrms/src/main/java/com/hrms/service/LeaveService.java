@@ -32,12 +32,12 @@ public class LeaveService {
         private final NotificationService notificationService;
         private final EmployeeRepository employeeRepository;
 
-        // ── Helper: notify all active ADMIN + HR, optionally skipping one (the actor)
-        // ──
         private void notifyAllAdmins(
-                        String title, String message,
+                        String title,
+                        String message,
                         NotificationType type,
-                        String entityType, Long entityId,
+                        String entityType,
+                        Long entityId,
                         Long excludeId) {
 
                 employeeRepository.findAll()
@@ -46,8 +46,12 @@ public class LeaveService {
                                                 && (e.getRole() == Role.ADMIN || e.getRole() == Role.HR)
                                                 && (excludeId == null || !e.getId().equals(excludeId)))
                                 .forEach(admin -> notificationService.createAndSend(
-                                                admin, title, message,
-                                                type, entityType, entityId));
+                                                admin,
+                                                title,
+                                                message,
+                                                type,
+                                                entityType,
+                                                entityId));
         }
 
         @Transactional
@@ -59,16 +63,42 @@ public class LeaveService {
                 Employee emp = employeeService.findById(employeeId);
 
                 if (req.getEndDate().isBefore(req.getStartDate())) {
-                        throw new IllegalArgumentException("End date must be after start date");
+                        throw new IllegalArgumentException(
+                                        "End date must be after start date");
                 }
 
-                int days = calculateWorkingDays(req.getStartDate(), req.getEndDate());
-                int pendingDays = leaveRepo.sumPendingDaysByEmployeeAndLeaveType(emp, req.getLeaveType());
+                boolean dateAlreadyUsed = leaveRepo.existsOverlappingLeave(
+                                emp,
+                                req.getStartDate(),
+                                req.getEndDate());
 
-                if (!leaveBalanceService.hasSufficientBalance(emp, req.getLeaveType(), days + pendingDays)) {
+                if (dateAlreadyUsed) {
                         throw new IllegalStateException(
-                                        "Insufficient leave balance for " + req.getLeaveType()
-                                                        + ". Requested: " + days + " days, Pending: " + pendingDays
+                                        "You already have a leave request for one or more "
+                                                        + "of the selected dates. "
+                                                        + "You cannot apply for leave for the same date twice.");
+                }
+
+                int days = calculateWorkingDays(
+                                req.getStartDate(),
+                                req.getEndDate());
+
+                int pendingDays = leaveRepo.sumPendingDaysByEmployeeAndLeaveType(
+                                emp,
+                                req.getLeaveType());
+
+                if (!leaveBalanceService.hasSufficientBalance(
+                                emp,
+                                req.getLeaveType(),
+                                days + pendingDays)) {
+
+                        throw new IllegalStateException(
+                                        "Insufficient leave balance for "
+                                                        + req.getLeaveType()
+                                                        + ". Requested: "
+                                                        + days
+                                                        + " days, Pending: "
+                                                        + pendingDays
                                                         + " days.");
                 }
 
@@ -86,12 +116,19 @@ public class LeaveService {
 
                 LeaveRequest saved = leaveRepo.save(leave);
 
-                String notifMsg = emp.getFirstName() + " " + emp.getLastName()
-                                + " applied for " + days + " day(s) of " + req.getLeaveType()
-                                + " leave from " + req.getStartDate() + " to " + req.getEndDate() + ".";
+                String notifMsg = emp.getFirstName()
+                                + " "
+                                + emp.getLastName()
+                                + " applied for "
+                                + days
+                                + " day(s) of "
+                                + req.getLeaveType()
+                                + " leave from "
+                                + req.getStartDate()
+                                + " to "
+                                + req.getEndDate()
+                                + ".";
 
-                // Every request lands in the shared Admin/HR queue — whoever picks it up first
-                // actions it
                 notifyAllAdmins(
                                 "New Leave Request",
                                 notifMsg,
@@ -103,23 +140,23 @@ public class LeaveService {
                 return toResponse(saved);
         }
 
-        /**
-         * Any Admin or HR user can approve/reject a pending leave.
-         * First action wins — if someone else already actioned it, this throws.
-         */
         @Transactional
         @CacheEvict(value = "dashboardData", allEntries = true)
         public LeaveDTOs.Response action(
-                        Long leaveId, Long reviewerId,
+                        Long leaveId,
+                        Long reviewerId,
                         LeaveDTOs.ActionRequest req) {
 
-                LeaveRequest leave = findById(leaveId);
+                LeaveRequest leave = findByIdForAction(leaveId);
 
                 if (leave.getStatus() != LeaveStatus.PENDING) {
                         throw new IllegalStateException(
-                                        "This request has already been " + leave.getStatus()
+                                        "This request has already been "
+                                                        + leave.getStatus()
                                                         + (leave.getReviewedBy() != null
-                                                                        ? " by " + leave.getReviewedBy().getFirstName()
+                                                                        ? " by "
+                                                                                        + leave.getReviewedBy()
+                                                                                                        .getFirstName()
                                                                                         + " "
                                                                                         + leave.getReviewedBy()
                                                                                                         .getLastName()
@@ -128,6 +165,7 @@ public class LeaveService {
                 }
 
                 Employee reviewer = employeeService.findById(reviewerId);
+
                 leave.setReviewedBy(reviewer);
                 leave.setRemarks(req.getRemarks());
                 leave.setActionAt(LocalDateTime.now());
@@ -136,24 +174,44 @@ public class LeaveService {
                         leave.setStatus(LeaveStatus.APPROVED);
 
                         leaveBalanceService.deductBalance(
-                                        leave.getEmployee(), leave.getLeaveType(), leave.getTotalDays());
+                                        leave.getEmployee(),
+                                        leave.getLeaveType(),
+                                        leave.getTotalDays());
 
                         notificationService.createAndSend(
                                         leave.getEmployee(),
                                         "Leave Approved",
-                                        "Your " + leave.getLeaveType() + " leave from " + leave.getStartDate()
-                                                        + " to " + leave.getEndDate() + " has been approved by "
-                                                        + reviewer.getFirstName() + " " + reviewer.getLastName() + ".",
+                                        "Your "
+                                                        + leave.getLeaveType()
+                                                        + " leave from "
+                                                        + leave.getStartDate()
+                                                        + " to "
+                                                        + leave.getEndDate()
+                                                        + " has been approved by "
+                                                        + reviewer.getFirstName()
+                                                        + " "
+                                                        + reviewer.getLastName()
+                                                        + ".",
                                         NotificationType.LEAVE_APPROVED,
-                                        "LEAVE_REQUEST", leave.getId());
+                                        "LEAVE_REQUEST",
+                                        leave.getId());
 
                         notifyAllAdmins(
                                         "Leave Approved",
-                                        leave.getEmployee().getFirstName() + " " + leave.getEmployee().getLastName()
-                                                        + "'s " + leave.getLeaveType() + " leave was approved by "
-                                                        + reviewer.getFirstName() + " " + reviewer.getLastName() + ".",
+                                        leave.getEmployee().getFirstName()
+                                                        + " "
+                                                        + leave.getEmployee().getLastName()
+                                                        + "'s "
+                                                        + leave.getLeaveType()
+                                                        + " leave was approved by "
+                                                        + reviewer.getFirstName()
+                                                        + " "
+                                                        + reviewer.getLastName()
+                                                        + ".",
                                         NotificationType.LEAVE_APPROVED,
-                                        "LEAVE_REQUEST", leave.getId(), reviewerId);
+                                        "LEAVE_REQUEST",
+                                        leave.getId(),
+                                        reviewerId);
 
                 } else {
                         leave.setStatus(LeaveStatus.REJECTED);
@@ -161,68 +219,101 @@ public class LeaveService {
                         notificationService.createAndSend(
                                         leave.getEmployee(),
                                         "Leave Rejected",
-                                        "Your leave request was rejected by " + reviewer.getFirstName() + " "
-                                                        + reviewer.getLastName() + ". Reason: " + req.getRemarks(),
+                                        "Your leave request was rejected by "
+                                                        + reviewer.getFirstName()
+                                                        + " "
+                                                        + reviewer.getLastName()
+                                                        + ". Reason: "
+                                                        + req.getRemarks(),
                                         NotificationType.LEAVE_REJECTED,
-                                        "LEAVE_REQUEST", leave.getId());
+                                        "LEAVE_REQUEST",
+                                        leave.getId());
 
                         notifyAllAdmins(
                                         "Leave Rejected",
-                                        leave.getEmployee().getFirstName() + " " + leave.getEmployee().getLastName()
-                                                        + "'s " + leave.getLeaveType() + " leave was rejected by "
-                                                        + reviewer.getFirstName() + " " + reviewer.getLastName() + ".",
+                                        leave.getEmployee().getFirstName()
+                                                        + " "
+                                                        + leave.getEmployee().getLastName()
+                                                        + "'s "
+                                                        + leave.getLeaveType()
+                                                        + " leave was rejected by "
+                                                        + reviewer.getFirstName()
+                                                        + " "
+                                                        + reviewer.getLastName()
+                                                        + ".",
                                         NotificationType.LEAVE_REJECTED,
-                                        "LEAVE_REQUEST", leave.getId(), reviewerId);
+                                        "LEAVE_REQUEST",
+                                        leave.getId(),
+                                        reviewerId);
                 }
 
-                return toResponse(leaveRepo.save(leave));
+                leaveRepo.saveAndFlush(leave);
+
+                LeaveRequest updatedLeave = findByIdWithDetails(leave.getId());
+
+                return toResponse(updatedLeave);
         }
 
         @Transactional
         @CacheEvict(value = "dashboardData", allEntries = true)
         public LeaveDTOs.Response requestCancellation(
-                        Long leaveId, Long employeeId,
+                        Long leaveId,
+                        Long employeeId,
                         LeaveDTOs.CancelRequest req) {
 
-                LeaveRequest leave = findById(leaveId);
+                LeaveRequest leave = findByIdWithDetails(leaveId);
                 Employee emp = leave.getEmployee();
 
                 if (!emp.getId().equals(employeeId)) {
-                        throw new IllegalStateException("You can only cancel your own leaves");
+                        throw new IllegalStateException(
+                                        "You can only cancel your own leaves");
                 }
 
                 if (leave.getStatus() == LeaveStatus.CANCELLED
                                 || leave.getStatus() == LeaveStatus.REJECTED
                                 || leave.getStatus() == LeaveStatus.CANCELLATION_PENDING) {
-                        throw new IllegalStateException("Leave already " + leave.getStatus());
+
+                        throw new IllegalStateException(
+                                        "Leave already " + leave.getStatus());
                 }
 
                 if (leave.getStatus() == LeaveStatus.APPROVED) {
                         leave.setStatus(LeaveStatus.CANCELLATION_PENDING);
-                        leave.setCancellationReason(req != null ? req.getReason() : null);
+                        leave.setCancellationReason(
+                                        req != null ? req.getReason() : null);
                         leave.setCancellationRequestedAt(LocalDateTime.now());
 
                         notificationService.createAndSend(
                                         emp,
                                         "Cancellation Requested",
-                                        "Your cancellation request for " + leave.getLeaveType()
+                                        "Your cancellation request for "
+                                                        + leave.getLeaveType()
                                                         + " leave is pending confirmation.",
                                         NotificationType.LEAVE_CANCELLED,
-                                        "LEAVE_REQUEST", leave.getId());
+                                        "LEAVE_REQUEST",
+                                        leave.getId());
 
                         notifyAllAdmins(
                                         "Leave Cancellation Request",
-                                        emp.getFirstName() + " " + emp.getLastName()
-                                                        + " requested cancellation of " + leave.getLeaveType()
+                                        emp.getFirstName()
+                                                        + " "
+                                                        + emp.getLastName()
+                                                        + " requested cancellation of "
+                                                        + leave.getLeaveType()
                                                         + " leave ("
-                                                        + leave.getStartDate() + " to " + leave.getEndDate() + ").",
+                                                        + leave.getStartDate()
+                                                        + " to "
+                                                        + leave.getEndDate()
+                                                        + ").",
                                         NotificationType.LEAVE_CANCELLED,
-                                        "LEAVE_REQUEST", leave.getId(), null);
+                                        "LEAVE_REQUEST",
+                                        leave.getId(),
+                                        null);
 
                 } else {
-                        // Still pending review — cancelling is immediate, nobody has actioned it yet
                         leave.setStatus(LeaveStatus.CANCELLED);
-                        leave.setCancellationReason(req != null ? req.getReason() : null);
+                        leave.setCancellationReason(
+                                        req != null ? req.getReason() : null);
                         leave.setCancellationRequestedAt(LocalDateTime.now());
                         leave.setCancellationActionAt(LocalDateTime.now());
 
@@ -231,53 +322,68 @@ public class LeaveService {
                                         "Leave Cancelled",
                                         "Your leave request has been cancelled.",
                                         NotificationType.LEAVE_CANCELLED,
-                                        "LEAVE_REQUEST", leave.getId());
+                                        "LEAVE_REQUEST",
+                                        leave.getId());
 
                         notifyAllAdmins(
                                         "Leave Cancelled",
-                                        emp.getFirstName() + " " + emp.getLastName()
-                                                        + " cancelled their " + leave.getLeaveType()
+                                        emp.getFirstName()
+                                                        + " "
+                                                        + emp.getLastName()
+                                                        + " cancelled their "
+                                                        + leave.getLeaveType()
                                                         + " leave request.",
                                         NotificationType.LEAVE_CANCELLED,
-                                        "LEAVE_REQUEST", leave.getId(), null);
+                                        "LEAVE_REQUEST",
+                                        leave.getId(),
+                                        null);
                 }
 
-                return toResponse(leaveRepo.save(leave));
+                leaveRepo.saveAndFlush(leave);
+
+                LeaveRequest updatedLeave = findByIdWithDetails(leave.getId());
+
+                return toResponse(updatedLeave);
         }
 
-        /**
-         * Any Admin or HR user can confirm/deny a pending cancellation. First action
-         * wins.
-         */
         @Transactional
         @CacheEvict(value = "dashboardData", allEntries = true)
         public LeaveDTOs.Response cancelAction(
-                        Long leaveId, Long reviewerId,
+                        Long leaveId,
+                        Long reviewerId,
                         LeaveDTOs.CancelActionRequest req) {
 
-                LeaveRequest leave = findById(leaveId);
+                LeaveRequest leave = findByIdWithDetails(leaveId);
 
                 if (leave.getStatus() != LeaveStatus.CANCELLATION_PENDING) {
-                        throw new IllegalStateException("This cancellation has already been resolved.");
+                        throw new IllegalStateException(
+                                        "This cancellation has already been resolved.");
                 }
 
                 Employee reviewer = employeeService.findById(reviewerId);
+
                 leave.setCancellationReviewedBy(reviewer);
                 leave.setCancellationRemarks(req.getRemarks());
                 leave.setCancellationActionAt(LocalDateTime.now());
 
                 if (Boolean.TRUE.equals(req.getApprove())) {
                         leave.setStatus(LeaveStatus.CANCELLED);
+
                         leaveBalanceService.restoreBalance(
-                                        leave.getEmployee(), leave.getLeaveType(), leave.getTotalDays());
+                                        leave.getEmployee(),
+                                        leave.getLeaveType(),
+                                        leave.getTotalDays());
 
                         notificationService.createAndSend(
                                         leave.getEmployee(),
                                         "Cancellation Confirmed",
-                                        reviewer.getFirstName() + " confirmed your cancellation. "
-                                                        + leave.getTotalDays() + " day(s) restored to your balance.",
+                                        reviewer.getFirstName()
+                                                        + " confirmed your cancellation. "
+                                                        + leave.getTotalDays()
+                                                        + " day(s) restored to your balance.",
                                         NotificationType.LEAVE_CANCELLED,
-                                        "LEAVE_REQUEST", leave.getId());
+                                        "LEAVE_REQUEST",
+                                        leave.getId());
 
                 } else {
                         leave.setStatus(LeaveStatus.APPROVED);
@@ -285,59 +391,108 @@ public class LeaveService {
                         notificationService.createAndSend(
                                         leave.getEmployee(),
                                         "Cancellation Denied",
-                                        reviewer.getFirstName() + " denied your cancellation request. "
-                                                        + "Reason: " + req.getRemarks(),
+                                        reviewer.getFirstName()
+                                                        + " denied your cancellation request. "
+                                                        + "Reason: "
+                                                        + req.getRemarks(),
                                         NotificationType.GENERAL,
-                                        "LEAVE_REQUEST", leave.getId());
+                                        "LEAVE_REQUEST",
+                                        leave.getId());
                 }
 
-                return toResponse(leaveRepo.save(leave));
+                leaveRepo.saveAndFlush(leave);
+
+                LeaveRequest updatedLeave = findByIdWithDetails(leave.getId());
+
+                return toResponse(updatedLeave);
         }
 
         @Transactional(readOnly = true)
-        public Page<LeaveDTOs.Response> getMyLeaves(Long employeeId, Pageable pageable) {
+        public Page<LeaveDTOs.Response> getMyLeaves(
+                        Long employeeId,
+                        Pageable pageable) {
+
                 Employee emp = employeeService.findById(employeeId);
-                return leaveRepo.findByEmployee(emp, pageable).map(this::toResponse);
+
+                return leaveRepo
+                                .findByEmployee(emp, pageable)
+                                .map(this::toResponse);
         }
 
         @Transactional(readOnly = true)
-        public Page<LeaveDTOs.Response> getAllLeaves(Pageable pageable) {
-                return leaveRepo.findAll(pageable).map(this::toResponse);
+        public Page<LeaveDTOs.Response> getAllLeaves(
+                        Pageable pageable) {
+
+                return leaveRepo
+                                .findAll(pageable)
+                                .map(this::toResponse);
         }
 
         @Transactional(readOnly = true)
         @Cacheable("dashboardData")
-        public Page<LeaveDTOs.Response> getPendingLeaves(Pageable pageable) {
-                return leaveRepo.findByStatus(LeaveStatus.PENDING, pageable).map(this::toResponse);
+        public Page<LeaveDTOs.Response> getPendingLeaves(
+                        Pageable pageable) {
+
+                return leaveRepo
+                                .findByStatus(
+                                                LeaveStatus.PENDING,
+                                                pageable)
+                                .map(this::toResponse);
         }
 
         @Transactional(readOnly = true)
-        public Page<LeaveDTOs.Response> getPendingCancellations(Pageable pageable) {
-                return leaveRepo.findByStatus(LeaveStatus.CANCELLATION_PENDING, pageable).map(this::toResponse);
+        public Page<LeaveDTOs.Response> getPendingCancellations(
+                        Pageable pageable) {
+
+                return leaveRepo
+                                .findByStatus(
+                                                LeaveStatus.CANCELLATION_PENDING,
+                                                pageable)
+                                .map(this::toResponse);
         }
 
-        private int calculateWorkingDays(LocalDate start, LocalDate end) {
+        private int calculateWorkingDays(
+                        LocalDate start,
+                        LocalDate end) {
+
                 int days = 0;
                 LocalDate date = start;
+
                 while (!date.isAfter(end)) {
-                        if (date.getDayOfWeek() != DayOfWeek.SATURDAY && date.getDayOfWeek() != DayOfWeek.SUNDAY) {
+                        if (date.getDayOfWeek() != DayOfWeek.SATURDAY
+                                        && date.getDayOfWeek() != DayOfWeek.SUNDAY) {
                                 days++;
                         }
                         date = date.plusDays(1);
                 }
+
                 return days;
         }
 
-        private LeaveRequest findById(Long id) {
-                return leaveRepo.findById(id)
-                                .orElseThrow(() -> new NoSuchElementException("Leave not found: " + id));
+        private LeaveRequest findByIdForAction(Long id) {
+                return leaveRepo
+                                .findByIdForAction(id)
+                                .orElseThrow(() -> new NoSuchElementException(
+                                                "Leave not found: " + id));
+        }
+
+        private LeaveRequest findByIdWithDetails(Long id) {
+                return leaveRepo
+                                .findById(id)
+                                .orElseThrow(() -> new NoSuchElementException(
+                                                "Leave not found: " + id));
         }
 
         private LeaveDTOs.Response toResponse(LeaveRequest l) {
+
                 LeaveDTOs.Response r = new LeaveDTOs.Response();
+
                 r.setId(l.getId());
                 r.setEmployeeDbId(l.getEmployee().getId());
-                r.setEmployeeName(l.getEmployee().getFirstName() + " " + l.getEmployee().getLastName());
+                r.setEmployeeName(
+                                l.getEmployee().getFirstName()
+                                                + " "
+                                                + l.getEmployee().getLastName());
                 r.setEmployeeCode(l.getEmployee().getEmployeeId());
                 r.setLeaveType(l.getLeaveType());
                 r.setStartDate(l.getStartDate());
@@ -347,21 +502,32 @@ public class LeaveService {
                 r.setAttachmentUrl(l.getAttachmentUrl());
                 r.setAttachmentFileName(l.getAttachmentFileName());
                 r.setStatus(l.getStatus());
+
                 if (l.getReviewedBy() != null) {
-                        r.setReviewedByName(l.getReviewedBy().getFirstName() + " " + l.getReviewedBy().getLastName());
+                        r.setReviewedByName(
+                                        l.getReviewedBy().getFirstName()
+                                                        + " "
+                                                        + l.getReviewedBy().getLastName());
                 }
+
                 r.setRemarks(l.getRemarks());
                 r.setAppliedAt(l.getAppliedAt());
                 r.setActionAt(l.getActionAt());
                 r.setCancellationReason(l.getCancellationReason());
-                r.setCancellationRequestedAt(l.getCancellationRequestedAt());
-                r.setCancellationRemarks(l.getCancellationRemarks());
-                r.setCancellationActionAt(l.getCancellationActionAt());
+                r.setCancellationRequestedAt(
+                                l.getCancellationRequestedAt());
+                r.setCancellationRemarks(
+                                l.getCancellationRemarks());
+                r.setCancellationActionAt(
+                                l.getCancellationActionAt());
+
                 if (l.getCancellationReviewedBy() != null) {
                         r.setCancellationReviewedByName(
-                                        l.getCancellationReviewedBy().getFirstName() + " "
+                                        l.getCancellationReviewedBy().getFirstName()
+                                                        + " "
                                                         + l.getCancellationReviewedBy().getLastName());
                 }
+
                 return r;
         }
 }
