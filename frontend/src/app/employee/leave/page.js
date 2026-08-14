@@ -235,11 +235,6 @@ function StatusPill({ status }) {
 
 const LEAVE_TYPES = [
   {
-    value: 'ANNUAL',
-    label: 'Annual',
-    icon: <Palmtree size={18} />
-  },
-  {
     value: 'SICK',
     label: 'Sick',
     icon: <Thermometer size={18} />
@@ -265,7 +260,6 @@ const LEAVE_TYPES = [
     icon: <ClipboardList size={18} />
   }
 ];
-
 
 const balanceStyle = {
   ANNUAL: {
@@ -402,7 +396,7 @@ export default function LeavePage() {
   const today = new Date().toISOString().split('T')[0];
 
   const [form, setForm] = useState({
-    leaveType: 'ANNUAL',
+    leaveType: 'SICK',
     startDate: '',
     endDate: '',
     reason: ''
@@ -468,6 +462,11 @@ export default function LeavePage() {
       return;
     }
 
+    if (!form.reason || !form.reason.trim()) {
+      toast.error('Please provide a reason for your leave');
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -483,7 +482,7 @@ export default function LeavePage() {
       setShowForm(false);
 
       setForm({
-        leaveType: 'ANNUAL',
+        leaveType: 'SICK',
         startDate: '',
         endDate: '',
         reason: ''

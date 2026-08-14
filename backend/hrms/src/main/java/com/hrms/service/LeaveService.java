@@ -62,10 +62,18 @@ public class LeaveService {
 
                 Employee emp = employeeService.findById(employeeId);
 
+                if ("ANNUAL".equalsIgnoreCase(req.getLeaveType())) {
+                        throw new IllegalArgumentException(
+                                        "Annual leave cannot be applied for directly. "
+                                                        + "It is automatically tracked from your Sick and Casual leave usage.");
+                }
+
                 if (req.getEndDate().isBefore(req.getStartDate())) {
                         throw new IllegalArgumentException(
                                         "End date must be after start date");
                 }
+
+                // ...rest of the method stays exactly the same
 
                 boolean dateAlreadyUsed = leaveRepo.existsOverlappingLeave(
                                 emp,
