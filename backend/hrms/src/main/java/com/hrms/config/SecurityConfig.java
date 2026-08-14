@@ -1,6 +1,5 @@
 package com.hrms.config;
 
-import org.springframework.http.HttpMethod;
 import com.hrms.repository.EmployeeRepository;
 import com.hrms.security.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
@@ -32,8 +31,13 @@ public class SecurityConfig {
 
     // Fully public — no token needed at all
     private static final String[] PUBLIC_URLS = {
-            "/api/auth/**",
+            "/api/auth/login",
+            "/api/auth/refresh",
+            "/api/auth/forgot-password",
+            "/api/auth/reset-password",
+
             "/api/files/**",
+            "/api/recruitment/jobs",
             "/api/recruitment/jobs/*/apply",
             "/swagger-ui/**",
             "/swagger-ui.html",
@@ -58,7 +62,7 @@ public class SecurityConfig {
             "/api/attendance/admin/**",
             "/api/performance",
             "/api/performance/*/update",
-            "/api/trainings",
+
             "/api/trainings/enrollments/*/complete",
             "/api/recruitment/jobs/all",
             "/api/recruitment/jobs",
@@ -94,26 +98,16 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_URLS).permitAll()
-
-                        // Recruitment
-                        .requestMatchers(HttpMethod.GET, "/api/recruitment/jobs").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/recruitment/jobs/*").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/recruitment/jobs")
-                        .hasAnyRole("ADMIN", "HR")
-                        .requestMatchers(HttpMethod.POST, "/api/recruitment/jobs/*/refer")
-                        .authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/recruitment/my-referrals")
-                        .authenticated()
-
                         .requestMatchers("/api/employees/managers").permitAll()
                         .requestMatchers(ADMIN_HR_URLS).hasAnyRole("ADMIN", "HR")
-
-                        // Attendance
+                        // ATTENDANCE - Employee authenticated endpoints (check-in, check-out, my,
+                        // my/detailed-report)
+                        // Change Password - Authenticated endpoint
+                        .requestMatchers("/api/auth/change-password").authenticated()
                         .requestMatchers("/api/attendance/check-in").authenticated()
                         .requestMatchers("/api/attendance/check-out").authenticated()
                         .requestMatchers("/api/attendance/my").authenticated()
                         .requestMatchers("/api/attendance/my/**").authenticated()
-
                         .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

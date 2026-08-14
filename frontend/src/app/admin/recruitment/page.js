@@ -144,6 +144,21 @@ export default function RecruitmentPage() {
   const [interviewNotes, setInterviewNotes] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
 
+  const handleViewResume = async (e, resumeUrl) => {
+    e.preventDefault();
+    try {
+      const url = resumeUrl.startsWith('http') ? new URL(resumeUrl).pathname : resumeUrl;
+      const res = await api.get(url, { responseType: 'blob' });
+      const contentType = res.headers['content-type'] || 'application/pdf';
+      const blob = new Blob([res.data], { type: contentType });
+      const blobUrl = window.URL.createObjectURL(blob);
+      window.open(blobUrl, '_blank');
+    } catch (err) {
+      toast.error('Failed to open resume');
+      console.error(err);
+    }
+  };
+
   const fetchJobs = useCallback(async () => {
     setLoading(true);
     try {
@@ -440,9 +455,8 @@ export default function RecruitmentPage() {
                     <div style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>📄 Resume:</span>
                       <a
-                        href={app.resumeUrl.startsWith('http') ? app.resumeUrl : `http://localhost:8080${app.resumeUrl}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        href="#"
+                        onClick={(e) => handleViewResume(e, app.resumeUrl)}
                         style={{ fontSize: '12px', color: 'var(--accent-primary)', fontWeight: '700', textDecoration: 'none' }}
                       >
                         View Resume →

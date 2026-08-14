@@ -17,6 +17,7 @@ const EMP_MENU = [
   { key: '/employee/payslips', label: 'Payslips', icon: <CircleDollarSign size={18} strokeWidth={2} /> },
   { key: '/employee/performance', label: 'Performance', icon: <Star size={18} strokeWidth={2} /> },
   { key: '/employee/onboarding', label: 'Onboarding', icon: <BadgeCheck size={18} strokeWidth={2} /> },
+  { key: '/employee/training', label: 'Training', icon: <GraduationCap size={18} strokeWidth={2} /> },
   { key: '/employee/jobs', label: 'Job Openings', icon: <Briefcase size={18} strokeWidth={2} /> },
   { key: '/employee/referrals', label: 'My Referrals', icon: <Users size={18} strokeWidth={2} /> },
   { key: '/employee/notifications', label: 'Notifications', icon: <Bell size={18} strokeWidth={2} /> },

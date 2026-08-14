@@ -162,17 +162,17 @@ export default function AttendanceReport() {
             `}</style>
 
             <div style={{ marginBottom: '20px' }}>
-                <h1 style={{ fontSize: '22px', fontWeight: '800', color: '#1e293b', marginBottom: '4px' }}>
+                <h1 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px' }}>
                     Attendance report
                 </h1>
-                <p style={{ fontSize: '13px', color: '#94a3b8' }}>
+                <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
                     View attendance for all employees by date range.
                 </p>
             </div>
 
             <div style={{
                 display: 'flex', gap: '12px', marginBottom: '16px', flexWrap: 'wrap',
-                background: 'white', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '14px 16px',
+                background: 'var(--bg-secondary, transparent)', border: '1px solid var(--border-color, #e2e8f0)', borderRadius: '12px', padding: '14px 16px',
             }}>
                 <input
                     type="text"

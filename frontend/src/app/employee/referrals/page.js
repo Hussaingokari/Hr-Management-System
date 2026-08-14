@@ -7,6 +7,21 @@ export default function MyReferrals() {
     const [referrals, setReferrals] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    const handleViewResume = async (e, resumeUrl) => {
+        e.preventDefault();
+        try {
+            const url = resumeUrl.startsWith('http') ? new URL(resumeUrl).pathname : resumeUrl;
+            const res = await api.get(url, { responseType: 'blob' });
+            const contentType = res.headers['content-type'] || 'application/pdf';
+            const blob = new Blob([res.data], { type: contentType });
+            const blobUrl = window.URL.createObjectURL(blob);
+            window.open(blobUrl, '_blank');
+        } catch (err) {
+            console.error(err);
+            alert('Failed to open resume');
+        }
+    };
+
     // =========================
     // GET MY REFERRALS
     // =========================
@@ -199,13 +214,8 @@ export default function MyReferrals() {
                                     <div className="mt-3">
 
                                         <a
-                                            href={
-                                                referral.resumeUrl.startsWith("http")
-                                                    ? referral.resumeUrl
-                                                    : `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'}${referral.resumeUrl}`
-                                            }
-                                            target="_blank"
-                                            rel="noopener noreferrer"
+                                            href="#"
+                                            onClick={(e) => handleViewResume(e, referral.resumeUrl)}
                                             className="text-emerald-600 dark:text-emerald-400 font-semibold text-sm hover:underline"
                                         >
                                             📄 View Resume →

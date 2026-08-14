@@ -12,15 +12,15 @@ import { Calendar, Coffee, Clock, Bell, Check, Loader2, Palmtree, Thermometer, S
 function StatCard({ label, value, sub, color, bg, icon, sparklineId, sparklinePath }) {
   return (
     <div style={{
-      background: `linear-gradient(145deg, ${color}10, var(--card-bg))`, 
+      background: `linear-gradient(145deg, ${color}10, var(--card-bg))`,
       borderRadius: '14px', padding: '20px',
       border: `1px solid var(--card-border)`, flex: 1,
       boxShadow: `0 4px 20px -2px ${color}10`, position: 'relative', overflow: 'hidden'
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', position: 'relative', zIndex: 2 }}>
         <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: '600', letterSpacing: '0.3px' }}>{label}</span>
-        <div style={{ 
-          width: '36px', height: '36px', background: `${color}15`, 
+        <div style={{
+          width: '36px', height: '36px', background: `${color}15`,
           borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center',
           border: `1px solid ${color}40`, color: color,
           boxShadow: `inset 0 0 10px ${color}10`
@@ -30,9 +30,9 @@ function StatCard({ label, value, sub, color, bg, icon, sparklineId, sparklinePa
       </div>
       <div style={{ fontSize: '28px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px', position: 'relative', zIndex: 2 }}>{value}</div>
       <div style={{ fontSize: '12px', color: 'var(--text-secondary)', position: 'relative', zIndex: 2 }}>{sub}</div>
-      
+
       {sparklinePath && (
-        <div style={{ 
+        <div style={{
           position: 'absolute', bottom: '20px', right: '20px', width: '45%', height: '35px', zIndex: 1, opacity: 0.9,
           maskImage: 'linear-gradient(to right, transparent 0%, black 25%)',
           WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 25%)'
@@ -231,8 +231,8 @@ export default function EmployeeDashboard() {
         </p>
 
         {/* Decorative Mountain Graphic Top Right */}
-        <div style={{ 
-          position: 'absolute', top: -30, right: 0, height: '140px', 
+        <div style={{
+          position: 'absolute', top: -30, right: 0, height: '140px',
           pointerEvents: 'none', display: 'flex',
           WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
           maskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)'
@@ -305,8 +305,8 @@ export default function EmployeeDashboard() {
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', marginBottom: '24px' }}>
-                <div style={{ 
-                  width: '24px', height: '24px', background: 'rgba(16, 185, 129, 0.15)', 
+                <div style={{
+                  width: '24px', height: '24px', background: 'rgba(16, 185, 129, 0.15)',
                   borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                   marginRight: '8px'
                 }}>
@@ -316,7 +316,7 @@ export default function EmployeeDashboard() {
                   Today&apos;s Attendance
                 </h3>
               </div>
-              
+
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', position: 'relative' }}>
                 <div style={{ flex: 1, textAlign: 'center' }}>
                   <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px' }}>Check In</div>
@@ -345,10 +345,10 @@ export default function EmployeeDashboard() {
               {/* Status badge positioned below the timestamps */}
               <div style={{ textAlign: 'center', minHeight: '24px', marginBottom: '24px' }}>
                 {displayAtt?.status && (
-                  <span style={{ 
-                     background: 'rgba(16, 185, 129, 0.05)', color: '#10b981', padding: '4px 12px',
-                     borderRadius: '20px', fontSize: '10px', fontWeight: '800', border: '1px solid rgba(16, 185, 129, 0.2)',
-                     letterSpacing: '0.5px', display: 'inline-block'
+                  <span style={{
+                    background: 'rgba(16, 185, 129, 0.05)', color: '#10b981', padding: '4px 12px',
+                    borderRadius: '20px', fontSize: '10px', fontWeight: '800', border: '1px solid rgba(16, 185, 129, 0.2)',
+                    letterSpacing: '0.5px', display: 'inline-block'
                   }}>
                     {displayAtt.status.replace(/_/g, ' ')}
                   </span>
@@ -398,8 +398,8 @@ export default function EmployeeDashboard() {
             <div style={{ background: 'var(--card-bg)', borderRadius: '12px', padding: '24px', border: '1px solid var(--card-border)', boxShadow: 'var(--card-shadow)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <div style={{ 
-                    width: '24px', height: '24px', background: 'rgba(16, 185, 129, 0.15)', 
+                  <div style={{
+                    width: '24px', height: '24px', background: 'rgba(16, 185, 129, 0.15)',
                     borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                     marginRight: '8px'
                   }}>
@@ -414,24 +414,69 @@ export default function EmployeeDashboard() {
                   padding: '4px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: '600', cursor: 'pointer'
                 }}>View all</button>
               </div>
-              
+
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 {displayBalance.map((b, i) => {
                   const c = balanceStyle[b.leaveType] || balanceStyle.UNPAID;
-                  const pct = b.totalAllotted > 0 ? Math.min(100, (b.remaining / b.totalAllotted) * 100) : 0;
+                  const isUnpaid = b.leaveType === 'UNPAID';
+
+                  const pct = isUnpaid
+                    ? 0
+                    : b.totalAllotted > 0
+                      ? Math.min(100, (b.remaining / b.totalAllotted) * 100)
+                      : 0;
+
                   return (
-                    <div key={i} style={{
-                      background: c.bg, borderRadius: '10px', padding: '14px',
-                      display: 'flex', alignItems: 'center', gap: '16px',
-                      border: `1px solid var(--card-border)`,
-                    }}>
+                    <div
+                      key={i}
+                      style={{
+                        background: c.bg,
+                        borderRadius: '10px',
+                        padding: '14px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '16px',
+                        border: `1px solid var(--card-border)`
+                      }}
+                    >
                       <MiniRing pct={pct} color={c.color} />
+
                       <div style={{ minWidth: 0 }}>
-                        <div style={{ fontSize: '10px', fontWeight: 800, color: c.color, display: 'flex', alignItems: 'center', gap: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                          <span>{c.icon}</span>{b.leaveType}
+                        <div
+                          style={{
+                            fontSize: '10px',
+                            fontWeight: 800,
+                            color: c.color,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.5px'
+                          }}
+                        >
+                          <span>{c.icon}</span>
+                          {b.leaveType}
                         </div>
-                        <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-primary)', marginTop: '4px' }}>
-                          {b.remaining}<span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)' }}> /{b.totalAllotted}d</span>
+
+                        <div
+                          style={{
+                            fontSize: '16px',
+                            fontWeight: 800,
+                            color: 'var(--text-primary)',
+                            marginTop: '4px'
+                          }}
+                        >
+                          {isUnpaid ? b.used : b.remaining}
+
+                          <span
+                            style={{
+                              fontSize: '12px',
+                              fontWeight: 600,
+                              color: 'var(--text-secondary)'
+                            }}
+                          >
+                            {isUnpaid ? ' / ∞' : ` /${b.totalAllotted}d`}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -448,8 +493,8 @@ export default function EmployeeDashboard() {
             <div style={{ background: 'var(--card-bg)', borderRadius: '12px', padding: '20px', border: '1px solid var(--card-border)', boxShadow: 'var(--card-shadow)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <div style={{ 
-                    width: '24px', height: '24px', background: 'rgba(236, 72, 153, 0.15)', 
+                  <div style={{
+                    width: '24px', height: '24px', background: 'rgba(236, 72, 153, 0.15)',
                     borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                     marginRight: '8px'
                   }}>
@@ -487,7 +532,7 @@ export default function EmployeeDashboard() {
                       <Badge status={l.status} />
                       <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{l.totalDays} days</span>
                       <span style={{ cursor: 'pointer', color: 'var(--text-secondary)', display: 'flex' }}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1" /><circle cx="12" cy="5" r="1" /><circle cx="12" cy="19" r="1" /></svg>
                       </span>
                     </div>
                   </div>
@@ -499,8 +544,8 @@ export default function EmployeeDashboard() {
             <div style={{ background: 'var(--card-bg)', borderRadius: '12px', padding: '20px', border: '1px solid var(--card-border)', boxShadow: 'var(--card-shadow)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <div style={{ 
-                    width: '24px', height: '24px', background: 'rgba(245, 158, 11, 0.15)', 
+                  <div style={{
+                    width: '24px', height: '24px', background: 'rgba(245, 158, 11, 0.15)',
                     borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center'
                   }}>
                     <Bell size={14} color="#f59e0b" />

@@ -22,24 +22,24 @@ function PayslipListItem({ p, selected, onSelect, formatCurrency }) {
         border: 'none',
         display: 'block',
         padding: '16px 20px',
-        borderBottom: '1px solid #f1f5f9',
-        cursor: 'pointer',
-        background: isSelected ? '#eff6ff' : 'white',
-        borderLeft: isSelected ? '3px solid #3b82f6' : '3px solid transparent',
-        transition: 'all 0.15s',
-      }}
-      onMouseEnter={e => {
-        if (!isSelected) e.currentTarget.style.background = '#f8fafc';
-      }}
-      onMouseLeave={e => {
-        if (!isSelected) e.currentTarget.style.background = 'white';
-      }}
-      onFocus={e => {
-        if (!isSelected) e.currentTarget.style.background = '#f8fafc';
-      }}
-      onBlur={e => {
-        if (!isSelected) e.currentTarget.style.background = 'white';
-      }}
+              borderBottom: '1px solid var(--border-color, rgba(148, 163, 184, 0.2))',
+      cursor: 'pointer',
+      background: isSelected ? 'var(--bg-active, rgba(59, 130, 246, 0.1))' : 'transparent',
+      borderLeft: isSelected ? '3px solid #3b82f6' : '3px solid transparent',
+      transition: 'all 0.15s',
+    }}
+    onMouseEnter={e => {
+      if (!isSelected) e.currentTarget.style.background = 'var(--bg-hover, rgba(148, 163, 184, 0.1))';
+    }}
+    onMouseLeave={e => {
+      if (!isSelected) e.currentTarget.style.background = 'transparent';
+    }}
+    onFocus={e => {
+      if (!isSelected) e.currentTarget.style.background = 'var(--bg-hover, rgba(148, 163, 184, 0.1))';
+    }}
+    onBlur={e => {
+      if (!isSelected) e.currentTarget.style.background = 'transparent';
+    }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>

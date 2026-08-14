@@ -1,45 +1,43 @@
 'use client';
+
 import { useState, useEffect, useCallback } from 'react';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
-import { BookOpen, User, Calendar, Clock, Users, MapPin, Link as LinkIcon, Inbox, Loader2 } from 'lucide-react';
+import {
+  BookOpen,
+  User,
+  Calendar,
+  Clock,
+  Users,
+  MapPin,
+  Link as LinkIcon,
+  Inbox,
+  Loader2,
+  X,
+  Plus,
+  CheckCircle2,
+} from 'lucide-react';
 
 function Badge({ status }) {
   const map = {
-    UPCOMING: { bg: '#eff6ff', color: '#3b82f6' },
-    ONGOING: { bg: '#fff7ed', color: '#f59e0b' },
-    COMPLETED: { bg: '#dcfce7', color: '#16a34a' },
-    CANCELLED: { bg: '#fee2e2', color: '#dc2626' },
-    ENROLLED: { bg: '#fdf4ff', color: '#9333ea' },
-    ONLINE: { bg: '#eff6ff', color: '#3b82f6' },
-    OFFLINE: { bg: '#f0fdf4', color: '#16a34a' },
-    HYBRID: { bg: '#fff7ed', color: '#f59e0b' },
+    UPCOMING: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
+    ONGOING: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
+    COMPLETED: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+    CANCELLED: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20',
+    ENROLLED: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
+    ONLINE: 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20',
+    OFFLINE: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+    HYBRID: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
   };
-  const s = map[status] || { bg: '#f1f5f9', color: 'var(--text-secondary)' };
+
+  const styleClass = map[status] || 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20';
+
   return (
-    <span style={{
-      background: s.bg, color: s.color,
-      padding: '3px 10px', borderRadius: '20px',
-      fontSize: '11px', fontWeight: '700',
-    }}>
+    <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${styleClass} inline-block`}>
       {status}
     </span>
   );
 }
-
-const inputStyle = {
-  width: '100%', padding: '9px 12px',
-  border: '1.5px solid #e2e8f0',
-  borderRadius: '8px', fontSize: '13px',
-  outline: 'none', boxSizing: 'border-box',
-  fontFamily: 'inherit',
-};
-
-const labelStyle = {
-  fontSize: '12px', fontWeight: '600',
-  color: '#374151', display: 'block',
-  marginBottom: '5px',
-};
 
 const EMPTY_FORM = {
   title: '', description: '', category: 'TECHNICAL',
@@ -61,16 +59,30 @@ export default function TrainingPage() {
   const [score, setScore] = useState('');
   const [feedback, setFeedback] = useState('');
   const [completingId, setCompletingId] = useState(null);
-  const today = new Date().toISOString().split("T")[0];
 
+  const today = new Date().toISOString().split('T')[0];
+
+  const getDynamicStatus = (t) => {
+    if (t.status === 'CANCELLED') return 'CANCELLED';
+    if (!t.startDate || !t.endDate) return t.status || 'UPCOMING';
+
+    if (today < t.startDate) return 'UPCOMING';
+    if (today >= t.startDate && today <= t.endDate) return 'ONGOING';
+    if (today > t.endDate) return 'COMPLETED';
+
+    return t.status || 'UPCOMING';
+  };
 
   const fetchTrainings = useCallback(async () => {
     setLoading(true);
     try {
       const res = await api.get('/api/trainings');
       setTrainings(res.data?.data?.content || []);
-    } catch { toast.error('Failed to load trainings'); }
-    finally { setLoading(false); }
+    } catch {
+      toast.error('Failed to load trainings');
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -83,13 +95,20 @@ export default function TrainingPage() {
     try {
       const res = await api.get(`/api/trainings/${trainingId}/enrollments`);
       setEnrollments(res.data?.data || []);
-    } catch { setEnrollments([]); }
-    finally { setLoadingEnroll(false); }
+    } catch {
+      setEnrollments([]);
+    } finally {
+      setLoadingEnroll(false);
+    }
   };
 
   const handleSelectTraining = (t) => {
-    setSelected(selected?.id === t.id ? null : t);
-    if (selected?.id !== t.id) fetchEnrollments(t.id);
+    if (selected?.id === t.id) {
+      setSelected(null);
+    } else {
+      setSelected(t);
+      fetchEnrollments(t.id);
+    }
     setCompletingId(null);
   };
 
@@ -108,7 +127,21 @@ export default function TrainingPage() {
       fetchTrainings();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to create training');
-    } finally { setSubmitting(false); }
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleCancelTraining = async (trainingId) => {
+    if (!confirm('Are you sure you want to cancel this training program?')) return;
+    try {
+      await api.put(`/api/trainings/${trainingId}/status`, { status: 'CANCELLED' });
+      toast.success('Training cancelled successfully');
+      setSelected(null);
+      fetchTrainings();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to cancel training');
+    }
   };
 
   const handleComplete = async (enrollmentId) => {
@@ -126,385 +159,427 @@ export default function TrainingPage() {
       if (selected) fetchEnrollments(selected.id);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to complete');
-    } finally { setCompleting(null); }
+    } finally {
+      setCompleting(null);
+    }
   };
 
-  const handleFocus = (e) => e.target.style.borderColor = '#3b82f6';
-  const handleBlur = (e) => e.target.style.borderColor = '#e2e8f0';
-
   return (
-    <div>
+    <div className="max-w-7xl mx-auto px-4 py-8 space-y-6 text-slate-800 dark:text-slate-100">
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
         <div>
-          <h1 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px' }}>
-            Training Management
-          </h1>
-          <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-            Create training programs and manage enrollments
-          </p>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Training Management</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Create training programs and manage employee enrollments.</p>
         </div>
-        <button onClick={() => setShowForm(true)}
-          style={{ padding: '10px 20px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '10px', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>
-          + Create Training
+        <button
+          onClick={() => setShowForm(true)}
+          className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm px-4 py-2.5 rounded-lg shadow-sm transition-all focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        >
+          <Plus size={16} />
+          <span>Create Training</span>
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: selected ? '1fr 1.3fr' : '1fr', gap: '20px' }}>
-
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Training List */}
-        <div style={{ background: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--card-border)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', overflow: 'hidden' }}>
-          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--card-border)' }}>
-            <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)' }}>
+        <div className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden transition-all duration-200 ${selected ? 'lg:col-span-5' : 'lg:col-span-12'}`}>
+          <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40">
+            <h3 className="font-semibold text-slate-800 dark:text-slate-200 text-sm">
               Training Programs ({trainings.length})
             </h3>
           </div>
 
           {loading ? (
-            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</div>
+            <div className="py-12 text-center text-slate-500 dark:text-slate-400 text-sm flex flex-col items-center gap-2">
+              <Loader2 className="animate-spin text-blue-500" size={24} />
+              Loading programs...
+            </div>
           ) : trainings.length === 0 ? (
-            <div style={{ padding: '60px', textAlign: 'center' }}>
-              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px', color: '#1e3a5f' }}>
-                <BookOpen size={40} strokeWidth={1.5} />
+            <div className="py-16 text-center px-4">
+              <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-full flex items-center justify-center mx-auto mb-3">
+                <BookOpen size={20} />
               </div>
-              <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '8px' }}>No trainings yet</div>
-              <button onClick={() => setShowForm(true)}
-                style={{ padding: '8px 18px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>
-                + Create First Training
+              <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1">No trainings created yet</h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 max-w-sm mx-auto">Get started by creating your first training program.</p>
+              <button
+                onClick={() => setShowForm(true)}
+                className="inline-flex items-center gap-2 bg-blue-600 text-white text-xs font-semibold px-3.5 py-2 rounded-md hover:bg-blue-700 transition"
+              >
+                <Plus size={14} /> Create First Training
               </button>
             </div>
           ) : (
-            trainings.map(t => (
-              <div key={t.id} onClick={() => handleSelectTraining(t)}
-                style={{
-                  padding: '16px 20px', borderBottom: '1px solid #f1f5f9', cursor: 'pointer',
-                  background: selected?.id === t.id ? '#eff6ff' : 'white',
-                  borderLeft: selected?.id === t.id ? '3px solid #3b82f6' : '3px solid transparent',
-                  transition: 'all 0.15s',
-                }}
-                onMouseEnter={e => { if (selected?.id !== t.id) e.currentTarget.style.background = '#f8fafc'; }}
-                onMouseLeave={e => { if (selected?.id !== t.id) e.currentTarget.style.background = 'white'; }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                  <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)' }}>{t.title}</div>
-                  <Badge status={t.status} />
-                </div>
-                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <User size={12} /> {t.trainer} · <Badge status={t.mode} />
-                </div>
-                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <Calendar size={12} /> {t.startDate} → {t.endDate} · <Clock size={12} /> {t.durationHours}h
-                </div>
-                <div style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <Users size={12} /> Max: {t.maxParticipants} · <MapPin size={12} /> {t.venue || 'No venue'}
-                </div>
-              </div>
-            ))
+            <div className="divide-y divide-slate-100 dark:divide-slate-800">
+              {trainings.map((t) => {
+                const currentStatus = getDynamicStatus(t);
+                const isSelected = selected?.id === t.id;
+
+                return (
+                  <div
+                    key={t.id}
+                    onClick={() => handleSelectTraining(t)}
+                    className={`p-4 cursor-pointer transition-all border-l-4 ${isSelected
+                      ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/20'
+                      : 'border-transparent hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                      }`}
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <h4 className="font-semibold text-slate-900 dark:text-slate-100 text-sm leading-snug">{t.title}</h4>
+                      <Badge status={currentStatus} />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-y-1.5 text-xs text-slate-500 dark:text-slate-400 mt-3">
+                      <div className="flex items-center gap-1.5">
+                        <User size={13} className="text-slate-400 dark:text-slate-500" />
+                        <span className="truncate">{t.trainer}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 justify-end">
+                        <Badge status={t.mode} />
+                      </div>
+                      <div className="flex items-center gap-1.5 col-span-2">
+                        <Calendar size={13} className="text-slate-400 dark:text-slate-500" />
+                        <span>{t.startDate} → {t.endDate}</span>
+                        <span className="text-slate-300 dark:text-slate-700">•</span>
+                        <Clock size={13} className="text-slate-400 dark:text-slate-500" />
+                        <span>{t.durationHours}h</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 col-span-2">
+                        <Users size={13} className="text-slate-400 dark:text-slate-500" />
+                        <span>Max: {t.maxParticipants}</span>
+                        <span className="text-slate-300 dark:text-slate-700">•</span>
+                        <MapPin size={13} className="text-slate-400 dark:text-slate-500" />
+                        <span className="truncate">{t.venue || 'No venue'}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           )}
         </div>
 
-        {/* Enrollments Panel */}
+        {/* Selected Program & Enrollments Panel */}
         {selected && (
-          <div style={{ background: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--card-border)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', overflow: 'hidden' }}>
-            <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--card-border)', background: 'var(--bg-primary)' }}>
-              <h3 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '2px' }}>
-                {selected.title}
-              </h3>
-              <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                {enrollments.length} enrolled · {selected.category}
-              </p>
+          <div className="lg:col-span-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden transition-all">
+            {/* Header */}
+            <div className="p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 flex items-start justify-between gap-4">
+              <div>
+                <span className="text-[10px] font-bold tracking-wider text-slate-400 dark:text-slate-500 uppercase">Training Details</span>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">{selected.title}</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  {enrollments.length} Enrolled • <span className="font-medium text-slate-700 dark:text-slate-300">{selected.category}</span>
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleCancelTraining(selected.id)}
+                  className="px-2.5 py-1.5 bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 rounded-md text-xs font-semibold transition"
+                >
+                  Cancel Program
+                </button>
+                <button
+                  onClick={() => setSelected(null)}
+                  className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md transition"
+                >
+                  <X size={18} />
+                </button>
+              </div>
             </div>
 
+            {/* Description */}
             {selected.description && (
-              <div style={{ padding: '14px 20px', borderBottom: '1px solid #f1f5f9', fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+              <div className="px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                 {selected.description}
               </div>
             )}
 
+            {/* Link */}
             {selected.meetingLink && (
-              <div style={{ padding: '10px 20px', borderBottom: '1px solid #f1f5f9', background: '#f0fdf4' }}>
-                <span style={{ fontSize: '12px', color: '#16a34a', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <LinkIcon size={12} /> {selected.meetingLink}
-                </span>
+              <div className="px-5 py-2.5 bg-emerald-500/10 border-b border-emerald-500/20 flex items-center gap-2 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                <LinkIcon size={14} className="shrink-0" />
+                <a href={selected.meetingLink} target="_blank" rel="noreferrer" className="underline hover:opacity-80 truncate">
+                  {selected.meetingLink}
+                </a>
               </div>
             )}
 
-            <div style={{ padding: '14px 20px' }}>
-              <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '12px' }}>
-                Enrollments
-              </div>
+            {/* Enrollments List */}
+            <div className="p-5">
+              <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-3">Enrolled Employees</h4>
 
               {loadingEnroll ? (
-                <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '20px' }}>Loading...</div>
+                <div className="py-8 text-center text-slate-400 text-xs flex justify-center items-center gap-2">
+                  <Loader2 className="animate-spin text-blue-500" size={16} /> Loading enrollments...
+                </div>
               ) : enrollments.length === 0 ? (
-                <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '20px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px', color: '#94a3b8' }}>
-                    <Inbox size={28} strokeWidth={1.5} />
-                  </div>
-                  No enrollments yet
+                <div className="py-8 text-center text-slate-400 dark:text-slate-500 text-xs bg-slate-50 dark:bg-slate-800/30 rounded-lg border border-dashed border-slate-200 dark:border-slate-800">
+                  <Inbox size={24} className="mx-auto mb-1 text-slate-300 dark:text-slate-600" />
+                  No enrollments registered for this training yet.
                 </div>
               ) : (
-                enrollments.map(enr => (
-                  <div key={enr.id} style={{ background: 'var(--bg-primary)', borderRadius: '10px', padding: '12px', marginBottom: '8px', border: '1px solid var(--card-border)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'linear-gradient(135deg, #1e3a5f, #3b82f6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: '700', color: 'white' }}>
-                          {enr.employeeName?.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                        </div>
-                        <div>
-                          <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)' }}>{enr.employeeName}</div>
-                          <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                            Enrolled: {new Date(enr.enrolledAt).toLocaleDateString('en-IN')}
+                <div className="space-y-3">
+                  {enrollments.map((enr) => (
+                    <div key={enr.id} className="p-3.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-lg text-xs space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-[11px] flex items-center justify-center shrink-0">
+                            {enr.employeeName?.split(' ').map((n) => n[0]).join('').slice(0, 2)}
+                          </div>
+                          <div>
+                            <div className="font-semibold text-slate-800 dark:text-slate-200">{enr.employeeName}</div>
+                            <div className="text-[11px] text-slate-400 dark:text-slate-500">
+                              Enrolled: {new Date(enr.enrolledAt).toLocaleDateString()}
+                            </div>
                           </div>
                         </div>
+                        <Badge status={enr.status} />
                       </div>
-                      <Badge status={enr.status} />
-                    </div>
 
-                    {enr.score && (
-                      <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-                        Score: <strong style={{ color: '#16a34a' }}>{enr.score}/100</strong>
-                        {enr.feedback && ` · "${enr.feedback}"`}
-                      </div>
-                    )}
-
-                    {enr.status === 'ENROLLED' && (
-                      completingId === enr.id ? (
-                        <div style={{ marginTop: '10px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                          <input
-                            type="number"
-                            placeholder="Score (0-100)"
-                            value={score}
-                            onChange={e => setScore(e.target.value)}
-                            style={{ flex: 1, minWidth: '120px', padding: '7px 10px', border: '1.5px solid #e2e8f0', borderRadius: '7px', fontSize: '12px', outline: 'none' }}
-                          />
-                          <input
-                            placeholder="Feedback..."
-                            value={feedback}
-                            onChange={e => setFeedback(e.target.value)}
-                            style={{ flex: 2, minWidth: '140px', padding: '7px 10px', border: '1.5px solid #e2e8f0', borderRadius: '7px', fontSize: '12px', outline: 'none' }}
-                          />
-                          <button onClick={() => handleComplete(enr.id)} disabled={completing === enr.id}
-                            style={{ padding: '7px 14px', background: '#dcfce7', color: '#16a34a', border: '1px solid #bbf7d0', borderRadius: '7px', fontSize: '12px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            {completing === enr.id ? <Loader2 size={14} className="animate-spin" /> : '✓ Complete'}
-                          </button>
-                          <button onClick={() => setCompletingId(null)}
-                            style={{ padding: '7px 12px', background: 'var(--card-border)', color: 'var(--text-secondary)', border: 'none', borderRadius: '7px', fontSize: '12px', cursor: 'pointer' }}>
-                            Cancel
-                          </button>
+                      {enr.score && (
+                        <div className="pt-2 border-t border-slate-200/60 dark:border-slate-700/50 text-slate-600 dark:text-slate-300 flex items-center gap-2">
+                          <span className="font-semibold text-emerald-600 dark:text-emerald-400">Score: {enr.score}/100</span>
+                          {enr.feedback && <span className="text-slate-400 dark:text-slate-500">| &ldquo;{enr.feedback}&rdquo;</span>}
                         </div>
-                      ) : (
-                        <button onClick={() => { setCompletingId(enr.id); setScore(''); setFeedback(''); }}
-                          style={{ marginTop: '8px', padding: '5px 12px', background: '#eff6ff', color: '#3b82f6', border: '1px solid #bfdbfe', borderRadius: '6px', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
-                          Mark Complete →
-                        </button>
-                      )
-                    )}
-                  </div>
-                ))
+                      )}
+
+                      {enr.status === 'ENROLLED' && (
+                        <div>
+                          {completingId === enr.id ? (
+                            <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700/50 space-y-2">
+                              <div className="flex gap-2">
+                                <input
+                                  type="number"
+                                  placeholder="Score (0-100)"
+                                  value={score}
+                                  onChange={(e) => setScore(e.target.value)}
+                                  className="w-1/3 px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-md text-xs focus:ring-1 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+                                />
+                                <input
+                                  type="text"
+                                  placeholder="Feedback notes..."
+                                  value={feedback}
+                                  onChange={(e) => setFeedback(e.target.value)}
+                                  className="w-2/3 px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-md text-xs focus:ring-1 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+                                />
+                              </div>
+                              <div className="flex gap-2 justify-end">
+                                <button
+                                  onClick={() => setCompletingId(null)}
+                                  className="px-3 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 transition"
+                                >
+                                  Cancel
+                                </button>
+                                <button
+                                  onClick={() => handleComplete(enr.id)}
+                                  disabled={completing === enr.id}
+                                  className="px-3 py-1 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition flex items-center gap-1 font-medium"
+                                >
+                                  {completing === enr.id ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle2 size={12} />}
+                                  <span>Submit</span>
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => { setCompletingId(enr.id); setScore(''); setFeedback(''); }}
+                              className="mt-2 text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                            >
+                              Mark as Completed →
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           </div>
         )}
       </div>
 
-      {/* Create Training Modal */}
+      {/* Modal Dialog */}
       {showForm && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '20px' }}>
-          <div style={{ background: 'var(--card-bg)', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '580px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h2 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-primary)' }}>Create Training Program</h2>
-              <button onClick={() => setShowForm(false)}
-                style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: 'var(--text-muted)' }}>✕</button>
+        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-slate-900 rounded-xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-800 mb-4">
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white">Create Program</h2>
+              <button onClick={() => setShowForm(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                <X size={20} />
+              </button>
             </div>
 
-            <form onSubmit={handleCreate}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+            <form onSubmit={handleCreate} className="space-y-4 text-xs">
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Title <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Advanced React Patterns"
+                  value={form.title}
+                  onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
+                  className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-900 dark:text-white"
+                />
+              </div>
 
-                {/* Title - full width */}
-                <div style={{ gridColumn: 'span 2' }}>
-                  <label style={labelStyle}>
-                    Title <span style={{ color: '#ef4444' }}>*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={form.title}
-                    onChange={e => setForm(prev => ({ ...prev, title: e.target.value }))}
-                    placeholder="e.g. React Advanced"
-                    required
-                    style={inputStyle}
-                    onFocus={handleFocus}
-                    onBlur={handleBlur}
-                  />
-                </div>
-
-                {/* Trainer */}
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label style={labelStyle}>
-                    Trainer <span style={{ color: '#ef4444' }}>*</span>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    Trainer <span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="text"
+                    required
+                    placeholder="Trainer Name"
                     value={form.trainer}
-                    onChange={e => setForm(prev => ({ ...prev, trainer: e.target.value }))}
-                    placeholder="Trainer name"
-                    required
-                    style={inputStyle}
-                    onFocus={handleFocus}
-                    onBlur={handleBlur}
+                    onChange={(e) => setForm((prev) => ({ ...prev, trainer: e.target.value }))}
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-900 dark:text-white"
                   />
                 </div>
 
-                {/* Category */}
                 <div>
-                  <label style={labelStyle}>Category</label>
-                  <select value={form.category}
-                    onChange={e => setForm(prev => ({ ...prev, category: e.target.value }))}
-                    style={{ ...inputStyle, background: 'var(--card-bg)' }}>
-                    {['TECHNICAL', 'SOFT_SKILLS', 'COMPLIANCE', 'LEADERSHIP', 'SAFETY'].map(c => (
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Category</label>
+                  <select
+                    value={form.category}
+                    onChange={(e) => setForm((prev) => ({ ...prev, category: e.target.value }))}
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-900 dark:text-white"
+                  >
+                    {['TECHNICAL', 'SOFT_SKILLS', 'COMPLIANCE', 'LEADERSHIP', 'SAFETY'].map((c) => (
                       <option key={c} value={c}>{c.replace('_', ' ')}</option>
                     ))}
                   </select>
                 </div>
+              </div>
 
-                {/* Mode */}
+              <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label style={labelStyle}>Mode</label>
-                  <select value={form.mode}
-                    onChange={e => setForm(prev => ({ ...prev, mode: e.target.value }))}
-                    style={{ ...inputStyle, background: 'var(--card-bg)' }}>
-                    {['ONLINE', 'OFFLINE', 'HYBRID'].map(m => (
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Mode</label>
+                  <select
+                    value={form.mode}
+                    onChange={(e) => setForm((prev) => ({ ...prev, mode: e.target.value }))}
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-900 dark:text-white"
+                  >
+                    {['ONLINE', 'OFFLINE', 'HYBRID'].map((m) => (
                       <option key={m} value={m}>{m}</option>
                     ))}
                   </select>
                 </div>
 
-                {/* Start Date */}
                 <div>
-                  <label style={labelStyle}>
-                    Start Date <span style={{ color: '#ef4444' }}>*</span>
-                  </label>
-                  <input
-                    type="date"
-                    value={form.startDate}
-                    onChange={e =>
-                      setForm(prev => ({
-                        ...prev,
-                        startDate: e.target.value,
-                        endDate:
-                          prev.endDate && prev.endDate < e.target.value
-                            ? ""
-                            : prev.endDate,
-                      }))
-                    }
-                    min={today}
-                    required
-                    style={inputStyle}
-                    onFocus={handleFocus}
-                    onBlur={handleBlur}
-                  />
-                </div>
-
-                {/* End Date */}
-                <div>
-                  <label style={labelStyle}>
-                    End Date <span style={{ color: '#ef4444' }}>*</span>
-                  </label>
-                  <input
-                    type="date"
-                    value={form.endDate}
-                    onChange={e => setForm(prev => ({ ...prev, endDate: e.target.value }))}
-                    min={form.startDate || today}
-                    required
-                    style={inputStyle}
-                    onFocus={handleFocus}
-                    onBlur={handleBlur}
-                  />
-                </div>
-
-                {/* Duration */}
-                <div>
-                  <label style={labelStyle}>Duration (hours)</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Duration (hrs)</label>
                   <input
                     type="number"
-                    value={form.durationHours}
-                    onChange={e => setForm(prev => ({ ...prev, durationHours: e.target.value }))}
                     placeholder="24"
-                    style={inputStyle}
-                    onFocus={handleFocus}
-                    onBlur={handleBlur}
+                    value={form.durationHours}
+                    onChange={(e) => setForm((prev) => ({ ...prev, durationHours: e.target.value }))}
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-900 dark:text-white"
                   />
                 </div>
 
-                {/* Max Participants */}
                 <div>
-                  <label style={labelStyle}>Max Participants</label>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Max Capacity</label>
                   <input
                     type="number"
-                    value={form.maxParticipants}
-                    onChange={e => setForm(prev => ({ ...prev, maxParticipants: e.target.value }))}
                     placeholder="10"
-                    style={inputStyle}
-                    onFocus={handleFocus}
-                    onBlur={handleBlur}
+                    value={form.maxParticipants}
+                    onChange={(e) => setForm((prev) => ({ ...prev, maxParticipants: e.target.value }))}
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-900 dark:text-white"
                   />
                 </div>
-
-                {/* Venue */}
-                <div>
-                  <label style={labelStyle}>Venue</label>
-                  <input
-                    type="text"
-                    value={form.venue}
-                    onChange={e => setForm(prev => ({ ...prev, venue: e.target.value }))}
-                    placeholder="Conference Room A"
-                    style={inputStyle}
-                    onFocus={handleFocus}
-                    onBlur={handleBlur}
-                  />
-                </div>
-
-                {/* Meeting Link */}
-                <div>
-                  <label style={labelStyle}>Meeting Link</label>
-                  <input
-                    type="text"
-                    value={form.meetingLink}
-                    onChange={e => setForm(prev => ({ ...prev, meetingLink: e.target.value }))}
-                    placeholder="https://meet.google.com/..."
-                    style={inputStyle}
-                    onFocus={handleFocus}
-                    onBlur={handleBlur}
-                  />
-                </div>
-
               </div>
 
-              {/* Description */}
-              <div style={{ marginBottom: '20px' }}>
-                <label style={labelStyle}>
-                  Description <span style={{ color: '#ef4444' }}>*</span>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    Start Date <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    min={today}
+                    value={form.startDate}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        startDate: e.target.value,
+                        endDate: prev.endDate && prev.endDate < e.target.value ? '' : prev.endDate,
+                      }))
+                    }
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-900 dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    End Date <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    min={form.startDate || today}
+                    value={form.endDate}
+                    onChange={(e) => setForm((prev) => ({ ...prev, endDate: e.target.value }))}
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-900 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Venue</label>
+                  <input
+                    type="text"
+                    placeholder="Conference Room A"
+                    value={form.venue}
+                    onChange={(e) => setForm((prev) => ({ ...prev, venue: e.target.value }))}
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-900 dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Meeting Link</label>
+                  <input
+                    type="text"
+                    placeholder="https://meet.google.com/..."
+                    value={form.meetingLink}
+                    onChange={(e) => setForm((prev) => ({ ...prev, meetingLink: e.target.value }))}
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-900 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                  Description <span className="text-rose-500">*</span>
                 </label>
                 <textarea
-                  value={form.description}
-                  onChange={e => setForm(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Training description..."
                   required
                   rows={3}
-                  style={{ ...inputStyle, resize: 'vertical' }}
-                  onFocus={handleFocus}
-                  onBlur={handleBlur}
+                  placeholder="Provide program overview and objectives..."
+                  value={form.description}
+                  onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
+                  className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none resize-y text-slate-900 dark:text-white"
                 />
               </div>
 
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button type="button" onClick={() => setShowForm(false)}
-                  style={{ flex: 1, padding: '12px', background: 'var(--card-bg)', color: '#374151', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
+              <div className="flex gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setShowForm(false)}
+                  className="w-1/2 py-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-lg font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition"
+                >
                   Cancel
                 </button>
-                <button type="submit" disabled={submitting}
-                  style={{ flex: 1, padding: '12px', background: '#1e3a5f', color: 'white', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.7 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                  {submitting ? <><Loader2 size={16} className="animate-spin" /> Creating...</> : 'Create Training'}
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="w-1/2 py-2.5 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition flex items-center justify-center gap-2"
+                >
+                  {submitting ? <Loader2 size={16} className="animate-spin" /> : 'Create Training'}
                 </button>
               </div>
             </form>

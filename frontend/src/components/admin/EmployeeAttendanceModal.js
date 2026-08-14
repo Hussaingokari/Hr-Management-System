@@ -21,9 +21,8 @@ const dateFieldStyle = {
     border: '1px solid #e2e8f0',
     borderRadius: '6px',
     fontSize: '12px',
-    color: '#1e293b',
-    background: 'white',
-    colorScheme: 'light',
+    color: 'var(--text-primary)',
+    background: 'var(--bg-secondary, transparent)',
 };
 
 function StatusBadge({ status }) {
@@ -264,7 +263,7 @@ export default function EmployeeAttendanceModal({ employeeId, asOfDate, onClose 
             <div
                 onClick={(e) => e.stopPropagation()}
                 style={{
-                    background: 'white', borderRadius: '14px', width: '460px',
+                    background: 'var(--bg-primary)', borderRadius: '14px', width: '460px',
                     maxWidth: '100%', maxHeight: '85vh',
                     overflowY: 'auto', overflowX: 'visible',
                     padding: '20px 24px', boxShadow: '0 10px 40px rgba(0,0,0,0.2)',
