@@ -22,7 +22,6 @@ import {
   FileText
 } from 'lucide-react';
 
-
 function StatCard({
   label,
   value,
@@ -128,10 +127,7 @@ function StatCard({
           <svg
             viewBox="0 0 200 45"
             preserveAspectRatio="none"
-            style={{
-              width: '100%',
-              height: '100%'
-            }}
+            style={{ width: '100%', height: '100%' }}
           >
             <defs>
               <linearGradient
@@ -175,7 +171,6 @@ function StatCard({
   );
 }
 
-
 function StatusPill({ status }) {
   const map = {
     APPROVED: {
@@ -183,25 +178,21 @@ function StatusPill({ status }) {
       color: '#10b981',
       icon: <Check size={12} strokeWidth={3} />
     },
-
     PENDING: {
       bg: 'rgba(245, 158, 11, 0.15)',
       color: '#f59e0b',
       icon: <Clock size={12} strokeWidth={3} />
     },
-
     REJECTED: {
       bg: 'rgba(239, 68, 68, 0.15)',
       color: '#ef4444',
       icon: <X size={12} strokeWidth={3} />
     },
-
     CANCELLATION_PENDING: {
       bg: 'rgba(139, 92, 246, 0.15)',
       color: '#8b5cf6',
       icon: <Undo2 size={12} strokeWidth={3} />
     },
-
     CANCELLED: {
       bg: 'rgba(255, 255, 255, 0.05)',
       color: 'var(--text-secondary)',
@@ -232,33 +223,13 @@ function StatusPill({ status }) {
   );
 }
 
-
 const LEAVE_TYPES = [
-  {
-    value: 'SICK',
-    label: 'Sick',
-    icon: <Thermometer size={18} />
-  },
-  {
-    value: 'CASUAL',
-    label: 'Casual',
-    icon: <Sun size={18} />
-  },
-  {
-    value: 'PATERNITY',
-    label: 'Paternity',
-    icon: <Baby size={18} />
-  },
-  {
-    value: 'MATERNITY',
-    label: 'Maternity',
-    icon: <Baby size={18} />
-  },
-  {
-    value: 'UNPAID',
-    label: 'Unpaid',
-    icon: <ClipboardList size={18} />
-  }
+  { value: 'ANNUAL', label: 'Annual', icon: <Palmtree size={18} /> },
+  { value: 'SICK', label: 'Sick', icon: <Thermometer size={18} /> },
+  { value: 'CASUAL', label: 'Casual', icon: <Sun size={18} /> },
+  { value: 'PATERNITY', label: 'Paternity', icon: <Baby size={18} /> },
+  { value: 'MATERNITY', label: 'Maternity', icon: <Baby size={18} /> },
+  { value: 'UNPAID', label: 'Unpaid', icon: <ClipboardList size={18} /> }
 ];
 
 const balanceStyle = {
@@ -267,31 +238,26 @@ const balanceStyle = {
     bg: 'rgba(139, 92, 246, 0.15)',
     icon: <Palmtree size={14} />
   },
-
   SICK: {
     color: '#10b981',
     bg: 'rgba(16, 185, 129, 0.15)',
     icon: <Thermometer size={14} />
   },
-
   CASUAL: {
     color: '#f59e0b',
     bg: 'rgba(245, 158, 11, 0.15)',
     icon: <Sun size={14} />
   },
-
   PATERNITY: {
     color: '#c084fc',
     bg: 'rgba(192, 132, 252, 0.15)',
     icon: <Baby size={14} />
   },
-
   MATERNITY: {
     color: '#ec4899',
     bg: 'rgba(236, 72, 153, 0.15)',
     icon: <Baby size={14} />
   },
-
   UNPAID: {
     color: '#94a3b8',
     bg: 'rgba(148, 163, 184, 0.15)',
@@ -299,26 +265,13 @@ const balanceStyle = {
   }
 };
 
-
-/*
- * Progress ring
- *
- * Normal leave:
- *     0%, 25%, 50%, etc.
- *
- * Unpaid leave:
- *     Shows ∞ in the center because there is no limit.
- */
-function MiniRing({ pct, color, unlimited = false }) {
+function MiniRing({ pct, color }) {
   const size = 42;
   const strokeWidth = 3;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-
-  const safePct = Math.max(0, Math.min(100, pct));
-
   const dashoffset =
-    circumference - (safePct / 100) * circumference;
+    circumference - (pct / 100) * circumference;
 
   return (
     <div
@@ -341,7 +294,6 @@ function MiniRing({ pct, color, unlimited = false }) {
           position: 'absolute'
         }}
       >
-        {/* Background ring */}
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -351,37 +303,32 @@ function MiniRing({ pct, color, unlimited = false }) {
           fill="none"
         />
 
-        {/* Normal leave progress */}
-        {!unlimited && (
-          <circle
-            cx={size / 2}
-            cy={size / 2}
-            r={radius}
-            stroke={color}
-            strokeWidth={strokeWidth}
-            fill="none"
-            strokeDasharray={circumference}
-            strokeDashoffset={dashoffset}
-            strokeLinecap="round"
-          />
-        )}
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke={color}
+          strokeWidth={strokeWidth}
+          fill="none"
+          strokeDasharray={circumference}
+          strokeDashoffset={dashoffset}
+          strokeLinecap="round"
+        />
       </svg>
 
       <div
         style={{
-          fontSize: unlimited ? '21px' : '9px',
+          fontSize: '9px',
           fontWeight: 800,
           color: 'var(--text-primary)',
-          zIndex: 2,
-          lineHeight: 1
+          zIndex: 2
         }}
       >
-        {unlimited ? '∞' : `${Math.round(safePct)}%`}
+        {Math.round(pct)}%
       </div>
     </div>
   );
 }
-
 
 export default function LeavePage() {
   const [leaves, setLeaves] = useState([]);
@@ -396,12 +343,11 @@ export default function LeavePage() {
   const today = new Date().toISOString().split('T')[0];
 
   const [form, setForm] = useState({
-    leaveType: 'SICK',
+    leaveType: 'ANNUAL',
     startDate: '',
     endDate: '',
     reason: ''
   });
-
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
@@ -414,7 +360,6 @@ export default function LeavePage() {
 
       if (leaveRes.status === 'fulfilled') {
         const data = leaveRes.value.data?.data;
-
         setLeaves(data?.content || []);
         setTotalPages(data?.totalPages || 0);
       }
@@ -426,22 +371,18 @@ export default function LeavePage() {
       toast.error(
         "Couldn't load your leave data — try refreshing"
       );
-
       console.error(err);
     } finally {
       setLoading(false);
     }
   }, [page]);
 
-
   useEffect(() => {
     const timer = setTimeout(() => fetchAll(), 0);
-
     return () => clearTimeout(timer);
   }, [fetchAll]);
 
-
-  const handleApply = async (e) => {
+  const handleApply = async e => {
     e.preventDefault();
 
     if (!form.startDate || !form.endDate) {
@@ -458,12 +399,9 @@ export default function LeavePage() {
       new Date(form.endDate) <
       new Date(form.startDate)
     ) {
-      toast.error('End date needs to be after the start date');
-      return;
-    }
-
-    if (!form.reason || !form.reason.trim()) {
-      toast.error('Please provide a reason for your leave');
+      toast.error(
+        'End date needs to be after the start date'
+      );
       return;
     }
 
@@ -478,11 +416,10 @@ export default function LeavePage() {
       });
 
       toast.success('Leave request sent!');
-
       setShowForm(false);
 
       setForm({
-        leaveType: 'SICK',
+        leaveType: 'ANNUAL',
         startDate: '',
         endDate: '',
         reason: ''
@@ -492,54 +429,42 @@ export default function LeavePage() {
     } catch (err) {
       toast.error(
         err.response?.data?.message ||
-        'Could not submit — try again'
+          'Could not submit — try again'
       );
     } finally {
       setSubmitting(false);
     }
   };
 
-
-  const handleCancel = async (id) => {
+  const handleCancel = async id => {
     setCancelling(id);
 
     try {
-      await api.put(
-        `/api/leaves/${id}/cancel`,
-        {
-          reason: 'Cancelled by employee'
-        }
-      );
+      await api.put(`/api/leaves/${id}/cancel`, {
+        reason: 'Cancelled by employee'
+      });
 
       toast.success('Cancellation processed');
-
       fetchAll();
     } catch (err) {
       toast.error(
         err.response?.data?.message ||
-        'Could not cancel — try again'
+          'Could not cancel — try again'
       );
     } finally {
       setCancelling(null);
     }
   };
 
-
   const pendingLeavesCount =
-    leaves.filter(
-      l => l.status === 'PENDING'
-    ).length;
+    leaves.filter(l => l.status === 'PENDING').length;
 
   const approvedLeavesCount =
-    leaves.filter(
-      l => l.status === 'APPROVED'
-    ).length;
+    leaves.filter(l => l.status === 'APPROVED').length;
 
   const annualBalance =
-    balance.find(
-      b => b.leaveType === 'ANNUAL'
-    )?.remaining || 0;
-
+    balance.find(b => b.leaveType === 'ANNUAL')
+      ?.remaining || 0;
 
   return (
     <div
@@ -552,17 +477,37 @@ export default function LeavePage() {
         borderRadius: '16px'
       }}
     >
-
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@600;700;800&display=swap');
+
+        /* Calendar fix */
+        .lm-date-wrapper {
+          position: relative;
+          width: 100%;
+        }
 
         .lm-date-input {
           color-scheme: dark;
         }
 
         .lm-date-input::-webkit-calendar-picker-indicator {
-          opacity: 1;
+          opacity: 0;
           cursor: pointer;
+          position: absolute;
+          right: 8px;
+          width: 25px;
+          height: 25px;
+          z-index: 3;
+        }
+
+        .lm-calendar-icon {
+          position: absolute;
+          right: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          color: var(--text-secondary);
+          pointer-events: none;
+          z-index: 2;
         }
 
         .lm-reason-textarea,
@@ -582,9 +527,7 @@ export default function LeavePage() {
         }
       `}</style>
 
-
       {/* Header */}
-
       <div
         style={{
           display: 'flex',
@@ -613,7 +556,8 @@ export default function LeavePage() {
               color: 'var(--text-secondary)'
             }}
           >
-            Apply for leave, track your requests, and monitor your balance
+            Apply for leave, track your requests, and
+            monitor your balance
           </p>
         </div>
 
@@ -622,10 +566,17 @@ export default function LeavePage() {
           style={{
             padding: '12px 22px',
             background: 'var(--primary)',
-            color: 'var(--text-primary)', border: 'none', borderRadius: '10px',
-            fontSize: '13px', fontWeight: 700, cursor: 'pointer',
-            display: 'flex', alignItems: 'center', gap: '6px',
-            boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)',
+            color: 'white',
+            border: 'none',
+            borderRadius: '10px',
+            fontSize: '13px',
+            fontWeight: 700,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            boxShadow:
+              '0 4px 12px rgba(99, 102, 241, 0.3)'
           }}
         >
           <Sparkles size={16} />
@@ -633,9 +584,7 @@ export default function LeavePage() {
         </button>
       </div>
 
-
       {loading && page === 0 ? (
-
         <div
           style={{
             textAlign: 'center',
@@ -651,15 +600,11 @@ export default function LeavePage() {
               marginBottom: '16px'
             }}
           />
-
           Loading...
         </div>
-
       ) : (
-
         <>
           {/* Stats Row */}
-
           <div
             style={{
               display: 'grid',
@@ -668,7 +613,6 @@ export default function LeavePage() {
               marginBottom: '24px'
             }}
           >
-
             <StatCard
               label="Annual Balance"
               value={`${annualBalance} days`}
@@ -708,12 +652,9 @@ export default function LeavePage() {
               sparklineId="requests"
               sparklinePath="M 0 25 Q 40 10, 80 20 T 150 15 T 200 5"
             />
-
           </div>
 
-
           {/* Balance Cards */}
-
           <div
             style={{
               display: 'grid',
@@ -723,9 +664,7 @@ export default function LeavePage() {
               marginBottom: '24px'
             }}
           >
-
             {balance.length === 0 ? (
-
               <div
                 style={{
                   gridColumn: '1 / -1',
@@ -736,37 +675,19 @@ export default function LeavePage() {
               >
                 No balance data available
               </div>
-
             ) : (
-
               balance.map((b, i) => {
-
                 const c =
                   balanceStyle[b.leaveType] ||
                   balanceStyle.UNPAID;
 
-                /*
-                 * Detect unlimited unpaid leave.
-                 */
-                const isUnpaid =
-                  b.leaveType === 'UNPAID';
-
-                /*
-                 * Normal leave:
-                 *   remaining / totalAllotted
-                 *
-                 * Unpaid leave:
-                 *   unlimited, so no percentage is calculated.
-                 */
-                const pct = isUnpaid
-                  ? 0
-                  : b.totalAllotted > 0
-                    ? (b.remaining / b.totalAllotted) * 100
+                const pct =
+                  b.totalAllotted > 0
+                    ? (b.remaining / b.totalAllotted) *
+                      100
                     : 0;
 
-
                 return (
-
                   <div
                     key={i}
                     className="lm-type-card"
@@ -780,7 +701,6 @@ export default function LeavePage() {
                       boxShadow: 'var(--card-shadow)'
                     }}
                   >
-
                     <div
                       style={{
                         display: 'flex',
@@ -788,24 +708,12 @@ export default function LeavePage() {
                         justifyContent: 'space-between'
                       }}
                     >
-
-                      {/* Progress / Infinity Ring */}
-
                       <MiniRing
                         pct={pct}
                         color={c.color}
-                        unlimited={isUnpaid}
                       />
 
-
-                      <div
-                        style={{
-                          textAlign: 'right'
-                        }}
-                      >
-
-                        {/* Leave type */}
-
+                      <div style={{ textAlign: 'right' }}>
                         <div
                           style={{
                             display: 'flex',
@@ -824,9 +732,6 @@ export default function LeavePage() {
                           {b.leaveType}
                         </div>
 
-
-                        {/* Balance */}
-
                         <div
                           style={{
                             fontSize: '18px',
@@ -834,65 +739,28 @@ export default function LeavePage() {
                             color: 'var(--text-primary)'
                           }}
                         >
-
-                          {isUnpaid ? (
-
-                            <>
-                              {Number(b.used || 0)}
-
-                              <span
-                                style={{
-                                  fontSize: '12px',
-                                  fontWeight: 600,
-                                  color:
-                                    'var(--text-secondary)'
-                                }}
-                              >
-                                {' '}
-                                / ∞
-                              </span>
-                            </>
-
-                          ) : (
-
-                            <>
-                              {b.remaining}
-
-                              <span
-                                style={{
-                                  fontSize: '12px',
-                                  fontWeight: 600,
-                                  color:
-                                    'var(--text-secondary)'
-                                }}
-                              >
-                                {' '}
-                                / {b.totalAllotted}d
-                              </span>
-                            </>
-
-                          )}
-
+                          {b.remaining}{' '}
+                          <span
+                            style={{
+                              fontSize: '12px',
+                              fontWeight: 600,
+                              color:
+                                'var(--text-secondary)'
+                            }}
+                          >
+                            /{b.totalAllotted}d
+                          </span>
                         </div>
-
                       </div>
-
                     </div>
-
                   </div>
-
                 );
               })
-
             )}
-
           </div>
 
-
           {/* Apply Modal */}
-
           {showForm && (
-
             <div
               style={{
                 position: 'fixed',
@@ -906,7 +774,6 @@ export default function LeavePage() {
                 backdropFilter: 'blur(4px)'
               }}
             >
-
               <div
                 style={{
                   background: 'var(--card-bg)',
@@ -920,7 +787,6 @@ export default function LeavePage() {
                     '1px solid var(--card-border)'
                 }}
               >
-
                 <div
                   style={{
                     display: 'flex',
@@ -929,7 +795,6 @@ export default function LeavePage() {
                     marginBottom: '20px'
                   }}
                 >
-
                   <h2
                     style={{
                       fontSize: '19px',
@@ -944,7 +809,6 @@ export default function LeavePage() {
                       size={19}
                       color="#6366f1"
                     />
-
                     Apply for Leave
                   </h2>
 
@@ -966,20 +830,15 @@ export default function LeavePage() {
                   >
                     ✕
                   </button>
-
                 </div>
 
-
                 <form onSubmit={handleApply}>
-
                   {/* Leave Type */}
-
                   <div
                     style={{
                       marginBottom: '18px'
                     }}
                   >
-
                     <label
                       style={{
                         fontSize: '12px',
@@ -988,14 +847,12 @@ export default function LeavePage() {
                           'var(--text-secondary)',
                         display: 'block',
                         marginBottom: '8px',
-                        textTransform:
-                          'uppercase',
+                        textTransform: 'uppercase',
                         letterSpacing: '0.5px'
                       }}
                     >
                       Leave Type
                     </label>
-
 
                     <div
                       style={{
@@ -1005,23 +862,18 @@ export default function LeavePage() {
                         gap: '8px'
                       }}
                     >
-
                       {LEAVE_TYPES.map(t => {
-
                         const active =
-                          form.leaveType ===
-                          t.value;
+                          form.leaveType === t.value;
 
                         return (
-
                           <button
                             type="button"
                             key={t.value}
                             onClick={() =>
                               setForm({
                                 ...form,
-                                leaveType:
-                                  t.value
+                                leaveType: t.value
                               })
                             }
                             style={{
@@ -1042,12 +894,10 @@ export default function LeavePage() {
                               display: 'flex',
                               flexDirection:
                                 'column',
-                              alignItems:
-                                'center',
+                              alignItems: 'center',
                               gap: '6px'
                             }}
                           >
-
                             <span
                               style={{
                                 fontSize: '18px'
@@ -1057,19 +907,13 @@ export default function LeavePage() {
                             </span>
 
                             {t.label}
-
                           </button>
-
                         );
                       })}
-
                     </div>
-
                   </div>
 
-
                   {/* Dates */}
-
                   <div
                     style={{
                       display: 'grid',
@@ -1079,9 +923,7 @@ export default function LeavePage() {
                       marginBottom: '18px'
                     }}
                   >
-
                     <div>
-
                       <label
                         style={{
                           fontSize: '12px',
@@ -1090,61 +932,61 @@ export default function LeavePage() {
                             'var(--text-secondary)',
                           display: 'block',
                           marginBottom: '8px',
-                          textTransform:
-                            'uppercase',
-                          letterSpacing:
-                            '0.5px'
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px'
                         }}
                       >
                         From
                       </label>
 
-                      <input
-                        type="date"
-                        className="lm-date-input"
-                        value={form.startDate}
-                        min={today}
-                        onChange={e => {
+                      <div className="lm-date-wrapper">
+                        <input
+                          type="date"
+                          className="lm-date-input"
+                          value={form.startDate}
+                          min={today}
+                          onChange={e => {
+                            const newStart =
+                              e.target.value;
 
-                          const newStart =
-                            e.target.value;
-
-                          setForm(prev => ({
-                            ...prev,
-                            startDate:
-                              newStart,
-                            endDate:
-                              prev.endDate &&
+                            setForm(prev => ({
+                              ...prev,
+                              startDate: newStart,
+                              endDate:
+                                prev.endDate &&
                                 prev.endDate <
-                                newStart
-                                ? ''
-                                : prev.endDate
-                          }));
+                                  newStart
+                                  ? ''
+                                  : prev.endDate
+                            }));
+                          }}
+                          required
+                          style={{
+                            width: '100%',
+                            padding:
+                              '11px 40px 11px 12px',
+                            border:
+                              '1px solid var(--card-border)',
+                            background:
+                              'var(--bg-primary)',
+                            borderRadius: '10px',
+                            fontSize: '13px',
+                            outline: 'none',
+                            boxSizing:
+                              'border-box',
+                            color:
+                              'var(--text-primary)'
+                          }}
+                        />
 
-                        }}
-                        required
-                        style={{
-                          width: '100%',
-                          padding: '11px 12px',
-                          border:
-                            '1px solid var(--card-border)',
-                          background:
-                            'var(--bg-primary)',
-                          borderRadius: '10px',
-                          fontSize: '13px',
-                          outline: 'none',
-                          boxSizing:
-                            'border-box',
-                          color:
-                            'var(--text-primary)'
-                        }}
-                      />
-
+                        <Calendar
+                          size={17}
+                          className="lm-calendar-icon"
+                        />
+                      </div>
                     </div>
 
-
                     <div>
-
                       <label
                         style={{
                           fontSize: '12px',
@@ -1153,61 +995,61 @@ export default function LeavePage() {
                             'var(--text-secondary)',
                           display: 'block',
                           marginBottom: '8px',
-                          textTransform:
-                            'uppercase',
-                          letterSpacing:
-                            '0.5px'
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px'
                         }}
                       >
                         To
                       </label>
 
-                      <input
-                        type="date"
-                        className="lm-date-input"
-                        value={form.endDate}
-                        min={
-                          form.startDate ||
-                          today
-                        }
-                        onChange={e =>
-                          setForm({
-                            ...form,
-                            endDate:
-                              e.target.value
-                          })
-                        }
-                        required
-                        style={{
-                          width: '100%',
-                          padding: '11px 12px',
-                          border:
-                            '1px solid var(--card-border)',
-                          background:
-                            'var(--bg-primary)',
-                          borderRadius: '10px',
-                          fontSize: '13px',
-                          outline: 'none',
-                          boxSizing:
-                            'border-box',
-                          color:
-                            'var(--text-primary)'
-                        }}
-                      />
+                      <div className="lm-date-wrapper">
+                        <input
+                          type="date"
+                          className="lm-date-input"
+                          value={form.endDate}
+                          min={
+                            form.startDate || today
+                          }
+                          onChange={e =>
+                            setForm({
+                              ...form,
+                              endDate:
+                                e.target.value
+                            })
+                          }
+                          required
+                          style={{
+                            width: '100%',
+                            padding:
+                              '11px 40px 11px 12px',
+                            border:
+                              '1px solid var(--card-border)',
+                            background:
+                              'var(--bg-primary)',
+                            borderRadius: '10px',
+                            fontSize: '13px',
+                            outline: 'none',
+                            boxSizing:
+                              'border-box',
+                            color:
+                              'var(--text-primary)'
+                          }}
+                        />
 
+                        <Calendar
+                          size={17}
+                          className="lm-calendar-icon"
+                        />
+                      </div>
                     </div>
-
                   </div>
 
-
                   {/* Reason */}
-
                   <div
                     style={{
                       marginBottom: '22px'
                     }}
                   >
-
                     <label
                       style={{
                         fontSize: '12px',
@@ -1216,10 +1058,8 @@ export default function LeavePage() {
                           'var(--text-secondary)',
                         display: 'block',
                         marginBottom: '8px',
-                        textTransform:
-                          'uppercase',
-                        letterSpacing:
-                          '0.5px'
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px'
                       }}
                     >
                       Reason
@@ -1231,8 +1071,7 @@ export default function LeavePage() {
                       onChange={e =>
                         setForm({
                           ...form,
-                          reason:
-                            e.target.value
+                          reason: e.target.value
                         })
                       }
                       placeholder="e.g. Family function out of town"
@@ -1247,16 +1086,11 @@ export default function LeavePage() {
                         fontSize: '13px',
                         outline: 'none',
                         resize: 'vertical',
-                        boxSizing:
-                          'border-box',
+                        boxSizing: 'border-box',
                         fontFamily: 'inherit'
                       }}
                     />
-
                   </div>
-
-
-                  {/* Info */}
 
                   <div
                     style={{
@@ -1266,21 +1100,16 @@ export default function LeavePage() {
                       padding: '10px 14px',
                       marginBottom: '18px',
                       fontSize: '11px',
-                      color:
-                        'var(--primary)',
+                      color: 'var(--primary)',
                       display: 'flex',
                       gap: '8px',
                       alignItems: 'center'
                     }}
                   >
                     <Lightbulb size={16} />
-
                     Your request will be reviewed by
                     Admin or HR.
                   </div>
-
-
-                  {/* Buttons */}
 
                   <div
                     style={{
@@ -1288,7 +1117,6 @@ export default function LeavePage() {
                       gap: '10px'
                     }}
                   >
-
                     <button
                       type="button"
                       onClick={() =>
@@ -1311,7 +1139,6 @@ export default function LeavePage() {
                     >
                       Cancel
                     </button>
-
 
                     <button
                       type="submit"
@@ -1338,20 +1165,13 @@ export default function LeavePage() {
                         ? 'Sending...'
                         : 'Submit Request'}
                     </button>
-
                   </div>
-
                 </form>
-
               </div>
-
             </div>
-
           )}
 
-
           {/* Leave History */}
-
           <div
             style={{
               background: 'var(--card-bg)',
@@ -1362,7 +1182,6 @@ export default function LeavePage() {
               overflow: 'hidden'
             }}
           >
-
             <div
               style={{
                 padding: '16px 20px',
@@ -1374,7 +1193,6 @@ export default function LeavePage() {
                 alignItems: 'center'
               }}
             >
-
               <h3
                 style={{
                   fontSize: '15px',
@@ -1395,12 +1213,9 @@ export default function LeavePage() {
               >
                 {leaves.length} records
               </span>
-
             </div>
 
-
             <div className="table-responsive">
-
               <div
                 style={{
                   display: 'grid',
@@ -1413,7 +1228,6 @@ export default function LeavePage() {
                     '1px solid var(--card-border)'
                 }}
               >
-
                 {[
                   'Type',
                   'From',
@@ -1423,7 +1237,6 @@ export default function LeavePage() {
                   'Reviewed by',
                   'Action'
                 ].map(h => (
-
                   <div
                     key={h}
                     style={{
@@ -1439,21 +1252,16 @@ export default function LeavePage() {
                   >
                     {h}
                   </div>
-
                 ))}
-
               </div>
 
-
               {leaves.length === 0 ? (
-
                 <div
                   style={{
                     padding: '60px',
                     textAlign: 'center'
                   }}
                 >
-
                   <div
                     style={{
                       display: 'flex',
@@ -1489,8 +1297,8 @@ export default function LeavePage() {
                       marginBottom: '16px'
                     }}
                   >
-                    Apply for your first leave whenever
-                    you need a break
+                    Apply for your first leave
+                    whenever you need a break
                   </div>
 
                   <button
@@ -1516,55 +1324,53 @@ export default function LeavePage() {
                         marginRight: '4px'
                       }}
                     />
-
                     Apply for Leave
                   </button>
-
                 </div>
-
               ) : (
-
                 <>
-
                   {leaves.map((l, i) => {
-
                     const typeMeta =
-                      balanceStyle[l.leaveType] ||
+                      balanceStyle[
+                        l.leaveType
+                      ] ||
                       balanceStyle.UNPAID;
 
-                    const canCancel =
-                      ['PENDING', 'APPROVED']
-                        .includes(l.status);
+                    const canCancel = [
+                      'PENDING',
+                      'APPROVED'
+                    ].includes(l.status);
 
                     return (
-
                       <div
                         key={l.id || i}
                         style={{
                           display: 'grid',
                           gridTemplateColumns:
                             '1.4fr 1fr 1fr 0.6fr 1.4fr 1.3fr 1fr',
-                          padding: '16px 20px',
+                          padding:
+                            '16px 20px',
                           borderBottom:
                             '1px solid var(--card-border)',
-                          alignItems: 'center',
+                          alignItems:
+                            'center',
                           transition:
                             'background 0.2s'
                         }}
                         onMouseEnter={e =>
-                          e.currentTarget.style.background =
-                          'rgba(255,255,255,0.02)'
+                          (e.currentTarget.style.background =
+                            'rgba(255,255,255,0.02)')
                         }
                         onMouseLeave={e =>
-                          e.currentTarget.style.background =
-                          'transparent'
+                          (e.currentTarget.style.background =
+                            'transparent')
                         }
                       >
-
                         <div
                           style={{
                             display: 'flex',
-                            alignItems: 'center',
+                            alignItems:
+                              'center',
                             gap: '8px',
                             fontSize: '13px',
                             fontWeight: 700,
@@ -1572,12 +1378,12 @@ export default function LeavePage() {
                               'var(--text-primary)'
                           }}
                         >
-
                           <div
                             style={{
                               width: '28px',
                               height: '28px',
-                              borderRadius: '6px',
+                              borderRadius:
+                                '6px',
                               background:
                                 typeMeta.bg,
                               color:
@@ -1593,9 +1399,7 @@ export default function LeavePage() {
                           </div>
 
                           {l.leaveType}
-
                         </div>
-
 
                         <div
                           style={{
@@ -1607,7 +1411,6 @@ export default function LeavePage() {
                           {l.startDate}
                         </div>
 
-
                         <div
                           style={{
                             fontSize: '13px',
@@ -1617,7 +1420,6 @@ export default function LeavePage() {
                         >
                           {l.endDate}
                         </div>
-
 
                         <div
                           style={{
@@ -1630,13 +1432,11 @@ export default function LeavePage() {
                           {l.totalDays}
                         </div>
 
-
                         <div>
                           <StatusPill
                             status={l.status}
                           />
                         </div>
-
 
                         <div
                           style={{
@@ -1645,17 +1445,17 @@ export default function LeavePage() {
                               'var(--text-secondary)'
                           }}
                         >
-                          {l.reviewedByName || '—'}
+                          {l.reviewedByName ||
+                            '—'}
                         </div>
 
-
                         <div>
-
                           {canCancel && (
-
                             <button
                               onClick={() =>
-                                handleCancel(l.id)
+                                handleCancel(
+                                  l.id
+                                )
                               }
                               disabled={
                                 cancelling ===
@@ -1668,27 +1468,27 @@ export default function LeavePage() {
                                   'transparent',
                                 color:
                                   l.status ===
-                                    'APPROVED'
+                                  'APPROVED'
                                     ? '#8b5cf6'
                                     : '#ef4444',
-                                border:
-                                  `1px solid ${l.status ===
-                                    'APPROVED'
+                                border: `1px solid ${
+                                  l.status ===
+                                  'APPROVED'
                                     ? '#8b5cf6'
                                     : '#ef4444'
-                                  }`,
+                                }`,
                                 borderRadius:
                                   '6px',
-                                fontSize: '11px',
-                                fontWeight: 700,
+                                fontSize:
+                                  '11px',
+                                fontWeight:
+                                  700,
                                 cursor:
                                   'pointer'
                               }}
                             >
-
                               {cancelling ===
-                                l.id ? (
-
+                              l.id ? (
                                 <Loader2
                                   size={12}
                                   className="animate-spin"
@@ -1697,35 +1497,24 @@ export default function LeavePage() {
                                       'inline'
                                   }}
                                 />
-
+                              ) : l.status ===
+                                'APPROVED' ? (
+                                'Request Cancel'
                               ) : (
-
-                                l.status ===
-                                  'APPROVED'
-                                  ? 'Request Cancel'
-                                  : 'Cancel'
-
+                                'Cancel'
                               )}
-
                             </button>
-
                           )}
-
                         </div>
-
                       </div>
-
                     );
                   })}
 
-
-                  {/* Pagination */}
-
                   {totalPages > 1 && (
-
                     <div
                       style={{
-                        padding: '14px 20px',
+                        padding:
+                          '14px 20px',
                         display: 'flex',
                         justifyContent:
                           'center',
@@ -1734,21 +1523,29 @@ export default function LeavePage() {
                           '1px solid var(--card-border)'
                       }}
                     >
-
                       <button
                         onClick={() =>
                           setPage(p =>
-                            Math.max(0, p - 1)
+                            Math.max(
+                              0,
+                              p - 1
+                            )
                           )
                         }
-                        disabled={page === 0}
+                        disabled={
+                          page === 0
+                        }
                         style={{
-                          padding: '6px 14px',
+                          padding:
+                            '6px 14px',
                           border:
                             '1px solid var(--card-border)',
-                          borderRadius: '6px',
-                          fontSize: '12px',
-                          fontWeight: 700,
+                          borderRadius:
+                            '6px',
+                          fontSize:
+                            '12px',
+                          fontWeight:
+                            700,
                           color:
                             page === 0
                               ? 'var(--text-secondary)'
@@ -1764,24 +1561,26 @@ export default function LeavePage() {
                         ← Prev
                       </button>
 
-
                       <span
                         style={{
-                          padding: '6px 14px',
-                          fontSize: '12px',
+                          padding:
+                            '6px 14px',
+                          fontSize:
+                            '12px',
                           color:
                             'var(--text-secondary)'
                         }}
                       >
-                        Page {page + 1} of {totalPages}
+                        Page {page + 1} of{' '}
+                        {totalPages}
                       </span>
-
 
                       <button
                         onClick={() =>
                           setPage(p =>
                             Math.min(
-                              totalPages - 1,
+                              totalPages -
+                                1,
                               p + 1
                             )
                           )
@@ -1791,45 +1590,40 @@ export default function LeavePage() {
                           totalPages - 1
                         }
                         style={{
-                          padding: '6px 14px',
+                          padding:
+                            '6px 14px',
                           border:
                             '1px solid var(--card-border)',
-                          borderRadius: '6px',
-                          fontSize: '12px',
-                          fontWeight: 700,
+                          borderRadius:
+                            '6px',
+                          fontSize:
+                            '12px',
+                          fontWeight:
+                            700,
                           color:
                             page >=
-                              totalPages - 1
+                            totalPages - 1
                               ? 'var(--text-secondary)'
                               : 'var(--text-primary)',
                           background:
                             'var(--bg-primary)',
                           cursor:
                             page >=
-                              totalPages - 1
+                            totalPages - 1
                               ? 'not-allowed'
                               : 'pointer'
                         }}
                       >
                         Next →
                       </button>
-
                     </div>
-
                   )}
-
                 </>
-
               )}
-
             </div>
-
           </div>
-
         </>
-
       )}
-
     </div>
   );
 }
