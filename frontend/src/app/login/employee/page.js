@@ -188,7 +188,7 @@ export default function EmployeeLogin() {
           Back
         </button>
 
-        <div className="w-full max-w-sm xl:max-w-md flex flex-col pt-12">
+        <div className="w-full max-w-sm xl:max-w-md flex flex-col pt-12 -translate-y-14">
 
           {/* Arrow Graphic */}
           <div className="w-full flex justify-start mb-4 opacity-70">
@@ -385,17 +385,6 @@ export default function EmployeeLogin() {
             </button>
 
             {/* Google / Apple login removed */}
-
-            {/* Create Account */}
-            <p className="text-center mt-4 text-[11px] font-medium text-slate-400 dark:text-slate-500">
-              You're new in here?{' '}
-              <Link
-                href="/register"
-                className="text-[#10b981] dark:text-[#ccf000] font-bold hover:underline"
-              >
-                Create Account
-              </Link>
-            </p>
 
           </form>
         </div>
