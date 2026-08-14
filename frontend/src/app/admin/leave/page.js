@@ -150,7 +150,7 @@ export default function AdminLeavePage() {
       {/* Flow indicator */}
       <div style={{
         background: 'var(--card-bg)', borderRadius: '16px', padding: '14px 20px',
-        border: '1px solid #EEF0F5', marginBottom: '20px',
+        border: '1px solid var(--card-border)', marginBottom: '20px',
         display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap',
       }}>
         <span style={{ background: 'rgba(79, 70, 229, 0.15)', color: '#4F46E5', padding: '5px 14px', borderRadius: '999px', fontSize: '12px', fontWeight: 700 }}>
@@ -167,14 +167,14 @@ export default function AdminLeavePage() {
       </div>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: '4px', background: '#F1F0FA', borderRadius: '14px', padding: '4px', width: 'fit-content', marginBottom: '20px' }}>
+      <div style={{ display: 'flex', gap: '4px', background: 'var(--bg-secondary)', borderRadius: '14px', padding: '4px', width: 'fit-content', marginBottom: '20px' }}>
         {tabs.map(t => (
           <button key={t.key}
             onClick={() => { setTab(t.key); setPage(0); }}
             style={{
               padding: '9px 18px',
-              background: tab === t.key ? 'white' : 'transparent',
-              color: tab === t.key ? '#1E293B' : '#94A3B8',
+              background: tab === t.key ? 'var(--card-bg)' : 'transparent',
+              color: tab === t.key ? 'var(--text-primary)' : 'var(--text-muted)',
               border: 'none', borderRadius: '11px', fontSize: '13px',
               fontWeight: tab === t.key ? 700 : 500, cursor: 'pointer',
               boxShadow: tab === t.key ? '0 2px 8px rgba(0,0,0,0.4)' : 'none',
@@ -186,10 +186,10 @@ export default function AdminLeavePage() {
       </div>
 
       {/* Table */}
-      <div style={{ background: 'var(--card-bg)', borderRadius: '18px', border: '1px solid #EEF0F5', boxShadow: '0 2px 10px rgba(0,0,0,0.3)' }}>
+      <div style={{ background: 'var(--card-bg)', borderRadius: '18px', border: '1px solid var(--card-border)', boxShadow: '0 2px 10px rgba(0,0,0,0.3)' }}>
         <div style={{
           display: 'grid', gridTemplateColumns: '2fr 1.1fr 1fr 1fr 0.5fr 1.3fr 2fr',
-          padding: '10px 22px', background: 'var(--card-bg)', borderBottom: '1px solid #F1F5F9',
+          padding: '10px 22px', background: 'var(--card-bg)', borderBottom: '1px solid var(--card-border)',
         }}>
           {['Employee', 'Type', 'From', 'To', 'Days', 'Status', lastColumnLabel].map(h => (
             <div key={h} style={{ fontSize: '10.5px', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.4px' }}>{h}</div>
@@ -218,7 +218,7 @@ export default function AdminLeavePage() {
               return (
                 <div key={l.id} style={{
                   display: 'grid', gridTemplateColumns: '2fr 1.1fr 1fr 1fr 0.5fr 1.3fr 2fr',
-                  padding: '14px 22px', borderBottom: '1px solid #F8FAFC', alignItems: 'center',
+                  padding: '14px 22px', borderBottom: '1px solid var(--card-border)', alignItems: 'center',
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <div style={{
@@ -314,14 +314,14 @@ export default function AdminLeavePage() {
             })}
 
             {(tab === 'PENDING' || tab === 'CANCELLATIONS') && totalPages > 1 && (
-              <div style={{ padding: '14px 20px', display: 'flex', justifyContent: 'center', gap: '8px', borderTop: '1px solid #F1F5F9' }}>
+              <div style={{ padding: '14px 20px', display: 'flex', justifyContent: 'center', gap: '8px', borderTop: '1px solid var(--card-border)' }}>
                 <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}
-                  style={{ padding: '6px 14px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '12px', fontWeight: 700, color: page === 0 ? '#475569' : '#1E293B', background: 'var(--card-bg)', cursor: page === 0 ? 'not-allowed' : 'pointer' }}>
+                  style={{ padding: '6px 14px', border: '1px solid var(--card-border)', borderRadius: '8px', fontSize: '12px', fontWeight: 700, color: page === 0 ? 'var(--text-muted)' : 'var(--text-primary)', background: 'var(--card-bg)', cursor: page === 0 ? 'not-allowed' : 'pointer' }}>
                   ← Prev
                 </button>
                 <span style={{ padding: '6px 14px', fontSize: '12px', color: 'var(--text-muted)' }}>{page + 1} / {totalPages}</span>
                 <button onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page >= totalPages - 1}
-                  style={{ padding: '6px 14px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '12px', fontWeight: 700, color: page >= totalPages - 1 ? '#475569' : '#1E293B', background: 'var(--card-bg)', cursor: page >= totalPages - 1 ? 'not-allowed' : 'pointer' }}>
+                  style={{ padding: '6px 14px', border: '1px solid var(--card-border)', borderRadius: '8px', fontSize: '12px', fontWeight: 700, color: page >= totalPages - 1 ? 'var(--text-muted)' : 'var(--text-primary)', background: 'var(--card-bg)', cursor: page >= totalPages - 1 ? 'not-allowed' : 'pointer' }}>
                   Next →
                 </button>
               </div>
