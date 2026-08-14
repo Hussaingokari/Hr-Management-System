@@ -166,9 +166,9 @@ export default function EmployeeLogin() {
 
       {/* Right Panel */}
       <div className="w-full lg:w-[55%] flex flex-col items-center justify-center relative p-8">
-
+        
         {/* Back Button */}
-        <button
+        <button 
           onClick={() => router.push('/')}
           className="absolute top-8 left-8 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 flex items-center gap-2 text-sm font-medium transition-colors"
         >
