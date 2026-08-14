@@ -109,7 +109,7 @@ export default function AdminChecklistPage() {
                 </div>
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                     <select value={initEmpId} onChange={e => setInitEmpId(e.target.value)}
-                        style={{ flex: 1, padding: '10px 14px', border: '1.5px solid #e2e8f0', borderRadius: '10px', fontSize: '13px', outline: 'none', background: 'var(--card-bg)' }}>
+                        style={{ flex: 1, padding: '10px 14px', border: '1.5px solid var(--card-border)', borderRadius: '10px', fontSize: '13px', outline: 'none', background: 'var(--card-bg)' }}>
                         <option value="">Select employee to onboard...</option>
                         {employees
                             .filter(e => !onboardings.find(o => o.employeeId === e.id))
@@ -122,8 +122,11 @@ export default function AdminChecklistPage() {
                     </select>
                     <button onClick={handleInit} disabled={initializing || !initEmpId}
                         style={{
-                            padding: '10px 24px', background: initEmpId ? '#1e3a5f' : '#cbd5e1',
-                            color: 'white', border: 'none', borderRadius: '10px',
+                            padding: '10px 24px', 
+                            background: initEmpId ? '#1e3a5f' : 'var(--bg-secondary)',
+                            color: initEmpId ? 'white' : 'var(--text-muted)', 
+                            border: initEmpId ? '1px solid transparent' : '1px solid var(--card-border)', 
+                            borderRadius: '10px',
                             fontSize: '13px', fontWeight: '700',
                             cursor: initEmpId ? 'pointer' : 'not-allowed',
                         }}>
