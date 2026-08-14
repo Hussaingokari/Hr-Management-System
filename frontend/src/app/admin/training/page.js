@@ -6,16 +6,16 @@ import { BookOpen, User, Calendar, Clock, Users, MapPin, Link as LinkIcon, Inbox
 
 function Badge({ status }) {
   const map = {
-    UPCOMING: { bg: '#eff6ff', color: '#3b82f6' },
-    ONGOING: { bg: '#fff7ed', color: '#f59e0b' },
-    COMPLETED: { bg: '#dcfce7', color: '#16a34a' },
-    CANCELLED: { bg: '#fee2e2', color: '#dc2626' },
-    ENROLLED: { bg: '#fdf4ff', color: '#9333ea' },
-    ONLINE: { bg: '#eff6ff', color: '#3b82f6' },
-    OFFLINE: { bg: '#f0fdf4', color: '#16a34a' },
-    HYBRID: { bg: '#fff7ed', color: '#f59e0b' },
+    UPCOMING: { bg: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' },
+    ONGOING: { bg: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b' },
+    COMPLETED: { bg: 'rgba(22, 163, 74, 0.1)', color: '#16a34a' },
+    CANCELLED: { bg: 'rgba(220, 38, 38, 0.1)', color: '#dc2626' },
+    ENROLLED: { bg: 'rgba(147, 51, 234, 0.1)', color: '#9333ea' },
+    ONLINE: { bg: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' },
+    OFFLINE: { bg: 'rgba(22, 163, 74, 0.1)', color: '#16a34a' },
+    HYBRID: { bg: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b' },
   };
-  const s = map[status] || { bg: '#f1f5f9', color: 'var(--text-secondary)' };
+  const s = map[status] || { bg: 'var(--bg-secondary)', color: 'var(--text-secondary)' };
   return (
     <span style={{
       background: s.bg, color: s.color,
@@ -177,13 +177,13 @@ export default function TrainingPage() {
             trainings.map(t => (
               <div key={t.id} onClick={() => handleSelectTraining(t)}
                 style={{
-                  padding: '16px 20px', borderBottom: '1px solid #f1f5f9', cursor: 'pointer',
-                  background: selected?.id === t.id ? '#eff6ff' : 'white',
-                  borderLeft: selected?.id === t.id ? '3px solid #3b82f6' : '3px solid transparent',
+                  padding: '16px 20px', borderBottom: '1px solid var(--card-border)', cursor: 'pointer',
+                  background: selected?.id === t.id ? 'var(--bg-secondary)' : 'transparent',
+                  borderLeft: selected?.id === t.id ? '3px solid var(--primary)' : '3px solid transparent',
                   transition: 'all 0.15s',
                 }}
-                onMouseEnter={e => { if (selected?.id !== t.id) e.currentTarget.style.background = '#f8fafc'; }}
-                onMouseLeave={e => { if (selected?.id !== t.id) e.currentTarget.style.background = 'white'; }}
+                onMouseEnter={e => { if (selected?.id !== t.id) e.currentTarget.style.background = 'var(--bg-secondary)'; }}
+                onMouseLeave={e => { if (selected?.id !== t.id) e.currentTarget.style.background = 'transparent'; }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                   <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)' }}>{t.title}</div>
@@ -216,13 +216,13 @@ export default function TrainingPage() {
             </div>
 
             {selected.description && (
-              <div style={{ padding: '14px 20px', borderBottom: '1px solid #f1f5f9', fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+              <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--card-border)', fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
                 {selected.description}
               </div>
             )}
 
             {selected.meetingLink && (
-              <div style={{ padding: '10px 20px', borderBottom: '1px solid #f1f5f9', background: '#f0fdf4' }}>
+              <div style={{ padding: '10px 20px', borderBottom: '1px solid var(--card-border)', background: 'rgba(22, 163, 74, 0.1)' }}>
                 <span style={{ fontSize: '12px', color: '#16a34a', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <LinkIcon size={12} /> {selected.meetingLink}
                 </span>
@@ -295,7 +295,7 @@ export default function TrainingPage() {
                         </div>
                       ) : (
                         <button onClick={() => { setCompletingId(enr.id); setScore(''); setFeedback(''); }}
-                          style={{ marginTop: '8px', padding: '5px 12px', background: '#eff6ff', color: '#3b82f6', border: '1px solid #bfdbfe', borderRadius: '6px', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
+                          style={{ marginTop: '8px', padding: '5px 12px', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '6px', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
                           Mark Complete →
                         </button>
                       )
