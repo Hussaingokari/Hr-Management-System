@@ -69,9 +69,9 @@ export default function EmployeeLogin() {
       <div className="hidden lg:flex lg:w-[45%] flex-col bg-slate-900 dark:bg-black relative">
         <div className="flex-1 relative overflow-hidden">
           {/* Unsplash Image matching the vibe */}
-          <img
-            src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1200&q=80"
-            alt="Team Working"
+          <img 
+            src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1200&q=80" 
+            alt="Team Working" 
             className="absolute inset-0 w-full h-full object-cover opacity-90 dark:opacity-40"
           />
           {/* Green separator line */}
@@ -82,10 +82,10 @@ export default function EmployeeLogin() {
             <div className="w-8 h-8 rounded bg-transparent border-2 border-[#10b981] dark:border-[#ccf000] flex items-center justify-center transition-colors">
               <span className="text-[#10b981] dark:text-[#ccf000] font-bold text-lg leading-none">H</span>
             </div>
-            <span className="text-white font-bold text-[17px] tracking-tight">Saiteja Infotech Private Limited - Employee</span>
+            <span className="text-white font-bold text-[17px] tracking-tight">Saiteja Infotech Private Limited / Employee</span>
           </div>
           <h1 className="text-white text-4xl xl:text-5xl font-bold leading-[1.1] mb-4 tracking-tight">
-            Let's empower your<br /><span className="dark:text-[#ccf000] text-white">employees</span> today.
+            Let's empower your<br/><span className="dark:text-[#ccf000] text-white">employees</span> today.
           </h1>
           <p className="text-slate-400 text-[13px] font-medium max-w-sm">
             We help to complete all your conveyancing needs easily
@@ -95,9 +95,9 @@ export default function EmployeeLogin() {
 
       {/* Right Panel */}
       <div className="w-full lg:w-[55%] flex flex-col items-center justify-center relative p-8">
-
+        
         {/* Back Button */}
-        <button
+        <button 
           onClick={() => router.push('/')}
           className="absolute top-8 left-8 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 flex items-center gap-2 text-sm font-medium transition-colors"
         >
@@ -106,119 +106,119 @@ export default function EmployeeLogin() {
         </button>
 
         <div className="w-full max-w-sm xl:max-w-md flex flex-col pt-12">
+           
+           {/* Arrow Graphic */}
+           <div className="w-full flex justify-start mb-4 opacity-70">
+             <svg width="48" height="48" viewBox="0 0 100 100" className="text-slate-300 dark:text-slate-700 transform -rotate-12 translate-x-4">
+                <path d="M20,60 Q50,20 80,40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                <path d="M72,30 L80,40 L68,44" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+             </svg>
+           </div>
+           
+           <h2 className="text-[22px] font-bold text-slate-900 dark:text-white mb-8 text-center">
+             Login first to <span className="dark:text-[#ccf000]">your account</span>
+           </h2>
 
-          {/* Arrow Graphic */}
-          <div className="w-full flex justify-start mb-4 opacity-70">
-            <svg width="48" height="48" viewBox="0 0 100 100" className="text-slate-300 dark:text-slate-700 transform -rotate-12 translate-x-4">
-              <path d="M20,60 Q50,20 80,40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-              <path d="M72,30 L80,40 L68,44" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
+           {error && (
+             <div className="w-full bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/50 rounded-lg p-3 mb-6 flex items-center gap-3">
+               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                 <circle cx="12" cy="12" r="10"></circle>
+                 <line x1="12" y1="8" x2="12" y2="12"></line>
+                 <line x1="12" y1="16" x2="12.01" y2="16"></line>
+               </svg>
+               <span className="text-xs text-red-600 dark:text-red-400 font-medium">{error}</span>
+             </div>
+           )}
 
-          <h2 className="text-[22px] font-bold text-slate-900 dark:text-white mb-8 text-center">
-            Login first to <span className="dark:text-[#ccf000]">your account</span>
-          </h2>
+           {/* Form */}
+           <form onSubmit={handleSubmit} className="w-full flex flex-col gap-5">
+             
+             <div>
+               <label htmlFor="emp-email" className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                 Email Address <span className="text-red-500">*</span>
+               </label>
+               <input 
+                 id="emp-email"
+                 name="email"
+                 type="email" 
+                 value={form.email}
+                 onChange={handleChange}
+                 placeholder="Input your registered email" 
+                 required 
+                 className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1E293B] text-[13px] focus:outline-none focus:border-[#10b981] dark:focus:border-[#ccf000] focus:ring-1 focus:ring-[#10b981] dark:focus:ring-[#ccf000] transition-all text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-600" 
+               />
+             </div>
 
-          {error && (
-            <div className="w-full bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/50 rounded-lg p-3 mb-6 flex items-center gap-3">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="12"></line>
-                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-              </svg>
-              <span className="text-xs text-red-600 dark:text-red-400 font-medium">{error}</span>
-            </div>
-          )}
+             <div>
+               <label htmlFor="emp-password" className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                 Password <span className="text-red-500">*</span>
+               </label>
+               <div className="relative">
+                 <input 
+                   id="emp-password"
+                   name="password"
+                   type={showPassword ? 'text' : 'password'} 
+                   value={form.password}
+                   onChange={handleChange}
+                   placeholder="Input your password account" 
+                   required 
+                   className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1E293B] text-[13px] focus:outline-none focus:border-[#10b981] dark:focus:border-[#ccf000] focus:ring-1 focus:ring-[#10b981] dark:focus:ring-[#ccf000] transition-all text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-600" 
+                 />
+                 <EyeIcon show={showPassword} toggle={() => setShowPassword(!showPassword)} />
+               </div>
+             </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="w-full flex flex-col gap-5">
+             <div className="flex items-center justify-between mt-1 mb-2">
+               <label className="flex items-center gap-2 cursor-pointer">
+                 <input type="checkbox" className="w-3.5 h-3.5 rounded border-slate-300 dark:border-slate-700 text-[#10b981] dark:text-[#ccf000] focus:ring-[#10b981] dark:focus:ring-[#ccf000] dark:bg-slate-800" />
+                 <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">Remember Me</span>
+               </label>
+               <button type="button" onClick={() => router.push('/forgot-password')} className="text-[11px] font-medium text-slate-500 dark:text-slate-400 hover:text-[#10b981] dark:hover:text-[#ccf000] transition-colors">
+                 Forgot Password
+               </button>
+             </div>
 
-            <div>
-              <label htmlFor="emp-email" className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                Email Address <span className="text-red-500">*</span>
-              </label>
-              <input
-                id="emp-email"
-                name="email"
-                type="email"
-                value={form.email}
-                onChange={handleChange}
-                placeholder="Input your registered email"
-                required
-                className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1E293B] text-[13px] focus:outline-none focus:border-[#10b981] dark:focus:border-[#ccf000] focus:ring-1 focus:ring-[#10b981] dark:focus:ring-[#ccf000] transition-all text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-600"
-              />
-            </div>
+             <button 
+               type="submit" 
+               disabled={loading || !isFormFilled} 
+               className={`w-full py-3 rounded-lg text-[13px] font-bold transition-all flex items-center justify-center gap-2
+                 ${isFormFilled 
+                   ? 'bg-[#10b981] dark:bg-[#ccf000] text-white dark:text-black hover:bg-emerald-600 dark:hover:bg-[#bce300] shadow-[0_4px_14px_0_rgba(16,185,129,0.39)] dark:shadow-none' 
+                   : 'bg-[#f1f5f9] dark:bg-[#1E293B] text-slate-400 dark:text-slate-600 cursor-not-allowed'
+                 }`}
+             >
+               {loading ? (
+                 <>
+                   <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                   Loading...
+                 </>
+               ) : (
+                 'Login'
+               )}
+             </button>
 
-            <div>
-              <label htmlFor="emp-password" className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                Password <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <input
-                  id="emp-password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={form.password}
-                  onChange={handleChange}
-                  placeholder="Input your password account"
-                  required
-                  className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1E293B] text-[13px] focus:outline-none focus:border-[#10b981] dark:focus:border-[#ccf000] focus:ring-1 focus:ring-[#10b981] dark:focus:ring-[#ccf000] transition-all text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-600"
-                />
-                <EyeIcon show={showPassword} toggle={() => setShowPassword(!showPassword)} />
-              </div>
-            </div>
+             <div className="flex items-center gap-3 my-2">
+               <div className="h-px bg-slate-100 dark:bg-slate-800 flex-1"></div>
+               <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">Or login with</span>
+               <div className="h-px bg-slate-100 dark:bg-slate-800 flex-1"></div>
+             </div>
 
-            <div className="flex items-center justify-between mt-1 mb-2">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" className="w-3.5 h-3.5 rounded border-slate-300 dark:border-slate-700 text-[#10b981] dark:text-[#ccf000] focus:ring-[#10b981] dark:focus:ring-[#ccf000] dark:bg-slate-800" />
-                <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">Remember Me</span>
-              </label>
-              <button type="button" onClick={() => router.push('/forgot-password')} className="text-[11px] font-medium text-slate-500 dark:text-slate-400 hover:text-[#10b981] dark:hover:text-[#ccf000] transition-colors">
-                Forgot Password
-              </button>
-            </div>
+             <div className="flex gap-4">
+               <button type="button" className="flex-1 flex items-center justify-center gap-2 py-2.5 border border-slate-200 dark:border-slate-800 rounded-lg hover:bg-slate-50 dark:hover:bg-[#1E293B] transition-colors text-[12px] font-bold text-slate-700 dark:text-slate-300">
+                 <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-4 h-4" alt="Google" />
+                 Google
+               </button>
+               <button type="button" className="flex-1 flex items-center justify-center gap-2 py-2.5 border border-slate-200 dark:border-slate-800 rounded-lg hover:bg-slate-50 dark:hover:bg-[#1E293B] transition-colors text-[12px] font-bold text-slate-700 dark:text-slate-300">
+                 <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.19 2.31-.88 3.5-.8 1.48.06 2.58.55 3.33 1.5-3.08 1.83-2.6 5.86.35 7.15-.55 1.4-1.39 2.82-2.26 4.32zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+                 Apple
+               </button>
+             </div>
 
-            <button
-              type="submit"
-              disabled={loading || !isFormFilled}
-              className={`w-full py-3 rounded-lg text-[13px] font-bold transition-all flex items-center justify-center gap-2
-                 ${isFormFilled
-                  ? 'bg-[#10b981] dark:bg-[#ccf000] text-white dark:text-black hover:bg-emerald-600 dark:hover:bg-[#bce300] shadow-[0_4px_14px_0_rgba(16,185,129,0.39)] dark:shadow-none'
-                  : 'bg-[#f1f5f9] dark:bg-[#1E293B] text-slate-400 dark:text-slate-600 cursor-not-allowed'
-                }`}
-            >
-              {loading ? (
-                <>
-                  <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                  Loading...
-                </>
-              ) : (
-                'Login'
-              )}
-            </button>
-
-            <div className="flex items-center gap-3 my-2">
-              <div className="h-px bg-slate-100 dark:bg-slate-800 flex-1"></div>
-              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">Or login with</span>
-              <div className="h-px bg-slate-100 dark:bg-slate-800 flex-1"></div>
-            </div>
-
-            <div className="flex gap-4">
-              <button type="button" className="flex-1 flex items-center justify-center gap-2 py-2.5 border border-slate-200 dark:border-slate-800 rounded-lg hover:bg-slate-50 dark:hover:bg-[#1E293B] transition-colors text-[12px] font-bold text-slate-700 dark:text-slate-300">
-                <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-4 h-4" alt="Google" />
-                Google
-              </button>
-              <button type="button" className="flex-1 flex items-center justify-center gap-2 py-2.5 border border-slate-200 dark:border-slate-800 rounded-lg hover:bg-slate-50 dark:hover:bg-[#1E293B] transition-colors text-[12px] font-bold text-slate-700 dark:text-slate-300">
-                <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.19 2.31-.88 3.5-.8 1.48.06 2.58.55 3.33 1.5-3.08 1.83-2.6 5.86.35 7.15-.55 1.4-1.39 2.82-2.26 4.32zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" /></svg>
-                Apple
-              </button>
-            </div>
-
-            <p className="text-center mt-4 text-[11px] font-medium text-slate-400 dark:text-slate-500">
-              You're new in here? <Link href="/register" className="text-[#10b981] dark:text-[#ccf000] font-bold hover:underline">Create Account</Link>
-            </p>
-
-          </form>
+             <p className="text-center mt-4 text-[11px] font-medium text-slate-400 dark:text-slate-500">
+               You're new in here? <Link href="/register" className="text-[#10b981] dark:text-[#ccf000] font-bold hover:underline">Create Account</Link>
+             </p>
+             
+           </form>
 
         </div>
 
