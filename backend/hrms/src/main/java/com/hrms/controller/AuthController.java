@@ -6,9 +6,11 @@ import com.hrms.dto.ForgotPasswordRequest;
 import com.hrms.dto.ResetPasswordRequest;
 import com.hrms.entity.Employee;
 import com.hrms.repository.EmployeeRepository;
+import com.hrms.security.JwtUtil;
 import com.hrms.service.AuthService;
 import com.hrms.service.EmailService;
 import com.hrms.service.OtpService;
+import com.hrms.util.PasswordValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -16,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import com.hrms.dto.UpdatePasswordRequest;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -28,6 +31,7 @@ public class AuthController {
     private final OtpService otpService;
     private final EmployeeRepository employeeRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
     @PostMapping("/login")
     @Operation(summary = "Login (Employee or Admin/HR)",
@@ -77,16 +81,25 @@ public class AuthController {
     }
 
     @PostMapping("/reset-password")
-    @Operation(summary = "Reset password using OTP")
+    @Operation(summary = "Reset password using OTP (with password validation)")
     public ResponseEntity<?> resetPassword(
-            @RequestBody ResetPasswordRequest request) {
+            @Valid @RequestBody ResetPasswordRequest request) {
         try {
-            boolean valid = otpService.validateOtp(
-                    request.getEmail(), request.getOtp());
-
-            if (!valid) {
+            // Validate password format first
+            if (!PasswordValidator.isValidPassword(request.getNewPassword())) {
                 return ResponseEntity.badRequest()
-                        .body(ApiResponse.error("Invalid or expired OTP"));
+                        .body(ApiResponse.error(PasswordValidator.getPasswordRequirements()));
+            }
+
+            // Validate OTP only if provided (not empty/null)
+            if (request.getOtp() != null && !request.getOtp().isEmpty()) {
+                boolean valid = otpService.validateOtp(
+                        request.getEmail(), request.getOtp());
+
+                if (!valid) {
+                    return ResponseEntity.badRequest()
+                            .body(ApiResponse.error("Invalid or expired OTP"));
+                }
             }
 
             Employee employee = employeeRepository
@@ -100,12 +113,57 @@ public class AuthController {
 
             return ResponseEntity.ok(
                     ApiResponse.success(
-                            "Password reset successfully!", null));
+                            "Password changed successfully!", null));
 
         } catch (Exception e) {
             return ResponseEntity.badRequest()
                     .body(ApiResponse.error(e.getMessage()));
         }
     }
+    @PostMapping("/update-password")
+@Operation(summary = "Update password for logged-in employee")
+public ResponseEntity<?> updatePassword(
+        @Valid @RequestBody UpdatePasswordRequest request) {
+
+    try {
+        Employee employee = employeeRepository
+                .findByEmail(request.getEmail())
+                .orElseThrow(() ->
+                        new RuntimeException("Employee not found"));
+
+        // Verify current password
+        if (!passwordEncoder.matches(
+                request.getCurrentPassword(),
+                employee.getPassword())) {
+
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(
+                            "Current password is incorrect"));
+        }
+
+        // Prevent using the same password
+        if (request.getCurrentPassword()
+                .equals(request.getNewPassword())) {
+
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(
+                            "New password cannot be same as current password"));
+        }
+
+        // Encode and save new password
+        employee.setPassword(
+                passwordEncoder.encode(request.getNewPassword()));
+
+        employeeRepository.save(employee);
+
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        "Password changed successfully!", null));
+
+    } catch (Exception e) {
+        return ResponseEntity.badRequest()
+                .body(ApiResponse.error(e.getMessage()));
+    }
+}
 
 }
