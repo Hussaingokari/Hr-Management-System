@@ -78,6 +78,18 @@ public class TrainingService {
                 return toResponse(trainingRepo.save(t));
         }
 
+        @Transactional
+        public TrainingDTOs.Response updateStatus(Long id, String statusStr) {
+                Training training = findById(id);
+                try {
+                        TrainingStatus status = TrainingStatus.valueOf(statusStr.toUpperCase());
+                        training.setStatus(status);
+                } catch (IllegalArgumentException e) {
+                        throw new IllegalArgumentException("Invalid training status: " + statusStr);
+                }
+                return toResponse(trainingRepo.save(training));
+        }
+
         @Transactional(readOnly = true)
         public Page<TrainingDTOs.Response> getAllTrainings(
                         Pageable pageable) {
@@ -219,7 +231,7 @@ public class TrainingService {
                 r.setEndDate(t.getEndDate());
                 r.setDurationHours(t.getDurationHours());
                 r.setMaxParticipants(t.getMaxParticipants());
-                r.setEnrolledCount(t.getEnrollments().size());
+                r.setEnrolledCount(t.getEnrollments() != null ? t.getEnrollments().size() : 0);
                 r.setVenue(t.getVenue());
                 r.setMeetingLink(t.getMeetingLink());
                 r.setStatus(t.getStatus());

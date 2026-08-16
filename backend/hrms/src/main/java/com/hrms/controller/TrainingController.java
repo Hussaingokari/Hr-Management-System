@@ -18,6 +18,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/trainings")
@@ -43,6 +44,17 @@ public class TrainingController {
                         @PathVariable Long id, @RequestBody TrainingDTOs.UpdateRequest req) {
                 return ResponseEntity.ok(ApiResponse.success("Training updated",
                                 trainingService.updateTraining(id, req)));
+        }
+
+        @PutMapping("/{id}/status")
+        @PreAuthorize("hasAnyRole('ADMIN','HR')")
+        @Operation(summary = "Update training status")
+        public ResponseEntity<ApiResponse<TrainingDTOs.Response>> updateStatus(
+                        @PathVariable Long id,
+                        @RequestBody Map<String, String> request) {
+                String status = request.get("status");
+                return ResponseEntity.ok(ApiResponse.success("Training status updated",
+                                trainingService.updateStatus(id, status)));
         }
 
         @GetMapping

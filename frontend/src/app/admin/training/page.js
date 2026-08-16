@@ -60,7 +60,8 @@ export default function TrainingPage() {
   const [feedback, setFeedback] = useState('');
   const [completingId, setCompletingId] = useState(null);
 
-  const today = new Date().toISOString().split('T')[0];
+  // Get local YYYY-MM-DD date
+  const today = new Date().toLocaleDateString('en-CA');
 
   const getDynamicStatus = (t) => {
     if (t.status === 'CANCELLED') return 'CANCELLED';
@@ -86,8 +87,7 @@ export default function TrainingPage() {
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => { fetchTrainings(); }, 0);
-    return () => clearTimeout(timer);
+    fetchTrainings();
   }, [fetchTrainings]);
 
   const fetchEnrollments = async (trainingId) => {
@@ -118,8 +118,8 @@ export default function TrainingPage() {
     try {
       await api.post('/api/trainings', {
         ...form,
-        durationHours: parseInt(form.durationHours) || 0,
-        maxParticipants: parseInt(form.maxParticipants) || 10,
+        durationHours: parseInt(form.durationHours, 10) || 0,
+        maxParticipants: parseInt(form.maxParticipants, 10) || 10,
       });
       toast.success('Training created successfully!');
       setShowForm(false);
@@ -148,7 +148,7 @@ export default function TrainingPage() {
     setCompleting(enrollmentId);
     try {
       await api.put(`/api/trainings/enrollments/${enrollmentId}/complete`, {
-        score: parseInt(score) || 0,
+        score: parseInt(score, 10) || 0,
         feedback: feedback,
         certificateUrl: `/api/files/certificate-${enrollmentId}.pdf`,
       });
@@ -263,7 +263,7 @@ export default function TrainingPage() {
         {/* Selected Program & Enrollments Panel */}
         {selected && (
           <div className="lg:col-span-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden transition-all">
-            {/* Header */}
+            {/* Panel Header */}
             <div className="p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 flex items-start justify-between gap-4">
               <div>
                 <span className="text-[10px] font-bold tracking-wider text-slate-400 dark:text-slate-500 uppercase">Training Details</span>
@@ -316,77 +316,70 @@ export default function TrainingPage() {
               ) : enrollments.length === 0 ? (
                 <div className="py-8 text-center text-slate-400 dark:text-slate-500 text-xs bg-slate-50 dark:bg-slate-800/30 rounded-lg border border-dashed border-slate-200 dark:border-slate-800">
                   <Inbox size={24} className="mx-auto mb-1 text-slate-300 dark:text-slate-600" />
-                  No enrollments registered for this training yet.
+                  No employees enrolled yet.
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {enrollments.map((enr) => (
-                    <div key={enr.id} className="p-3.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-lg text-xs space-y-2">
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-[11px] flex items-center justify-center shrink-0">
-                            {enr.employeeName?.split(' ').map((n) => n[0]).join('').slice(0, 2)}
-                          </div>
-                          <div>
-                            <div className="font-semibold text-slate-800 dark:text-slate-200">{enr.employeeName}</div>
-                            <div className="text-[11px] text-slate-400 dark:text-slate-500">
-                              Enrolled: {new Date(enr.enrolledAt).toLocaleDateString()}
-                            </div>
-                          </div>
+                  {enrollments.map((e) => (
+                    <div key={e.id} className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 flex flex-col gap-2">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{e.employeeName}</p>
+                          <p className="text-[11px] text-slate-400">Enrolled: {e.enrolledAt ? new Date(e.enrolledAt).toLocaleDateString() : 'N/A'}</p>
                         </div>
-                        <Badge status={enr.status} />
+                        <Badge status={e.completed ? 'COMPLETED' : e.status} />
                       </div>
 
-                      {enr.score && (
-                        <div className="pt-2 border-t border-slate-200/60 dark:border-slate-700/50 text-slate-600 dark:text-slate-300 flex items-center gap-2">
-                          <span className="font-semibold text-emerald-600 dark:text-emerald-400">Score: {enr.score}/100</span>
-                          {enr.feedback && <span className="text-slate-400 dark:text-slate-500">| &ldquo;{enr.feedback}&rdquo;</span>}
+                      {e.completed ? (
+                        <div className="text-xs bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 p-2.5 rounded-md space-y-1 mt-1">
+                          <div className="flex justify-between font-semibold">
+                            <span>Score: {e.score}/100</span>
+                            <span className="text-[10px] opacity-80">{e.completedAt ? new Date(e.completedAt).toLocaleDateString() : ''}</span>
+                          </div>
+                          {e.feedback && <p className="text-[11px] opacity-90">Feedback: {e.feedback}</p>}
                         </div>
-                      )}
-
-                      {enr.status === 'ENROLLED' && (
+                      ) : (
                         <div>
-                          {completingId === enr.id ? (
-                            <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700/50 space-y-2">
+                          {completingId === e.id ? (
+                            <div className="mt-2 p-3 bg-white dark:bg-slate-900 rounded-md border border-slate-200 dark:border-slate-700 space-y-2">
                               <div className="flex gap-2">
                                 <input
                                   type="number"
                                   placeholder="Score (0-100)"
                                   value={score}
-                                  onChange={(e) => setScore(e.target.value)}
-                                  className="w-1/3 px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-md text-xs focus:ring-1 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+                                  onChange={(evt) => setScore(evt.target.value)}
+                                  className="w-1/3 px-2 py-1 text-xs border border-slate-200 dark:border-slate-700 rounded dark:bg-slate-800"
                                 />
                                 <input
                                   type="text"
-                                  placeholder="Feedback notes..."
+                                  placeholder="Feedback"
                                   value={feedback}
-                                  onChange={(e) => setFeedback(e.target.value)}
-                                  className="w-2/3 px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-md text-xs focus:ring-1 focus:ring-blue-500 outline-none text-slate-900 dark:text-white"
+                                  onChange={(evt) => setFeedback(evt.target.value)}
+                                  className="w-2/3 px-2 py-1 text-xs border border-slate-200 dark:border-slate-700 rounded dark:bg-slate-800"
                                 />
                               </div>
-                              <div className="flex gap-2 justify-end">
+                              <div className="flex justify-end gap-2">
                                 <button
                                   onClick={() => setCompletingId(null)}
-                                  className="px-3 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 transition"
+                                  className="px-2 py-1 text-[11px] text-slate-500 hover:text-slate-700"
                                 >
                                   Cancel
                                 </button>
                                 <button
-                                  onClick={() => handleComplete(enr.id)}
-                                  disabled={completing === enr.id}
-                                  className="px-3 py-1 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition flex items-center gap-1 font-medium"
+                                  disabled={completing === e.id}
+                                  onClick={() => handleComplete(e.id)}
+                                  className="px-2.5 py-1 text-[11px] bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded flex items-center gap-1"
                                 >
-                                  {completing === enr.id ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle2 size={12} />}
-                                  <span>Submit</span>
+                                  {completing === e.id && <Loader2 size={12} className="animate-spin" />} Save & Complete
                                 </button>
                               </div>
                             </div>
                           ) : (
                             <button
-                              onClick={() => { setCompletingId(enr.id); setScore(''); setFeedback(''); }}
-                              className="mt-2 text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                              onClick={() => setCompletingId(e.id)}
+                              className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
                             >
-                              Mark as Completed →
+                              <CheckCircle2 size={14} /> Mark as Complete
                             </button>
                           )}
                         </div>
@@ -400,186 +393,171 @@ export default function TrainingPage() {
         )}
       </div>
 
-      {/* Modal Dialog */}
+      {/* Modal - Create Training */}
       {showForm && (
-        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-slate-900 rounded-xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-800 mb-4">
-              <h2 className="text-lg font-bold text-slate-900 dark:text-white">Create Program</h2>
-              <button onClick={() => setShowForm(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-                <X size={20} />
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl max-w-xl w-full overflow-hidden max-h-[90vh] flex flex-col">
+            <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
+              <h3 className="font-bold text-slate-900 dark:text-white text-base">Create Training Program</h3>
+              <button
+                onClick={() => setShowForm(false)}
+                className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-md"
+              >
+                <X size={18} />
               </button>
             </div>
 
-            <form onSubmit={handleCreate} className="space-y-4 text-xs">
+            <form onSubmit={handleCreate} className="p-5 overflow-y-auto space-y-4">
               <div>
-                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Title <span className="text-rose-500">*</span>
-                </label>
+                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Title *</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Advanced React Patterns"
                   value={form.title}
-                  onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
-                  className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-900 dark:text-white"
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  className="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 rounded-lg dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                  placeholder="e.g. Advanced Java Microservices"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Description</label>
+                <textarea
+                  rows={2}
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  className="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 rounded-lg dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                  placeholder="Course details and outline..."
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    Trainer <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Trainer Name"
-                    value={form.trainer}
-                    onChange={(e) => setForm((prev) => ({ ...prev, trainer: e.target.value }))}
-                    className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-900 dark:text-white"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Category</label>
+                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Category</label>
                   <select
                     value={form.category}
-                    onChange={(e) => setForm((prev) => ({ ...prev, category: e.target.value }))}
-                    className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-900 dark:text-white"
+                    onChange={(e) => setForm({ ...form, category: e.target.value })}
+                    className="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 rounded-lg dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
                   >
-                    {['TECHNICAL', 'SOFT_SKILLS', 'COMPLIANCE', 'LEADERSHIP', 'SAFETY'].map((c) => (
-                      <option key={c} value={c}>{c.replace('_', ' ')}</option>
-                    ))}
+                    <option value="TECHNICAL">TECHNICAL</option>
+                    <option value="SOFT_SKILLS">SOFT_SKILLS</option>
+                    <option value="COMPLIANCE">COMPLIANCE</option>
+                    <option value="MANAGEMENT">MANAGEMENT</option>
                   </select>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Mode</label>
+                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Mode</label>
                   <select
                     value={form.mode}
-                    onChange={(e) => setForm((prev) => ({ ...prev, mode: e.target.value }))}
-                    className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-900 dark:text-white"
+                    onChange={(e) => setForm({ ...form, mode: e.target.value })}
+                    className="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 rounded-lg dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
                   >
-                    {['ONLINE', 'OFFLINE', 'HYBRID'].map((m) => (
-                      <option key={m} value={m}>{m}</option>
-                    ))}
+                    <option value="ONLINE">ONLINE</option>
+                    <option value="OFFLINE">OFFLINE</option>
+                    <option value="HYBRID">HYBRID</option>
                   </select>
                 </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Trainer *</label>
+                  <input
+                    type="text"
+                    required
+                    value={form.trainer}
+                    onChange={(e) => setForm({ ...form, trainer: e.target.value })}
+                    className="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 rounded-lg dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                    placeholder="Instructor Name"
+                  />
+                </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Duration (hrs)</label>
+                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Duration (Hours)</label>
                   <input
                     type="number"
-                    placeholder="24"
                     value={form.durationHours}
-                    onChange={(e) => setForm((prev) => ({ ...prev, durationHours: e.target.value }))}
-                    className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-900 dark:text-white"
+                    onChange={(e) => setForm({ ...form, durationHours: e.target.value })}
+                    className="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 rounded-lg dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                    placeholder="e.g. 10"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Start Date *</label>
+                  <input
+                    type="date"
+                    required
+                    value={form.startDate}
+                    onChange={(e) => setForm({ ...form, startDate: e.target.value })}
+                    className="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 rounded-lg dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Max Capacity</label>
+                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">End Date *</label>
+                  <input
+                    type="date"
+                    required
+                    value={form.endDate}
+                    onChange={(e) => setForm({ ...form, endDate: e.target.value })}
+                    className="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 rounded-lg dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Max Participants</label>
                   <input
                     type="number"
-                    placeholder="10"
                     value={form.maxParticipants}
-                    onChange={(e) => setForm((prev) => ({ ...prev, maxParticipants: e.target.value }))}
-                    className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-900 dark:text-white"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    Start Date <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    required
-                    min={today}
-                    value={form.startDate}
-                    onChange={(e) =>
-                      setForm((prev) => ({
-                        ...prev,
-                        startDate: e.target.value,
-                        endDate: prev.endDate && prev.endDate < e.target.value ? '' : prev.endDate,
-                      }))
-                    }
-                    className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-900 dark:text-white"
+                    onChange={(e) => setForm({ ...form, maxParticipants: e.target.value })}
+                    className="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 rounded-lg dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                    placeholder="10"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    End Date <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    required
-                    min={form.startDate || today}
-                    value={form.endDate}
-                    onChange={(e) => setForm((prev) => ({ ...prev, endDate: e.target.value }))}
-                    className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-900 dark:text-white"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Venue</label>
+                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Venue (if offline)</label>
                   <input
                     type="text"
-                    placeholder="Conference Room A"
                     value={form.venue}
-                    onChange={(e) => setForm((prev) => ({ ...prev, venue: e.target.value }))}
-                    className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-900 dark:text-white"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Meeting Link</label>
-                  <input
-                    type="text"
-                    placeholder="https://meet.google.com/..."
-                    value={form.meetingLink}
-                    onChange={(e) => setForm((prev) => ({ ...prev, meetingLink: e.target.value }))}
-                    className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-900 dark:text-white"
+                    onChange={(e) => setForm({ ...form, venue: e.target.value })}
+                    className="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 rounded-lg dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                    placeholder="Conference Room A"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Description <span className="text-rose-500">*</span>
-                </label>
-                <textarea
-                  required
-                  rows={3}
-                  placeholder="Provide program overview and objectives..."
-                  value={form.description}
-                  onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
-                  className="w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none resize-y text-slate-900 dark:text-white"
+                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Meeting Link (if online)</label>
+                <input
+                  type="url"
+                  value={form.meetingLink}
+                  onChange={(e) => setForm({ ...form, meetingLink: e.target.value })}
+                  className="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 rounded-lg dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                  placeholder="https://meet.google.com/..."
                 />
               </div>
 
-              <div className="flex gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+              <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
-                  className="w-1/2 py-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-lg font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition"
+                  className="px-4 py-2 text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-1/2 py-2.5 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition flex items-center justify-center gap-2"
+                  className="px-4 py-2 text-xs font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition flex items-center gap-1.5"
                 >
-                  {submitting ? <Loader2 size={16} className="animate-spin" /> : 'Create Training'}
+                  {submitting && <Loader2 size={14} className="animate-spin" />} Create Training
                 </button>
               </div>
             </form>
