@@ -224,7 +224,6 @@ function StatusPill({ status }) {
 }
 
 const LEAVE_TYPES = [
-  { value: 'ANNUAL', label: 'Annual', icon: <Palmtree size={18} /> },
   { value: 'SICK', label: 'Sick', icon: <Thermometer size={18} /> },
   { value: 'CASUAL', label: 'Casual', icon: <Sun size={18} /> },
   { value: 'PATERNITY', label: 'Paternity', icon: <Baby size={18} /> },
@@ -343,7 +342,7 @@ export default function LeavePage() {
   const today = new Date().toISOString().split('T')[0];
 
   const [form, setForm] = useState({
-    leaveType: 'ANNUAL',
+    leaveType: 'SICK',
     startDate: '',
     endDate: '',
     reason: ''
@@ -419,17 +418,16 @@ export default function LeavePage() {
       setShowForm(false);
 
       setForm({
-        leaveType: 'ANNUAL',
+        leaveType: 'SICK',
         startDate: '',
         endDate: '',
         reason: ''
       });
-
       fetchAll();
     } catch (err) {
       toast.error(
         err.response?.data?.message ||
-          'Could not submit — try again'
+        'Could not submit — try again'
       );
     } finally {
       setSubmitting(false);
@@ -449,7 +447,7 @@ export default function LeavePage() {
     } catch (err) {
       toast.error(
         err.response?.data?.message ||
-          'Could not cancel — try again'
+        'Could not cancel — try again'
       );
     } finally {
       setCancelling(null);
@@ -681,10 +679,19 @@ export default function LeavePage() {
                   balanceStyle[b.leaveType] ||
                   balanceStyle.UNPAID;
 
-                const pct =
-                  b.totalAllotted > 0
-                    ? (b.remaining / b.totalAllotted) *
-                      100
+                const isUnpaid = b.leaveType === 'UNPAID';
+
+                // For unpaid leave:
+                // used = number of unpaid days taken
+                // remaining = unlimited, so display ∞
+                const displayValue = isUnpaid
+                  ? b.used
+                  : b.remaining;
+
+                const pct = isUnpaid
+                  ? 0
+                  : b.totalAllotted > 0
+                    ? (b.remaining / b.totalAllotted) * 100
                     : 0;
 
                 return (
@@ -695,8 +702,7 @@ export default function LeavePage() {
                       background: 'var(--card-bg)',
                       borderRadius: '12px',
                       padding: '16px',
-                      border:
-                        '1px solid var(--card-border)',
+                      border: '1px solid var(--card-border)',
                       transition: 'transform 0.15s',
                       boxShadow: 'var(--card-shadow)'
                     }}
@@ -739,16 +745,18 @@ export default function LeavePage() {
                             color: 'var(--text-primary)'
                           }}
                         >
-                          {b.remaining}{' '}
+                          {displayValue}{' '}
+
                           <span
                             style={{
                               fontSize: '12px',
                               fontWeight: 600,
-                              color:
-                                'var(--text-secondary)'
+                              color: 'var(--text-secondary)'
                             }}
                           >
-                            /{b.totalAllotted}d
+                            {isUnpaid
+                              ? '/∞'
+                              : `/${b.totalAllotted}d`}
                           </span>
                         </div>
                       </div>
@@ -954,7 +962,7 @@ export default function LeavePage() {
                               startDate: newStart,
                               endDate:
                                 prev.endDate &&
-                                prev.endDate <
+                                  prev.endDate <
                                   newStart
                                   ? ''
                                   : prev.endDate
@@ -1332,7 +1340,7 @@ export default function LeavePage() {
                   {leaves.map((l, i) => {
                     const typeMeta =
                       balanceStyle[
-                        l.leaveType
+                      l.leaveType
                       ] ||
                       balanceStyle.UNPAID;
 
@@ -1358,12 +1366,12 @@ export default function LeavePage() {
                             'background 0.2s'
                         }}
                         onMouseEnter={e =>
-                          (e.currentTarget.style.background =
-                            'rgba(255,255,255,0.02)')
+                        (e.currentTarget.style.background =
+                          'rgba(255,255,255,0.02)')
                         }
                         onMouseLeave={e =>
-                          (e.currentTarget.style.background =
-                            'transparent')
+                        (e.currentTarget.style.background =
+                          'transparent')
                         }
                       >
                         <div
@@ -1468,15 +1476,14 @@ export default function LeavePage() {
                                   'transparent',
                                 color:
                                   l.status ===
-                                  'APPROVED'
+                                    'APPROVED'
                                     ? '#8b5cf6'
                                     : '#ef4444',
-                                border: `1px solid ${
-                                  l.status ===
+                                border: `1px solid ${l.status ===
                                   'APPROVED'
-                                    ? '#8b5cf6'
-                                    : '#ef4444'
-                                }`,
+                                  ? '#8b5cf6'
+                                  : '#ef4444'
+                                  }`,
                                 borderRadius:
                                   '6px',
                                 fontSize:
@@ -1488,7 +1495,7 @@ export default function LeavePage() {
                               }}
                             >
                               {cancelling ===
-                              l.id ? (
+                                l.id ? (
                                 <Loader2
                                   size={12}
                                   className="animate-spin"
@@ -1580,7 +1587,7 @@ export default function LeavePage() {
                           setPage(p =>
                             Math.min(
                               totalPages -
-                                1,
+                              1,
                               p + 1
                             )
                           )
@@ -1602,14 +1609,14 @@ export default function LeavePage() {
                             700,
                           color:
                             page >=
-                            totalPages - 1
+                              totalPages - 1
                               ? 'var(--text-secondary)'
                               : 'var(--text-primary)',
                           background:
                             'var(--bg-primary)',
                           cursor:
                             page >=
-                            totalPages - 1
+                              totalPages - 1
                               ? 'not-allowed'
                               : 'pointer'
                         }}
