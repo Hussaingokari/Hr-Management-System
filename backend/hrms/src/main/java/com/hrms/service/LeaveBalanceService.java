@@ -19,7 +19,10 @@ public class LeaveBalanceService {
 
     private final LeaveBalanceRepository balanceRepo;
 
-    // Leave quotas as per company policy
+    // ============================================================
+    // LEAVE QUOTAS
+    // ============================================================
+
     private static final Map<String, Double> DEFAULT_QUOTA = Map.of(
             "ANNUAL", 14.0,
             "SICK", 7.0,
@@ -27,7 +30,10 @@ public class LeaveBalanceService {
             "PATERNITY", 30.0,
             "MATERNITY", 180.0);
 
-    // Leave types shown to employees
+    // ============================================================
+    // ALL LEAVE TYPES
+    // ============================================================
+
     private static final List<String> ALL_LEAVE_TYPES = List.of(
             "ANNUAL",
             "SICK",
@@ -36,17 +42,19 @@ public class LeaveBalanceService {
             "MATERNITY",
             "UNPAID");
 
-    /*
-     * ANNUAL is not a leave type employees apply against directly.
-     * It is a computed rollup: every day taken from SICK or CASUAL
-     * also counts against ANNUAL (7 + 7 = 14).
-     */
+    // ============================================================
+    // ANNUAL LINKED LEAVE TYPES
+    // Sick + Casual both consume Annual balance
+    // ============================================================
+
     private static final Set<String> ANNUAL_LINKED_TYPES = Set.of("SICK", "CASUAL");
+
     private static final String ANNUAL = "ANNUAL";
 
-    /**
-     * Get existing balance or create a new balance.
-     */
+    // ============================================================
+    // GET OR CREATE BALANCE
+    // ============================================================
+
     @Transactional
     public LeaveBalance getOrCreateBalance(
             Employee employee,
@@ -54,31 +62,37 @@ public class LeaveBalanceService {
 
         int year = Year.now().getValue();
 
+        String type = leaveType.toUpperCase();
+
         return balanceRepo
                 .findByEmployeeAndLeaveTypeAndYear(
                         employee,
-                        leaveType.toUpperCase(),
+                        type,
                         year)
                 .orElseGet(() -> {
 
                     double quota;
 
                     /*
-                     * Unpaid leave is unlimited.
-                     * We don't need a real quota for it because
-                     * hasSufficientBalance() handles it separately.
+                     * UNPAID leave is unlimited.
+                     *
+                     * We store:
+                     * totalAllotted = 0
+                     * remaining = 0
+                     *
+                     * The frontend displays the limit as ∞.
                      */
-                    if ("UNPAID".equalsIgnoreCase(leaveType)) {
+                    if ("UNPAID".equals(type)) {
                         quota = 0.0;
                     } else {
                         quota = DEFAULT_QUOTA.getOrDefault(
-                                leaveType.toUpperCase(),
+                                type,
                                 0.0);
                     }
 
                     LeaveBalance lb = LeaveBalance.builder()
                             .employee(employee)
-                            .leaveType(leaveType.toUpperCase())
+                            .leaveType(type)
                             .year(year)
                             .totalAllotted(quota)
                             .used(0)
@@ -89,38 +103,51 @@ public class LeaveBalanceService {
                 });
     }
 
-    /**
-     * Check whether employee has enough balance.
-     */
+    // ============================================================
+    // CHECK SUFFICIENT BALANCE
+    // ============================================================
+
     @Transactional
     public boolean hasSufficientBalance(
             Employee employee,
             String leaveType,
             int requestedDays) {
 
+        String type = leaveType.toUpperCase();
+
         /*
          * UNPAID leave is unlimited.
+         *
+         * Therefore, don't check remaining balance.
          */
-        if ("UNPAID".equalsIgnoreCase(leaveType)) {
+        if ("UNPAID".equals(type)) {
             return true;
         }
 
-        LeaveBalance balance = getOrCreateBalance(employee, leaveType);
+        // Check the selected leave balance
+        LeaveBalance balance = getOrCreateBalance(employee, type);
 
         if (balance.getRemaining() < requestedDays) {
             return false;
         }
 
         /*
-         * SICK / CASUAL also draw down the ANNUAL rollup.
-         * Guard against ANNUAL running out even if the individual
-         * bucket (Sick/Casual) still has room — shouldn't normally
-         * happen since 7+7=14, but keeps things safe if quotas
-         * are ever changed independently.
+         * Sick and Casual also consume Annual balance.
+         *
+         * Example:
+         *
+         * Annual = 14
+         * Sick = 7
+         *
+         * Employee requests 2 Sick days.
+         *
+         * We need:
+         *
+         * Sick remaining >= 2
+         * Annual remaining >= 2
          */
-        String type = leaveType.toUpperCase();
-
         if (ANNUAL_LINKED_TYPES.contains(type)) {
+
             LeaveBalance annual = getOrCreateBalance(employee, ANNUAL);
 
             if (annual.getRemaining() < requestedDays) {
@@ -131,126 +158,297 @@ public class LeaveBalanceService {
         return true;
     }
 
-    /**
-     * Deduct balance when leave is approved.
-     */
+    // ============================================================
+    // DEDUCT BALANCE WHEN LEAVE IS APPROVED
+    // ============================================================
+
     @Transactional
     public void deductBalance(
             Employee employee,
             String leaveType,
             int days) {
 
+        String type = leaveType.toUpperCase();
+
+        if (days <= 0) {
+            throw new IllegalArgumentException(
+                    "Leave days must be greater than zero.");
+        }
+
+        // ========================================================
+        // UNPAID LEAVE
+        // ========================================================
+
         /*
-         * Unpaid leave does not consume a balance.
+         * UNPAID has unlimited availability.
+         *
+         * Therefore:
+         *
+         * used -> INCREASE
+         * remaining -> stays 0
+         * total -> stays 0
+         *
+         * Example:
+         *
+         * Before:
+         * used = 1
+         *
+         * Approve 3 more days:
+         *
+         * used = 4
+         *
+         * remaining = 0
          */
-        if ("UNPAID".equalsIgnoreCase(leaveType)) {
+
+        if ("UNPAID".equals(type)) {
+
+            LeaveBalance unpaid = getOrCreateBalance(
+                    employee,
+                    "UNPAID");
+
+            unpaid.setUsed(
+                    unpaid.getUsed() + days);
+
+            // Unlimited leave has no remaining limit.
+            unpaid.setRemaining(0);
+
+            unpaid.setTotalAllotted(0);
+
+            balanceRepo.save(unpaid);
+
             return;
         }
 
-        String type = leaveType.toUpperCase();
+        // ========================================================
+        // NORMAL LEAVE TYPES
+        // ========================================================
 
         LeaveBalance balance = getOrCreateBalance(employee, type);
 
         if (balance.getRemaining() < days) {
+
             throw new IllegalStateException(
-                    "Insufficient " + leaveType +
+                    "Insufficient " +
+                            type +
                             " leave balance.");
         }
 
+        // Increase used days
         balance.setUsed(
                 balance.getUsed() + days);
 
+        // Decrease remaining days
+        balance.setRemaining(
+                Math.max(
+                        0,
+                        balance.getTotalAllotted()
+                                - balance.getUsed()));
+
         balanceRepo.save(balance);
 
-        /*
-         * SICK / CASUAL usage also increments the ANNUAL rollup
-         * (e.g. 1 day Sick -> Sick 1/7, Annual 1/14).
-         */
-        if (ANNUAL_LINKED_TYPES.contains(type)) {
-            LeaveBalance annual = getOrCreateBalance(employee, ANNUAL);
+        // ========================================================
+        // SICK / CASUAL -> ANNUAL
+        // ========================================================
 
-            annual.setUsed(annual.getUsed() + days);
+        /*
+         * Sick and Casual leave also consume Annual.
+         *
+         * Example:
+         *
+         * Before:
+         *
+         * Annual = 14 / 14
+         * Sick = 7 / 7
+         *
+         * Approve 1 Sick:
+         *
+         * Annual = 13 / 14
+         * Sick = 6 / 7
+         */
+
+        if (ANNUAL_LINKED_TYPES.contains(type)) {
+
+            LeaveBalance annual = getOrCreateBalance(
+                    employee,
+                    ANNUAL);
+
+            if (annual.getRemaining() < days) {
+
+                throw new IllegalStateException(
+                        "Insufficient Annual leave balance.");
+            }
+
+            // Increase Annual used
+            annual.setUsed(
+                    annual.getUsed() + days);
+
+            // Decrease Annual remaining
+            annual.setRemaining(
+                    Math.max(
+                            0,
+                            annual.getTotalAllotted()
+                                    - annual.getUsed()));
 
             balanceRepo.save(annual);
         }
     }
 
-    /**
-     * Restore balance when an approved leave is cancelled.
-     */
+    // ============================================================
+    // RESTORE BALANCE WHEN APPROVED LEAVE IS CANCELLED
+    // ============================================================
+
     @Transactional
     public void restoreBalance(
             Employee employee,
             String leaveType,
             int days) {
 
-        /*
-         * Unpaid leave has no balance to restore.
-         */
-        if ("UNPAID".equalsIgnoreCase(leaveType)) {
+        String type = leaveType.toUpperCase();
+
+        if (days <= 0) {
             return;
         }
 
-        String type = leaveType.toUpperCase();
+        // ========================================================
+        // UNPAID
+        // ========================================================
 
-        LeaveBalance balance = getOrCreateBalance(employee, type);
+        /*
+         * For Unpaid:
+         *
+         * used must decrease when cancellation is approved.
+         *
+         * remaining stays 0.
+         */
 
+        if ("UNPAID".equals(type)) {
+
+            LeaveBalance unpaid = getOrCreateBalance(
+                    employee,
+                    "UNPAID");
+
+            unpaid.setUsed(
+                    Math.max(
+                            0,
+                            unpaid.getUsed() - days));
+
+            unpaid.setRemaining(0);
+            unpaid.setTotalAllotted(0);
+
+            balanceRepo.save(unpaid);
+
+            return;
+        }
+
+        // ========================================================
+        // NORMAL LEAVE
+        // ========================================================
+
+        LeaveBalance balance = getOrCreateBalance(
+                employee,
+                type);
+
+        // Reduce used days
         balance.setUsed(
                 Math.max(
                         0,
                         balance.getUsed() - days));
 
+        // Increase remaining days
+        balance.setRemaining(
+                Math.min(
+                        balance.getTotalAllotted(),
+                        balance.getTotalAllotted()
+                                - balance.getUsed()));
+
         balanceRepo.save(balance);
 
-        /*
-         * Mirror the restore on the ANNUAL rollup.
-         */
+        // ========================================================
+        // SICK / CASUAL -> RESTORE ANNUAL
+        // ========================================================
+
         if (ANNUAL_LINKED_TYPES.contains(type)) {
-            LeaveBalance annual = getOrCreateBalance(employee, ANNUAL);
+
+            LeaveBalance annual = getOrCreateBalance(
+                    employee,
+                    ANNUAL);
 
             annual.setUsed(
                     Math.max(
                             0,
                             annual.getUsed() - days));
 
+            annual.setRemaining(
+                    Math.min(
+                            annual.getTotalAllotted(),
+                            annual.getTotalAllotted()
+                                    - annual.getUsed()));
+
             balanceRepo.save(annual);
         }
     }
 
-    /**
-     * Return all leave balances.
-     */
+    // ============================================================
+    // GET ALL BALANCES
+    // ============================================================
+
     @Transactional
     public List<LeaveDTOs.BalanceResponse> getAllBalances(
             Employee employee) {
 
-        return ALL_LEAVE_TYPES.stream()
-                .map(type -> getOrCreateBalance(employee, type))
+        return ALL_LEAVE_TYPES
+                .stream()
+                .map(type -> getOrCreateBalance(
+                        employee,
+                        type))
                 .map(this::toResponse)
                 .toList();
     }
 
-    /**
-     * Convert entity to response.
-     */
+    // ============================================================
+    // ENTITY -> RESPONSE
+    // ============================================================
+
     private LeaveDTOs.BalanceResponse toResponse(
             LeaveBalance lb) {
 
         LeaveDTOs.BalanceResponse r = new LeaveDTOs.BalanceResponse();
 
-        r.setLeaveType(lb.getLeaveType());
-        r.setYear(lb.getYear());
-        r.setTotalAllotted(lb.getTotalAllotted());
-        r.setUsed(lb.getUsed());
+        r.setLeaveType(
+                lb.getLeaveType());
+
+        r.setYear(
+                lb.getYear());
+
+        r.setTotalAllotted(
+                lb.getTotalAllotted());
 
         /*
-         * For unpaid leave, frontend handles the
-         * unlimited balance as ∞.
+         * IMPORTANT:
+         *
+         * For UNPAID:
+         *
+         * used = actual number of unpaid days taken
+         * remaining = 0 internally
+         *
+         * Frontend displays:
+         *
+         * 1 / ∞
+         * 2 / ∞
+         * 5 / ∞
          */
-        if ("UNPAID".equalsIgnoreCase(lb.getLeaveType())) {
+        r.setUsed(
+                lb.getUsed());
+
+        if ("UNPAID".equalsIgnoreCase(
+                lb.getLeaveType())) {
+
             r.setRemaining(0);
+
         } else {
-            r.setRemaining(lb.getRemaining());
+
+            r.setRemaining(
+                    lb.getRemaining());
         }
 
         return r;
