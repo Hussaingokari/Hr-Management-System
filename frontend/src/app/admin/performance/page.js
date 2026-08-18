@@ -319,12 +319,16 @@ export default function PerformancePage() {
                   <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                     Review Period
                   </label>
-                  <input
-                    value={form.reviewPeriod}
-                    onChange={(e) => setForm({ ...form, reviewPeriod: e.target.value })}
-                    placeholder="e.g. Q2 2026"
-                    className="w-full p-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                  <select
+  value={form.reviewPeriod}
+  onChange={(e) => setForm({ ...form, reviewPeriod: e.target.value })}
+  className="w-full p-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+>
+  <option value="Q1 2026">Q1 2026</option>
+  <option value="Q2 2026">Q2 2026</option>
+  <option value="Q3 2026">Q3 2026</option>
+  <option value="Q4 2026">Q4 2026</option>
+</select>
                 </div>
               </div>
 
