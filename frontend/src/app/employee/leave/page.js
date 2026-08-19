@@ -1070,7 +1070,7 @@ export default function LeavePage() {
                         letterSpacing: '0.5px'
                       }}
                     >
-                      Reason
+                      Reason*
                     </label>
 
                     <textarea

@@ -260,7 +260,7 @@ export default function EmployeeDashboard() {
             <StatCard
               label="Present Days"
               value={presentDays > 0 ? presentDays : 1}
-              sub="This month"
+              sub="Total Present"
               color="#14b8a6" icon={<Calendar size={20} />}
               sparklineId="present" sparklinePath="M 0 35 Q 20 20 40 30 T 80 25 T 120 30 T 160 20 T 200 25"
             />
