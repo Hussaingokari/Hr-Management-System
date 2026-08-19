@@ -14,8 +14,6 @@ const STATUS_COLORS = {
     HOLIDAY: { bg: '#fdf4ff', color: '#9333ea' },
 };
 
-// Explicit color/background/colorScheme so date inputs never inherit a
-// faded text color from a global stylesheet or dark color-scheme rule.
 const dateFieldStyle = {
     padding: '6px 10px',
     border: '1px solid #e2e8f0',
@@ -49,14 +47,6 @@ function formatTime(t) {
     return t ? String(t).slice(0, 5) : '--';
 }
 
-// The backend labels a day WEEKEND/ABSENT purely from the calendar date,
-// before checking whether an attendance record actually exists — so an
-// employee who genuinely checked in on a Saturday still gets shown as
-// WEEKEND. Since the real checkIn/checkOut/workHours are still present on
-// the payload either way, derive the status the same way the backend does
-// for a normal workday (workHours < 4 => HALF_DAY, else PRESENT) whenever
-// there's an actual check-in, and only trust WEEKEND/ABSENT when there's
-// truly nothing recorded.
 function effectiveStatus(day) {
     const hasRecord = !!day.checkIn;
     if (hasRecord && (day.status === 'WEEKEND' || day.status === 'ABSENT')) {
@@ -65,10 +55,33 @@ function effectiveStatus(day) {
     return day.status;
 }
 
-// index: this cell's position among the 7 day cells (0 = Sun ... 6 = Sat)
-// total: how many day cells there are (7)
+function isFutureDate(dateStr) {
+    if (!dateStr) return false;
+    const todayStr = new Date().toLocaleDateString('en-CA');
+    const dOnly = String(dateStr).slice(0, 10);
+    return dOnly > todayStr;
+}
+
 function DayCell({ day, index = 0, total = 7 }) {
     const [hovered, setHovered] = useState(false);
+
+    if (isFutureDate(day.date)) {
+        return (
+            <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '11px', color: '#94a3b8', marginBottom: '4px' }}>{day.dayName}</div>
+                <div style={{
+                    width: '32px', height: '32px', borderRadius: '6px',
+                    background: 'transparent', color: '#cbd5e1',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '11px', fontWeight: '700', margin: '0 auto',
+                    border: '1px dashed #e2e8f0',
+                }}>
+                    –
+                </div>
+            </div>
+        );
+    }
+
     const status = effectiveStatus(day);
     const s = STATUS_COLORS[status] || { bg: '#f1f5f9', color: '#64748b' };
     const shortLabel = status === 'PRESENT' ? 'P'
@@ -80,9 +93,6 @@ function DayCell({ day, index = 0, total = 7 }) {
     const breaks = day.breaks || [];
     const hasBreaks = breaks.length > 0;
 
-    // Rank breaks by impact: longest duration first. This surfaces the
-    // break that most affected the day's total break time at the top,
-    // rather than showing them in whatever order they were taken.
     const sortedBreaks = [...breaks].sort(
         (a, b) => (b.durationMinutes || 0) - (a.durationMinutes || 0)
     );
@@ -92,9 +102,6 @@ function DayCell({ day, index = 0, total = 7 }) {
         : null;
     const totalMinutes = breaks.reduce((sum, b) => sum + (b.durationMinutes || 0), 0);
 
-    // Decide which edge of the tooltip anchors to the cell so it never
-    // pokes past the modal's left/right edge. First ~2 cells anchor left,
-    // last ~2 cells anchor right, everything else stays centered.
     let align = 'center';
     if (index <= 1) align = 'left';
     else if (index >= total - 2) align = 'right';
@@ -196,7 +203,6 @@ function DayCell({ day, index = 0, total = 7 }) {
                             <div style={{ color: '#94a3b8' }}>No breaks</div>
                         ) : null
                     )}
-                    {/* little arrow pointing down at the day cell */}
                     <div style={{
                         position: 'absolute', top: '100%',
                         width: 0, height: 0,
@@ -210,11 +216,15 @@ function DayCell({ day, index = 0, total = 7 }) {
     );
 }
 
+// Local YYYY-MM-DD for "today", used as the `max` on both date pickers so
+// the calendar UI itself greys out/blocks any future date from selection.
+const todayStr = new Date().toLocaleDateString('en-CA');
+
 export default function EmployeeAttendanceModal({ employeeId, asOfDate, onClose }) {
     const [report, setReport] = useState(null);
     const [loading, setLoading] = useState(true);
     const [fromDate, setFromDate] = useState(asOfDate ? asOfDate.slice(0, 8) + '01' : '');
-    const [toDate, setToDate] = useState(asOfDate);
+    const [toDate, setToDate] = useState(asOfDate && asOfDate > todayStr ? todayStr : asOfDate);
     const [exporting, setExporting] = useState(false);
 
     useEffect(() => {
@@ -304,14 +314,22 @@ export default function EmployeeAttendanceModal({ employeeId, asOfDate, onClose 
                             <input
                                 type="date"
                                 value={fromDate}
-                                onChange={(e) => setFromDate(e.target.value)}
+                                max={todayStr}
+                                onChange={(e) => {
+                                    const v = e.target.value;
+                                    setFromDate(v > todayStr ? todayStr : v);
+                                }}
                                 style={dateFieldStyle}
                             />
                             <span style={{ fontSize: '12px', color: '#94a3b8' }}>to</span>
                             <input
                                 type="date"
                                 value={toDate}
-                                onChange={(e) => setToDate(e.target.value)}
+                                max={todayStr}
+                                onChange={(e) => {
+                                    const v = e.target.value;
+                                    setToDate(v > todayStr ? todayStr : v);
+                                }}
                                 style={dateFieldStyle}
                             />
                             <button

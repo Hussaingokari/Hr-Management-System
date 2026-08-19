@@ -46,6 +46,10 @@ const EMPTY_FORM = {
   venue: '', meetingLink: '',
 };
 
+// Local YYYY-MM-DD "today" — used as the floor for the Start Date field so
+// the calendar itself blocks any date before today from being picked.
+const todayStr = new Date().toLocaleDateString('en-CA');
+
 export default function TrainingPage() {
   const [trainings, setTrainings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -114,12 +118,26 @@ export default function TrainingPage() {
 
   const handleCreate = async (e) => {
     e.preventDefault();
+    const duration = parseInt(form.durationHours, 10) || 0;
+    const maxP = parseInt(form.maxParticipants, 10) || 0;
+    if (duration < 0 || maxP < 0) {
+      toast.error('Duration and Max Participants cannot be negative');
+      return;
+    }
+    if (form.mode !== 'ONLINE' && !form.venue.trim()) {
+      toast.error('Venue is required for offline/hybrid trainings');
+      return;
+    }
+    if (form.mode !== 'OFFLINE' && !form.meetingLink.trim()) {
+      toast.error('Meeting link is required for online/hybrid trainings');
+      return;
+    }
     setSubmitting(true);
     try {
       await api.post('/api/trainings', {
         ...form,
-        durationHours: parseInt(form.durationHours, 10) || 0,
-        maxParticipants: parseInt(form.maxParticipants, 10) || 10,
+        durationHours: duration,
+        maxParticipants: maxP,
       });
       toast.success('Training created successfully!');
       setShowForm(false);
@@ -421,9 +439,10 @@ export default function TrainingPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Description</label>
+                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Description *</label>
                 <textarea
                   rows={2}
+                  required
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
                   className="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 rounded-lg dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
@@ -433,8 +452,9 @@ export default function TrainingPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Category</label>
+                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Category *</label>
                   <select
+                    required
                     value={form.category}
                     onChange={(e) => setForm({ ...form, category: e.target.value })}
                     className="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 rounded-lg dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
@@ -447,8 +467,9 @@ export default function TrainingPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Mode</label>
+                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Mode *</label>
                   <select
+                    required
                     value={form.mode}
                     onChange={(e) => setForm({ ...form, mode: e.target.value })}
                     className="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 rounded-lg dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
@@ -474,11 +495,20 @@ export default function TrainingPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Duration (Hours)</label>
+                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Duration (Hours) *</label>
                   <input
                     type="number"
+                    required
+                    min="0"
+                    step="1"
                     value={form.durationHours}
-                    onChange={(e) => setForm({ ...form, durationHours: e.target.value })}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      // Block negative values outright; allow empty string
+                      // while the user is still typing.
+                      if (v !== '' && Number(v) < 0) return;
+                      setForm({ ...form, durationHours: v });
+                    }}
                     className="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 rounded-lg dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
                     placeholder="e.g. 10"
                   />
@@ -491,8 +521,12 @@ export default function TrainingPage() {
                   <input
                     type="date"
                     required
+                    min={todayStr}
                     value={form.startDate}
-                    onChange={(e) => setForm({ ...form, startDate: e.target.value })}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setForm({ ...form, startDate: v && v < todayStr ? todayStr : v });
+                    }}
                     className="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 rounded-lg dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
                   />
                 </div>
@@ -511,20 +545,30 @@ export default function TrainingPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Max Participants</label>
+                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Max Participants *</label>
                   <input
                     type="number"
+                    required
+                    min="0"
+                    step="1"
                     value={form.maxParticipants}
-                    onChange={(e) => setForm({ ...form, maxParticipants: e.target.value })}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (v !== '' && Number(v) < 0) return;
+                      setForm({ ...form, maxParticipants: v });
+                    }}
                     className="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 rounded-lg dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
                     placeholder="10"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Venue (if offline)</label>
+                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                    Venue (if offline) {form.mode !== 'ONLINE' && '*'}
+                  </label>
                   <input
                     type="text"
+                    required={form.mode !== 'ONLINE'}
                     value={form.venue}
                     onChange={(e) => setForm({ ...form, venue: e.target.value })}
                     className="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 rounded-lg dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
@@ -534,9 +578,12 @@ export default function TrainingPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Meeting Link (if online)</label>
+                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                  Meeting Link (if online) {form.mode !== 'OFFLINE' && '*'}
+                </label>
                 <input
                   type="url"
+                  required={form.mode !== 'OFFLINE'}
                   value={form.meetingLink}
                   onChange={(e) => setForm({ ...form, meetingLink: e.target.value })}
                   className="w-full px-3 py-2 text-xs border border-slate-200 dark:border-slate-800 rounded-lg dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
