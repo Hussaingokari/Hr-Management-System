@@ -117,6 +117,7 @@ function Badge({ status }) {
   );
 }
 
+
 const EMPTY_JOB = {
   title: '', department: '', location: '',
   employmentType: 'FULL_TIME', description: '',
@@ -124,6 +125,8 @@ const EMPTY_JOB = {
   salaryRange: '', applicationDeadline: '',
 };
 
+// Local YYYY-MM-DD "today" — used as the floor for the deadline field
+const todayStr = new Date().toLocaleDateString('en-CA');
 export default function RecruitmentPage() {
   const [jobs, setJobs] = useState([]);
   const [selectedJob, setSelectedJob] = useState(null);
@@ -538,11 +541,15 @@ export default function RecruitmentPage() {
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'var(--text-secondary)', marginBottom: '6px' }}>Location *</label>
-                  <input
-                    type="text" required name="location" value={jobForm.location} onChange={handleInputChange}
-                    placeholder="Remote / Tirupati"
+                  <select
+                    required name="location" value={jobForm.location} onChange={handleInputChange}
                     style={{ width: '100%', padding: '10px 12px', background: 'var(--bg-card-header)', color: 'var(--text-primary)', border: '1px solid var(--border-color-strong)', borderRadius: '8px', fontSize: '14px', outline: 'none' }}
-                  />
+                  >
+                    <option value="">Select Location</option>
+                    <option value="On-site">On-site</option>
+                    <option value="Remote">Remote</option>
+
+                  </select>
                 </div>
               </div>
 
@@ -581,7 +588,11 @@ export default function RecruitmentPage() {
                 <div>
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'var(--text-secondary)', marginBottom: '6px' }}>Application Deadline</label>
                   <input
-                    type="date" name="applicationDeadline" value={jobForm.applicationDeadline} onChange={handleInputChange}
+                    type="date" name="applicationDeadline" min={todayStr} value={jobForm.applicationDeadline}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setJobForm((prev) => ({ ...prev, applicationDeadline: v && v < todayStr ? todayStr : v }));
+                    }}
                     style={{ width: '100%', padding: '10px 12px', background: 'var(--bg-card-header)', color: 'var(--text-primary)', border: '1px solid var(--border-color-strong)', borderRadius: '8px', fontSize: '14px', outline: 'none' }}
                   />
                 </div>
