@@ -8,35 +8,33 @@ import { Users, CheckCircle, Clock, Bell, PartyPopper, XCircle, Loader2, Check, 
 function generateSparkline(value, id) {
   if (!value || value === 0) return "M 0 40 L 200 40";
   const seed = (id || '').length + (typeof value === 'number' ? value : 10);
-  
-  // Constrain Y between 10 and 35 to prevent clipping (viewBox height is 45, stroke width is 2)
+
   const p1y = 35 - (seed % 10);
   const p2y = 15 + ((seed * 2) % 10);
   const p3y = 35 - ((seed * 3) % 10);
   const p4y = 10 + ((seed * 5) % 10);
-  
-  // Use cubic beziers with horizontal tangents so the curve never overshoots the Y values
-  const dx = 20; 
+
+  const dx = 20;
   return `M 0 40 ` +
-         `C ${0 + dx} 40, ${50 - dx} ${p1y}, 50 ${p1y} ` +
-         `C ${50 + dx} ${p1y}, ${100 - dx} ${p2y}, 100 ${p2y} ` +
-         `C ${100 + dx} ${p2y}, ${150 - dx} ${p3y}, 150 ${p3y} ` +
-         `C ${150 + dx} ${p3y}, ${200 - dx} ${p4y}, 200 ${p4y}`;
+    `C ${0 + dx} 40, ${50 - dx} ${p1y}, 50 ${p1y} ` +
+    `C ${50 + dx} ${p1y}, ${100 - dx} ${p2y}, 100 ${p2y} ` +
+    `C ${100 + dx} ${p2y}, ${150 - dx} ${p3y}, 150 ${p3y} ` +
+    `C ${150 + dx} ${p3y}, ${200 - dx} ${p4y}, 200 ${p4y}`;
 }
 
 function StatCard({ label, value, sub, color, bg, icon, sparklineId }) {
   const sparklinePath = generateSparkline(value, sparklineId);
   return (
     <div style={{
-      background: `linear-gradient(145deg, ${color}10, var(--card-bg))`, 
+      background: `linear-gradient(145deg, ${color}10, var(--card-bg))`,
       borderRadius: '14px', padding: '20px',
       border: `1px solid ${color}25`, flex: 1,
       boxShadow: `0 4px 20px -2px ${color}15`, position: 'relative', overflow: 'hidden'
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', position: 'relative', zIndex: 2 }}>
         <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: '600', letterSpacing: '0.3px' }}>{label}</span>
-        <div style={{ 
-          width: '36px', height: '36px', background: `${color}15`, 
+        <div style={{
+          width: '36px', height: '36px', background: `${color}15`,
           borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center',
           border: `1px solid ${color}40`, color: color,
           boxShadow: `inset 0 0 10px ${color}10`
@@ -46,9 +44,9 @@ function StatCard({ label, value, sub, color, bg, icon, sparklineId }) {
       </div>
       <div style={{ fontSize: '28px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px', position: 'relative', zIndex: 2 }}>{value}</div>
       <div style={{ fontSize: '12px', color: 'var(--text-secondary)', position: 'relative', zIndex: 2 }}>{sub}</div>
-      
+
       {sparklinePath && (
-        <div style={{ 
+        <div style={{
           position: 'absolute', bottom: '20px', right: '20px', width: '45%', height: '35px', zIndex: 1, opacity: 0.9,
           maskImage: 'linear-gradient(to right, transparent 0%, black 25%)',
           WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 25%)'
@@ -85,7 +83,7 @@ function Badge({ status }) {
     LATE: { bg: 'rgba(139, 92, 246, 0.15)', color: '#8b5cf6' },
   };
   const s = map[status] || { bg: '#1E293B', color: 'var(--text-secondary)' };
-  
+
   return (
     <span style={{
       background: s.bg, color: s.color,
@@ -168,7 +166,7 @@ export default function AdminDashboard() {
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@600;700;800&display=swap');
       `}</style>
-      
+
       {/* Header */}
       <div style={{ marginBottom: '30px', position: 'relative' }}>
         <h1 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px' }}>
@@ -179,8 +177,8 @@ export default function AdminDashboard() {
         </p>
 
         {/* Decorative Mountain Graphic Top Right */}
-        <div style={{ 
-          position: 'absolute', top: -30, right: 0, height: '140px', 
+        <div style={{
+          position: 'absolute', top: -30, right: 0, height: '140px',
           pointerEvents: 'none', display: 'flex',
           WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
           maskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)'
@@ -220,7 +218,7 @@ export default function AdminDashboard() {
             <StatCard
               label="Present Today"
               value={presentToday}
-              sub={`of ${todayAttendance.length} checked in`}
+              sub={`of ${employees.length} checked in`}
               color="#14b8a6" icon={<Calendar size={20} />}
               sparklineId="present"
             />
@@ -268,8 +266,8 @@ export default function AdminDashboard() {
 
                   return (
                     <div key={l.id || i} style={{ padding: '14px 20px', borderBottom: '1px solid var(--card-border)', transition: 'background 0.2s' }}
-                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
-                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                         <div>
                           <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '2px' }}>
@@ -390,8 +388,8 @@ export default function AdminDashboard() {
                       padding: '12px 20px', borderBottom: '1px solid var(--card-border)',
                       transition: 'background 0.2s'
                     }}
-                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
-                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <div style={{
@@ -449,8 +447,8 @@ export default function AdminDashboard() {
                     padding: '16px 20px', borderBottom: '1px solid var(--card-border)', alignItems: 'center',
                     transition: 'background 0.2s'
                   }}
-                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                   >
                     <div style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: '600' }}>
                       {e.employeeId || e.employeeCode || '—'}
