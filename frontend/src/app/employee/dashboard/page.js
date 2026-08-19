@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
+import { useRouter } from 'next/navigation';
 import {
   getMyAttendance, checkIn, checkOut,
   getMyLeaves, getLeaveBalance,
@@ -125,6 +126,7 @@ function MiniRing({ pct, color }) {
 
 export default function EmployeeDashboard() {
   const { user } = useSelector((state) => state.auth);
+  const router = useRouter();
 
   const [attendance, setAttendance] = useState(null);
   const [todayAtt, setTodayAtt] = useState(null);
@@ -409,10 +411,6 @@ export default function EmployeeDashboard() {
                     Leave Balance
                   </h3>
                 </div>
-                <button style={{
-                  background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-secondary)',
-                  padding: '4px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: '600', cursor: 'pointer'
-                }}>View all</button>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
@@ -504,10 +502,12 @@ export default function EmployeeDashboard() {
                     Recent Leave Requests
                   </h3>
                 </div>
-                <button style={{
-                  background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-secondary)',
-                  padding: '4px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: '600', cursor: 'pointer'
-                }}>View all</button>
+                <button
+                  onClick={() => router.push('/employee/leave')}
+                  style={{
+                    background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-secondary)',
+                    padding: '4px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: '600', cursor: 'pointer'
+                  }}>View all</button>
               </div>
               {displayLeaves.length === 0 ? (
                 <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '13px' }}>
@@ -559,10 +559,12 @@ export default function EmployeeDashboard() {
                     </span>
                   )}
                 </div>
-                <button style={{
-                  background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-secondary)',
-                  padding: '4px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: '600', cursor: 'pointer'
-                }}>View all</button>
+                <button
+                  onClick={() => router.push('/employee/notifications')}
+                  style={{
+                    background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-secondary)',
+                    padding: '4px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: '600', cursor: 'pointer'
+                  }}>View all</button>
               </div>
               {displayNotifs.length === 0 ? (
                 <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '13px' }}>
