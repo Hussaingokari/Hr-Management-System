@@ -541,7 +541,7 @@ export default function AdminSettingsPage() {
                     onChange={(e) =>
                       setNewPassword(e.target.value)
                     }
-                    placeholder="Example: Hussain@123"
+                    placeholder="Example: Enter new password"
                     required
                     minLength={8}
                     maxLength={20}
