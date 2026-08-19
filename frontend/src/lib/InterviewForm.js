@@ -70,6 +70,11 @@ export const useInterview = () => {
             const formData = new FormData();
             formData.append('candidateName', request.candidateName);
             formData.append('recipientEmail', request.recipientEmail);
+            if (request.ccEmails && request.ccEmails.length > 0) {
+                request.ccEmails.forEach((email) => {
+                    formData.append('ccEmails', email);
+                });
+            }
             formData.append('jobTitle', request.jobTitle);
             formData.append('salary', request.salary);
             formData.append('joiningDate', request.joiningDate);
