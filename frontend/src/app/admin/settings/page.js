@@ -58,16 +58,27 @@ export default function AdminSettingsPage() {
 
   const [changing, setChanging] = useState(false);
 
-  // Password validation checks
+  // ============================================================
+  // PASSWORD VALIDATION
+  // ============================================================
+
   const validatePassword = (pwd) => {
     if (!pwd) {
       return {
         valid: false,
-        checks: {}
+        checks: {
+          minimum8: false,
+          maximum20: false,
+          uppercase: false,
+          lowercase: false,
+          number: false,
+          special: false,
+        },
       };
     }
 
     const hasMinimum8 = pwd.length >= 8;
+    const hasMaximum20 = pwd.length <= 20;
     const hasUppercase = /[A-Z]/.test(pwd);
     const hasLowercase = /[a-z]/.test(pwd);
     const hasNumber = /\d/.test(pwd);
@@ -75,6 +86,7 @@ export default function AdminSettingsPage() {
 
     const matchesPattern =
       hasMinimum8 &&
+      hasMaximum20 &&
       hasUppercase &&
       hasLowercase &&
       hasNumber &&
@@ -84,24 +96,35 @@ export default function AdminSettingsPage() {
       valid: matchesPattern,
       checks: {
         minimum8: hasMinimum8,
+        maximum20: hasMaximum20,
         uppercase: hasUppercase,
         lowercase: hasLowercase,
         number: hasNumber,
         special: hasSpecial,
-      }
+      },
     };
   };
 
   const passwordValidation = validatePassword(newPassword);
+
   const metMatch =
     newPassword === confirmPassword &&
     confirmPassword !== '';
 
-  const isPasswordValid = passwordValidation.valid;
+  // Password is valid ONLY when:
+  // 1. All password rules are satisfied
+  // 2. New and confirm passwords match
+  const isPasswordValid =
+    passwordValidation.valid && metMatch;
+
+  // ============================================================
+  // CHANGE PASSWORD
+  // ============================================================
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
 
+    // Check current and new password are not same
     if (newPassword === currentPassword) {
       toast.error(
         'New password cannot be the same as the current password'
@@ -109,13 +132,15 @@ export default function AdminSettingsPage() {
       return;
     }
 
-    if (!isPasswordValid) {
+    // Check password requirements
+    if (!passwordValidation.valid) {
       toast.error(
-        'Password must be at least 8 characters and contain at least one uppercase letter, one lowercase letter, one number, and one special character.'
+        'Password must be between 8 and 20 characters and contain at least one uppercase letter, one lowercase letter, one number, and one special character.'
       );
       return;
     }
 
+    // Check confirm password
     if (!metMatch) {
       toast.error('New passwords do not match');
       return;
@@ -145,6 +170,10 @@ export default function AdminSettingsPage() {
     }
   };
 
+  // ============================================================
+  // INPUT STYLE
+  // ============================================================
+
   const inputStyle = {
     width: '100%',
     padding: '12px 44px 12px 14px',
@@ -158,15 +187,24 @@ export default function AdminSettingsPage() {
     background: 'var(--card-bg)',
   };
 
+  // ============================================================
+  // PAGE
+  // ============================================================
+
   return (
     <div>
+
+      {/* ========================================================
+          PAGE HEADER
+      ======================================================== */}
+
       <div style={{ marginBottom: '24px' }}>
         <h1
           style={{
             fontSize: '22px',
             fontWeight: '800',
             color: 'var(--text-primary)',
-            marginBottom: '4px'
+            marginBottom: '4px',
           }}
         >
           Settings
@@ -175,7 +213,7 @@ export default function AdminSettingsPage() {
         <p
           style={{
             fontSize: '13px',
-            color: 'var(--text-muted)'
+            color: 'var(--text-muted)',
           }}
         >
           Manage your account settings
@@ -186,29 +224,34 @@ export default function AdminSettingsPage() {
         style={{
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
-          gap: '20px'
+          gap: '20px',
         }}
       >
 
-        {/* Profile Info */}
+        {/* ======================================================
+            PROFILE INFO
+        ====================================================== */}
+
         <div
           style={{
             background: 'var(--card-bg)',
             borderRadius: '14px',
             border: '1px solid var(--card-border)',
             boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-            overflow: 'hidden'
+            overflow: 'hidden',
           }}
         >
+
           <div
             style={{
               padding: '16px 20px',
               borderBottom: '1px solid var(--card-border)',
-              background: 'linear-gradient(135deg, #1e3a5f, #2563eb)',
+              background:
+                'linear-gradient(135deg, #1e3a5f, #2563eb)',
               color: 'white',
               display: 'flex',
               alignItems: 'center',
-              gap: '6px'
+              gap: '6px',
             }}
           >
             <Shield size={16} />
@@ -216,7 +259,7 @@ export default function AdminSettingsPage() {
             <h3
               style={{
                 fontSize: '15px',
-                fontWeight: '700'
+                fontWeight: '700',
               }}
             >
               Admin Profile
@@ -224,6 +267,8 @@ export default function AdminSettingsPage() {
           </div>
 
           <div style={{ padding: '20px' }}>
+
+            {/* Admin profile card */}
 
             <div
               style={{
@@ -233,9 +278,10 @@ export default function AdminSettingsPage() {
                 marginBottom: '24px',
                 padding: '16px',
                 background: 'var(--bg-primary)',
-                borderRadius: '12px'
+                borderRadius: '12px',
               }}
             >
+
               <div
                 style={{
                   width: '64px',
@@ -254,18 +300,19 @@ export default function AdminSettingsPage() {
               >
                 {user?.name
                   ?.split(' ')
-                  .map(n => n[0])
+                  .map((n) => n[0])
                   .join('')
                   .slice(0, 2)
                   .toUpperCase()}
               </div>
 
               <div>
+
                 <div
                   style={{
                     fontSize: '18px',
                     fontWeight: '800',
-                    color: 'var(--text-primary)'
+                    color: 'var(--text-primary)',
                   }}
                 >
                   {user?.name}
@@ -274,7 +321,7 @@ export default function AdminSettingsPage() {
                 <div
                   style={{
                     fontSize: '13px',
-                    color: 'var(--text-secondary)'
+                    color: 'var(--text-secondary)',
                   }}
                 >
                   {user?.email}
@@ -284,19 +331,34 @@ export default function AdminSettingsPage() {
                   style={{
                     fontSize: '12px',
                     color: 'var(--text-muted)',
-                    marginTop: '2px'
+                    marginTop: '2px',
                   }}
                 >
                   {user?.employeeCode} · {user?.role}
                 </div>
+
               </div>
             </div>
 
+            {/* Profile details */}
+
             {[
-              { label: 'Full Name', value: user?.name },
-              { label: 'Email Address', value: user?.email },
-              { label: 'Employee Code', value: user?.employeeCode },
-              { label: 'Role', value: user?.role },
+              {
+                label: 'Full Name',
+                value: user?.name,
+              },
+              {
+                label: 'Email Address',
+                value: user?.email,
+              },
+              {
+                label: 'Employee Code',
+                value: user?.employeeCode,
+              },
+              {
+                label: 'Role',
+                value: user?.role,
+              },
             ].map((item, i) => (
               <div
                 key={i}
@@ -304,13 +366,14 @@ export default function AdminSettingsPage() {
                   display: 'flex',
                   justifyContent: 'space-between',
                   padding: '10px 0',
-                  borderBottom: '1px solid #f1f5f9'
+                  borderBottom: '1px solid #f1f5f9',
                 }}
               >
+
                 <span
                   style={{
                     fontSize: '13px',
-                    color: 'var(--text-secondary)'
+                    color: 'var(--text-secondary)',
                   }}
                 >
                   {item.label}
@@ -320,13 +383,16 @@ export default function AdminSettingsPage() {
                   style={{
                     fontSize: '13px',
                     fontWeight: '600',
-                    color: 'var(--text-primary)'
+                    color: 'var(--text-primary)',
                   }}
                 >
                   {item.value || '—'}
                 </span>
+
               </div>
             ))}
+
+            {/* Admin access message */}
 
             <div
               style={{
@@ -334,7 +400,7 @@ export default function AdminSettingsPage() {
                 padding: '12px',
                 background: '#fdf4ff',
                 borderRadius: '8px',
-                border: '1px solid #e9d5ff'
+                border: '1px solid #e9d5ff',
               }}
             >
               <div
@@ -344,7 +410,7 @@ export default function AdminSettingsPage() {
                   fontWeight: '600',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '4px'
+                  gap: '4px',
                 }}
               >
                 <Shield size={14} />
@@ -352,28 +418,35 @@ export default function AdminSettingsPage() {
                 You have full system access as {user?.role}
               </div>
             </div>
+
           </div>
         </div>
 
-        {/* Change Password */}
+
+        {/* ======================================================
+            CHANGE PASSWORD
+        ====================================================== */}
+
         <div
           style={{
             background: 'var(--card-bg)',
             borderRadius: '14px',
             border: '1px solid var(--card-border)',
             boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-            overflow: 'hidden'
+            overflow: 'hidden',
           }}
         >
+
           <div
             style={{
               padding: '16px 20px',
               borderBottom: '1px solid var(--card-border)',
-              background: 'linear-gradient(135deg, #1e3a5f, #2563eb)',
+              background:
+                'linear-gradient(135deg, #1e3a5f, #2563eb)',
               color: 'white',
               display: 'flex',
               alignItems: 'center',
-              gap: '6px'
+              gap: '6px',
             }}
           >
             <Lock size={16} />
@@ -381,46 +454,53 @@ export default function AdminSettingsPage() {
             <h3
               style={{
                 fontSize: '15px',
-                fontWeight: '700'
+                fontWeight: '700',
               }}
             >
               Change Password
             </h3>
           </div>
 
+
           <div style={{ padding: '20px' }}>
 
             <form onSubmit={handleChangePassword}>
 
-              {/* Current Password */}
+              {/* ==================================================
+                  CURRENT PASSWORD
+              ================================================== */}
+
               <div style={{ marginBottom: '16px' }}>
+
                 <label
                   style={{
                     fontSize: '13px',
                     fontWeight: '600',
                     color: '#374151',
                     display: 'block',
-                    marginBottom: '6px'
+                    marginBottom: '6px',
                   }}
                 >
                   Current Password *
                 </label>
 
                 <div style={{ position: 'relative' }}>
+
                   <input
                     type={showCurrent ? 'text' : 'password'}
                     value={currentPassword}
-                    onChange={e =>
+                    onChange={(e) =>
                       setCurrentPassword(e.target.value)
                     }
                     placeholder="Enter current password"
                     required
                     style={inputStyle}
-                    onFocus={e =>
-                      e.target.style.borderColor = '#1e3a5f'
+                    autoComplete="current-password"
+                    onFocus={(e) =>
+                      (e.target.style.borderColor = '#1e3a5f')
                     }
-                    onBlur={e =>
-                      e.target.style.borderColor = '#e2e8f0'
+                    onBlur={(e) =>
+                      (e.target.style.borderColor = '#e2e8f0')
                     }
                   />
 
@@ -430,38 +510,48 @@ export default function AdminSettingsPage() {
                       setShowCurrent(!showCurrent)
                     }
                   />
+
                 </div>
               </div>
 
-              {/* New Password */}
+
+              {/* ==================================================
+                  NEW PASSWORD
+              ================================================== */}
+
               <div style={{ marginBottom: '16px' }}>
+
                 <label
                   style={{
                     fontSize: '13px',
                     fontWeight: '600',
                     color: '#374151',
                     display: 'block',
-                    marginBottom: '6px'
+                    marginBottom: '6px',
                   }}
                 >
-                  New Password
+                  New Password *
                 </label>
 
                 <div style={{ position: 'relative' }}>
+
                   <input
                     type={showNew ? 'text' : 'password'}
                     value={newPassword}
-                    onChange={e =>
+                    onChange={(e) =>
                       setNewPassword(e.target.value)
                     }
-                    placeholder="Example: Hussainb@123"
+                    placeholder="Example: Hussain@123"
                     required
+                    minLength={8}
+                    maxLength={20}
                     style={inputStyle}
-                    onFocus={e =>
-                      e.target.style.borderColor = '#1e3a5f'
+                    autoComplete="new-password"
+                    onFocus={(e) =>
+                      (e.target.style.borderColor = '#1e3a5f')
                     }
-                    onBlur={e =>
-                      e.target.style.borderColor = '#e2e8f0'
+                    onBlur={(e) =>
+                      (e.target.style.borderColor = '#e2e8f0')
                     }
                   />
 
@@ -471,38 +561,48 @@ export default function AdminSettingsPage() {
                       setShowNew(!showNew)
                     }
                   />
+
                 </div>
               </div>
 
-              {/* Confirm Password */}
+
+              {/* ==================================================
+                  CONFIRM PASSWORD
+              ================================================== */}
+
               <div style={{ marginBottom: '16px' }}>
+
                 <label
                   style={{
                     fontSize: '13px',
                     fontWeight: '600',
                     color: '#374151',
                     display: 'block',
-                    marginBottom: '6px'
+                    marginBottom: '6px',
                   }}
                 >
-                  Confirm New Password
+                  Confirm New Password *
                 </label>
 
                 <div style={{ position: 'relative' }}>
+
                   <input
                     type={showConfirm ? 'text' : 'password'}
                     value={confirmPassword}
-                    onChange={e =>
+                    onChange={(e) =>
                       setConfirmPassword(e.target.value)
                     }
                     placeholder="Confirm new password"
                     required
+                    minLength={8}
+                    maxLength={20}
                     style={inputStyle}
-                    onFocus={e =>
-                      e.target.style.borderColor = '#1e3a5f'
+                    autoComplete="new-password"
+                    onFocus={(e) =>
+                      (e.target.style.borderColor = '#1e3a5f')
                     }
-                    onBlur={e =>
-                      e.target.style.borderColor = '#e2e8f0'
+                    onBlur={(e) =>
+                      (e.target.style.borderColor = '#e2e8f0')
                     }
                   />
 
@@ -512,54 +612,71 @@ export default function AdminSettingsPage() {
                       setShowConfirm(!showConfirm)
                     }
                   />
+
                 </div>
               </div>
 
-              {/* Password Rules */}
+
+              {/* ==================================================
+                  PASSWORD REQUIREMENTS
+              ================================================== */}
+
               <div
                 style={{
                   background: 'var(--bg-primary)',
                   borderRadius: '10px',
                   padding: '14px',
                   marginBottom: '20px',
-                  border: '1px solid var(--card-border)'
+                  border: '1px solid var(--card-border)',
                 }}
               >
+
                 <div
                   style={{
                     fontSize: '12px',
                     fontWeight: '700',
                     color: '#374151',
-                    marginBottom: '8px'
+                    marginBottom: '8px',
                   }}
                 >
                   Password Requirements:
                 </div>
 
+
                 {[
                   {
-                    rule: 'Exactly 12 characters',
-                    met: passwordValidation.checks.exact12
+                    rule: 'Minimum 8 characters',
+                    met:
+                      passwordValidation.checks.minimum8,
                   },
                   {
-                    rule: 'First letter UPPERCASE',
-                    met: passwordValidation.checks.uppercase
+                    rule: 'Maximum 20 characters',
+                    met:
+                      passwordValidation.checks.maximum20,
                   },
                   {
-                    rule: '8 alphabets total',
-                    met: passwordValidation.checks.alphabets
+                    rule: 'At least 1 uppercase letter',
+                    met:
+                      passwordValidation.checks.uppercase,
                   },
                   {
-                    rule: '1 special character (@#$%!&*?)',
-                    met: passwordValidation.checks.special
+                    rule: 'At least 1 lowercase letter',
+                    met:
+                      passwordValidation.checks.lowercase,
                   },
                   {
-                    rule: 'Exactly 3 digits',
-                    met: passwordValidation.checks.digits
+                    rule: 'At least 1 number',
+                    met:
+                      passwordValidation.checks.number,
+                  },
+                  {
+                    rule: 'At least 1 special character',
+                    met:
+                      passwordValidation.checks.special,
                   },
                   {
                     rule: 'Passwords match',
-                    met: metMatch
+                    met: metMatch,
                   },
                 ].map((r, i) => (
                   <div
@@ -568,9 +685,10 @@ export default function AdminSettingsPage() {
                       display: 'flex',
                       alignItems: 'center',
                       gap: '8px',
-                      marginBottom: '6px'
+                      marginBottom: '6px',
                     }}
                   >
+
                     <svg
                       width="14"
                       height="14"
@@ -593,36 +711,51 @@ export default function AdminSettingsPage() {
                         fontSize: '12px',
                         color: r.met
                           ? '#16a34a'
-                          : '#94a3b8'
+                          : '#94a3b8',
                       }}
                     >
                       {r.rule}
                     </span>
+
                   </div>
                 ))}
+
               </div>
 
-              {/* Submit */}
+
+              {/* ==================================================
+                  SUBMIT BUTTON
+              ================================================== */}
+
               <button
                 type="submit"
-                disabled={changing || !isPasswordValid}
+                disabled={
+                  changing ||
+                  !isPasswordValid ||
+                  !currentPassword
+                }
                 style={{
                   width: '100%',
                   padding: '13px',
-                  background: isPasswordValid
-                    ? '#1e3a5f'
-                    : '#cbd5e1',
+                  background:
+                    isPasswordValid && currentPassword
+                      ? '#1e3a5f'
+                      : '#cbd5e1',
                   color: 'white',
                   border: 'none',
                   borderRadius: '10px',
                   fontSize: '14px',
                   fontWeight: '700',
                   cursor:
-                    changing || !isPasswordValid
+                    changing ||
+                    !isPasswordValid ||
+                    !currentPassword
                       ? 'not-allowed'
                       : 'pointer',
                   opacity:
-                    changing || !isPasswordValid
+                    changing ||
+                    !isPasswordValid ||
+                    !currentPassword
                       ? 0.7
                       : 1,
                   display: 'flex',
@@ -631,6 +764,7 @@ export default function AdminSettingsPage() {
                   gap: '8px',
                 }}
               >
+
                 {changing ? (
                   <>
                     <Loader2
@@ -665,9 +799,11 @@ export default function AdminSettingsPage() {
                     Change Password
                   </>
                 )}
+
               </button>
 
             </form>
+
           </div>
         </div>
 
