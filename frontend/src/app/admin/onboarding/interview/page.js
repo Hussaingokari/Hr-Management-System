@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { ChevronRight, Send } from 'lucide-react';
 import SendInterviewForm from '@/components/layout/SendInterviewForm';
 
 export default function InterviewPage() {
@@ -10,32 +12,42 @@ export default function InterviewPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const token = sessionStorage.getItem('accessToken');
-        const userStr = sessionStorage.getItem('user');
-        const user = userStr ? JSON.parse(userStr) : null;
-        const userRole = user?.role;
+        try {
+            const token = sessionStorage.getItem('accessToken');
+            const userStr = sessionStorage.getItem('user');
+            const user = userStr ? JSON.parse(userStr) : null;
+            const userRole = user?.role;
 
-        if (!token) {
+            if (!token) {
+                router.push('/login');
+                return;
+            }
+
+            if (
+                userRole?.toLowerCase() !== 'admin' &&
+                userRole?.toLowerCase() !== 'hr'
+            ) {
+                router.push('/admin/dashboard');
+                return;
+            }
+
+            setIsAuthenticated(true);
+        } catch {
             router.push('/login');
-            return;
+        } finally {
+            setLoading(false);
         }
-
-        if (
-            userRole?.toLowerCase() !== 'admin' &&
-            userRole?.toLowerCase() !== 'hr'
-        ) {
-            router.push('/admin/dashboard');
-            return;
-        }
-
-        setIsAuthenticated(true);
-        setLoading(false);
     }, [router]);
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-950">
-                <div className="animate-spin w-12 h-12 border-4 border-gray-300 dark:border-slate-700 border-t-blue-500 dark:border-t-blue-500 rounded-full"></div>
+            <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-500 dark:text-slate-400">
+                <div className="flex flex-col items-center gap-3">
+                    <div className="animate-spin w-10 h-10 border-4 border-slate-200 dark:border-slate-800 border-t-blue-600 dark:border-t-blue-500 rounded-full" />
+                    <p className="text-sm font-medium">
+                        Verifying access...
+                    </p>
+                </div>
             </div>
         );
     }
@@ -45,55 +57,70 @@ export default function InterviewPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-4 sm:p-8">
-            <div className="max-w-7xl mx-auto">
+        <div className="space-y-6 text-slate-900 dark:text-slate-100">
 
-                {/* Breadcrumb */}
-                <div className="mb-4 sm:mb-8">
-                    <nav className="text-sm text-gray-600 dark:text-slate-400">
+            {/* Breadcrumb */}
+            <nav
+                aria-label="Breadcrumb"
+                className="flex items-center text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 gap-1.5 sm:gap-2 flex-wrap"
+            >
+                <Link
+                    href="/admin/dashboard"
+                    className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                    Dashboard
+                </Link>
 
-                        <a
-                            href="/admin/dashboard"
-                            className="text-blue-500 dark:text-blue-400 hover:underline"
-                        >
-                            Dashboard
-                        </a>
+                <ChevronRight
+                    size={14}
+                    className="text-slate-400 dark:text-slate-600 shrink-0"
+                />
 
-                        <span className="mx-2">/</span>
+                <Link
+                    href="/admin/onboarding"
+                    className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                    Onboarding
+                </Link>
 
-                        <a
-                            href="/admin/onboarding"
-                            className="text-blue-500 dark:text-blue-400 hover:underline"
-                        >
-                            Onboarding
-                        </a>
+                <ChevronRight
+                    size={14}
+                    className="text-slate-400 dark:text-slate-600 shrink-0"
+                />
 
-                        <span className="mx-2">/</span>
+                <span className="text-slate-900 dark:text-slate-100 font-semibold">
+                    Send Interview
+                </span>
+            </nav>
 
-                        <span className="text-gray-900 dark:text-slate-100 font-medium">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200 dark:border-slate-800">
+                <div className="space-y-1">
+
+                    <div className="flex items-center gap-3">
+
+                        <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/60 border border-blue-100 dark:border-blue-900/50 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
+                            <Send size={22} />
+                        </div>
+
+                        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                             Send Interview
-                        </span>
+                        </h1>
 
-                    </nav>
-                </div>
+                    </div>
 
-                {/* Header */}
-                <div className="mb-6 sm:mb-8">
-
-                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                        Send Interview Invitation
-                    </h1>
-
-                    <p className="text-gray-600 dark:text-slate-400">
-                        Send online or offline interview invitations to candidates
+                    <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 pl-1">
+                        Send online or offline interview invitations to candidates.
                     </p>
 
                 </div>
-
-                {/* Forms */}
-                <SendInterviewForm />
-
             </div>
+
+            {/* Existing Interview Form — unchanged */}
+            <div className="w-full">
+                <SendInterviewForm />
+            </div>
+
         </div>
     );
 }
