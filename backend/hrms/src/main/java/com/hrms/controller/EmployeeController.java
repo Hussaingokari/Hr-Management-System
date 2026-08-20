@@ -81,8 +81,8 @@ public class EmployeeController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','HR')")
-    @Operation(summary = "Delete employee")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Delete employee-Admin only")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         employeeService.deleteEmployee(id);
         return ResponseEntity.ok(ApiResponse.success("Employee deleted successfully"));
