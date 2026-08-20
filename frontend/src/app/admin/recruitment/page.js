@@ -627,7 +627,7 @@ export default function RecruitmentPage() {
                   type="submit" disabled={submitting}
                   style={{ padding: '10px 20px', background: 'var(--accent-primary)', color: 'white', border: 'none', borderRadius: '8px', fontWeight: '700', cursor: 'pointer', opacity: submitting ? 0.7 : 1 }}
                 >
-                  {submitting ? 'Posting...' : 'Submit Job'}
+                  {submitting ? 'Posting...' : 'Post Job'}
                 </button>
               </div>
             </form>
