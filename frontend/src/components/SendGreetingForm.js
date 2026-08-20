@@ -196,7 +196,7 @@ export default function SendGreetingForm() {
                         id="candidateName"
                         value={candidateName}
                         onChange={(e) => setCandidateName(e.target.value)}
-                        placeholder="Enter candidate name (e.g., Enter Name)"
+                        placeholder="Enter candidate name "
                         disabled={loading}
                         style={{
                             width: '100%',

@@ -181,7 +181,7 @@ function ReferPersonContent() {
                                 }
                             }}
                             required
-                            placeholder="Enter candidate name"
+                            placeholder="candidate name"
                             className="w-full bg-white dark:bg-[#0f1522] border border-gray-300 dark:border-slate-700 rounded-lg px-4 py-3 focus:outline-none focus:border-emerald-500 dark:focus:border-emerald-500 text-slate-900 dark:text-white"
                         />
                     </div>
