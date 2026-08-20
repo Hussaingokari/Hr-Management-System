@@ -467,7 +467,7 @@ export default function EmployeeManagementPage() {
 
             toast.error(
                 error?.response?.data?.message ||
-                    'Operation failed'
+                'Operation failed'
             );
         } finally {
             setSubmitting(false);
@@ -478,31 +478,28 @@ export default function EmployeeManagementPage() {
        DELETE
     ===================================================== */
 
-    const handleDelete = async (id) => {
-        setDeleting(id);
-
+    const handleDelete = async (employee) => {
         try {
-            await deleteEmployee(id);
+            await deleteEmployee(employee.id);
 
-            toast.success(
-                'Employee deleted successfully!'
-            );
+            alert("Employee deleted successfully.");
 
-            setShowDeleteConfirm(null);
+            fetchEmployees();
 
-            await fetchEmployees();
         } catch (error) {
-            console.error(error);
+            if (error.response?.status === 403) {
+                alert(
+                    "You don't have permission to delete employees. Only Admin can delete employees."
+                );
+                return;
+            }
 
-            toast.error(
-                error?.response?.data?.message ||
-                    'Delete failed'
+            alert(
+                error.response?.data?.message ||
+                "Failed to delete employee."
             );
-        } finally {
-            setDeleting(null);
         }
     };
-
     /* =====================================================
        PAGE
     ===================================================== */
@@ -2005,7 +2002,7 @@ export default function EmployeeManagementPage() {
                             >
 
                                 {deleting ===
-                                showDeleteConfirm.id ? (
+                                    showDeleteConfirm.id ? (
                                     <>
                                         <Loader2
                                             size={16}
