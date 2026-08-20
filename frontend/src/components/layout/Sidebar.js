@@ -177,16 +177,7 @@ export default function Sidebar({ role }) {
           {isDark && (
             <div style={{ position: 'relative', width: '100%', flexShrink: 0, overflow: 'hidden' }}>
               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '40px', background: 'linear-gradient(to bottom, #0A0E17, transparent)', zIndex: 1 }} />
-              <img
-                src="/bottom.png"
-                alt="Landscape"
-                style={{
-                  width: '100%',
-                  height: 'auto',
-                  display: 'block',
-                  opacity: 0.9
-                }}
-              />
+              
             </div>
           )}
         </div>
