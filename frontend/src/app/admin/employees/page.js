@@ -479,25 +479,52 @@ export default function EmployeeManagementPage() {
     ===================================================== */
 
     const handleDelete = async (employee) => {
+        const employeeId = employee?.id ?? employee?.employeeId;
+
+        if (!employeeId) {
+            console.error('Delete failed: Employee ID is missing', employee);
+            toast.error('Unable to delete employee: Employee ID is missing.');
+            return;
+        }
+
+        setDeleting(employeeId);
+
         try {
-            await deleteEmployee(employee.id);
+            await deleteEmployee(employeeId);
 
-            alert("Employee deleted successfully.");
+            toast.success('Employee deleted successfully!');
 
-            fetchEmployees();
+            setShowDeleteConfirm(null);
+
+            await fetchEmployees();
 
         } catch (error) {
-            if (error.response?.status === 403) {
-                alert(
-                    "You don't have permission to delete employees. Only Admin can delete employees."
+            console.error('Delete employee error:', error);
+
+            if (error?.response?.status === 403) {
+                toast.error(
+                    "You don't have permission to delete employees. Only Admin can delete employees.",
+                    { duration: 5000 }
                 );
                 return;
             }
 
-            alert(
-                error.response?.data?.message ||
-                "Failed to delete employee."
+            if (error?.response?.status === 401) {
+                toast.error(
+                    'Your session has expired. Please login again.',
+                    { duration: 5000 }
+                );
+                return;
+            }
+
+            toast.error(
+                error?.response?.data?.message ||
+                'Failed to delete employee. Please try again.',
+                { duration: 5000 }
             );
+
+        } finally {
+            setDeleting(null);
         }
     };
     /* =====================================================
@@ -1977,11 +2004,7 @@ export default function EmployeeManagementPage() {
                                     deleting ===
                                     showDeleteConfirm.id
                                 }
-                                onClick={() =>
-                                    handleDelete(
-                                        showDeleteConfirm.id
-                                    )
-                                }
+                                onClick={() => handleDelete(showDeleteConfirm)}
                                 className="
                                     flex-1
                                     py-3
