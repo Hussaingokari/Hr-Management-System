@@ -271,7 +271,7 @@ export default function Navbar() {
       </div>
 
       {/* Right Side */}
-      <div className="nav-right-side" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+      <div className="nav-right-side" style={{ display: 'flex', alignItems: 'center', gap: '16px', }}>
 
         <DashboardThemeSwitcher />
 

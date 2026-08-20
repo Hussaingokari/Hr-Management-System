@@ -17,10 +17,10 @@ export default function DashboardThemeSwitcher({ className = '' }) {
   const isDark = resolvedTheme === 'dark';
 
   return (
-    <div className={`flex items-center p-1 rounded-full bg-[#f1f5f9] dark:bg-[#1E293B] ${className}`}>
+    <div className={`flex items-center p-1 rounded-full  bg-[#f1f5f9] dark:bg-[#1E293B] ${className}`}>
       <button
         onClick={() => setTheme('light')}
-        className={`flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold transition-all duration-300 ${
+        className={`flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] cursor-pointer font-bold transition-all duration-300 ${
           !isDark 
             ? 'bg-white text-slate-800 shadow-sm' 
             : 'text-slate-400 hover:text-slate-200'
@@ -41,7 +41,7 @@ export default function DashboardThemeSwitcher({ className = '' }) {
       </button>
       <button
         onClick={() => setTheme('dark')}
-        className={`flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold transition-all duration-300 ${
+        className={`flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full cursor-pointer text-[11px] font-bold transition-all duration-300 ${
           isDark 
             ? 'bg-[#0f172a] text-white shadow-sm shadow-black/20' 
             : 'text-slate-500 hover:text-slate-700'
