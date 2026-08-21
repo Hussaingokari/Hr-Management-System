@@ -1,5 +1,5 @@
 'use client';
-
+import { useSelector } from 'react-redux';
 import { useState, useEffect, useCallback } from 'react';
 import {
     getAllEmployees,
@@ -201,6 +201,13 @@ export default function EmployeeManagementPage() {
         useState(null);
 
     const [deleting, setDeleting] = useState(null);
+
+    /* =====================================================
+       CURRENT USER ROLE (from Redux auth slice)
+       Used to gate the delete action for non-admins.
+    ===================================================== */
+
+    const currentUserRole = useSelector((state) => state.auth.user?.role);
 
     /* =====================================================
        TABLE COLUMNS
@@ -484,6 +491,17 @@ export default function EmployeeManagementPage() {
         if (!employeeId) {
             console.error('Delete failed: Employee ID is missing', employee);
             toast.error('Unable to delete employee: Employee ID is missing.');
+            return;
+        }
+
+        // TEMPORARY: block non-admins from deleting until backend is redeployed
+        // with the @PreAuthorize("hasRole('ADMIN')") restriction on DELETE /api/employees/{id}
+        if (currentUserRole !== 'ADMIN') {
+            toast.error(
+                "You don't have permission to delete employees. Only Admin can delete employees.",
+                { duration: 5000 }
+            );
+            setShowDeleteConfirm(null);
             return;
         }
 
