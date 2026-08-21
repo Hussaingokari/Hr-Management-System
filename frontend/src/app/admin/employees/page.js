@@ -1,5 +1,5 @@
 'use client';
-
+import { useSelector } from 'react-redux';
 import { useState, useEffect, useCallback } from 'react';
 import {
     getAllEmployees,
@@ -201,6 +201,13 @@ export default function EmployeeManagementPage() {
         useState(null);
 
     const [deleting, setDeleting] = useState(null);
+
+    /* =====================================================
+       CURRENT USER ROLE (from Redux auth slice)
+       Used to gate the delete action for non-admins.
+    ===================================================== */
+
+    const currentUserRole = useSelector((state) => state.auth.user?.role);
 
     /* =====================================================
        TABLE COLUMNS
@@ -467,7 +474,7 @@ export default function EmployeeManagementPage() {
 
             toast.error(
                 error?.response?.data?.message ||
-                    'Operation failed'
+                'Operation failed'
             );
         } finally {
             setSubmitting(false);
@@ -478,31 +485,66 @@ export default function EmployeeManagementPage() {
        DELETE
     ===================================================== */
 
-    const handleDelete = async (id) => {
-        setDeleting(id);
+    const handleDelete = async (employee) => {
+        const employeeId = employee?.id ?? employee?.employeeId;
+
+        if (!employeeId) {
+            console.error('Delete failed: Employee ID is missing', employee);
+            toast.error('Unable to delete employee: Employee ID is missing.');
+            return;
+        }
+
+        // TEMPORARY: block non-admins from deleting until backend is redeployed
+        // with the @PreAuthorize("hasRole('ADMIN')") restriction on DELETE /api/employees/{id}
+        if (currentUserRole !== 'ADMIN') {
+            toast.error(
+                "You don't have permission to delete employees. Only Admin can delete employees.",
+                { duration: 5000 }
+            );
+            setShowDeleteConfirm(null);
+            return;
+        }
+
+        setDeleting(employeeId);
 
         try {
-            await deleteEmployee(id);
+            await deleteEmployee(employeeId);
 
-            toast.success(
-                'Employee deleted successfully!'
-            );
+            toast.success('Employee deleted successfully!');
 
             setShowDeleteConfirm(null);
 
             await fetchEmployees();
+
         } catch (error) {
-            console.error(error);
+            console.error('Delete employee error:', error);
+
+            if (error?.response?.status === 403) {
+                toast.error(
+                    "You don't have permission to delete employees. Only Admin can delete employees.",
+                    { duration: 5000 }
+                );
+                return;
+            }
+
+            if (error?.response?.status === 401) {
+                toast.error(
+                    'Your session has expired. Please login again.',
+                    { duration: 5000 }
+                );
+                return;
+            }
 
             toast.error(
                 error?.response?.data?.message ||
-                    'Delete failed'
+                'Failed to delete employee. Please try again.',
+                { duration: 5000 }
             );
+
         } finally {
             setDeleting(null);
         }
     };
-
     /* =====================================================
        PAGE
     ===================================================== */
@@ -700,7 +742,7 @@ export default function EmployeeManagementPage() {
                         w-full
                         min-w-0
                         max-w-full
-                        overflow-hidden
+                        overflow-x-auto
                         rounded-xl
                         border
                         bg-white
@@ -1980,11 +2022,7 @@ export default function EmployeeManagementPage() {
                                     deleting ===
                                     showDeleteConfirm.id
                                 }
-                                onClick={() =>
-                                    handleDelete(
-                                        showDeleteConfirm.id
-                                    )
-                                }
+                                onClick={() => handleDelete(showDeleteConfirm)}
                                 className="
                                     flex-1
                                     py-3
@@ -2005,7 +2043,7 @@ export default function EmployeeManagementPage() {
                             >
 
                                 {deleting ===
-                                showDeleteConfirm.id ? (
+                                    showDeleteConfirm.id ? (
                                     <>
                                         <Loader2
                                             size={16}
