@@ -724,7 +724,7 @@ export default function EmployeeManagementPage() {
                         w-full
                         min-w-0
                         max-w-full
-                        overflow-hidden
+                        overflow-x-auto
                         rounded-xl
                         border
                         bg-white
