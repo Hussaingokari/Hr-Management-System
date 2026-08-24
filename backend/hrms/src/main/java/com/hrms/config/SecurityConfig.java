@@ -81,57 +81,113 @@ public class SecurityConfig {
             "/api/greeting/send-offline-interview",
             "/api/greeting/send-offer-letter",
 
-            // for submission of docum req
             "/api/document-request/send",
-            "/api/document-request/list",
-
+            "/api/document-request/list"
     };
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http,
+    public SecurityFilterChain filterChain(
+            HttpSecurity http,
             JwtAuthFilter jwtAuthFilter,
-
             AuthenticationProvider authenticationProvider) throws Exception {
+
         http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                .cors(cors ->
+                        cors.configurationSource(corsConfigurationSource())
+                )
+
+                /*
+                 * HRMS uses JWT authentication.
+                 * We intentionally keep Spring Security stateless.
+                 */
+                .sessionManagement(sm ->
+                        sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+
                 .authorizeHttpRequests(auth -> auth
+
+                        // Public endpoints
                         .requestMatchers(PUBLIC_URLS).permitAll()
+
+                        // Managers endpoint
                         .requestMatchers("/api/employees/managers").permitAll()
-                        .requestMatchers(ADMIN_HR_URLS).hasAnyRole("ADMIN", "HR")
-                        // ATTENDANCE - Employee authenticated endpoints (check-in, check-out, my,
-                        // my/detailed-report)
-                        // Change Password - Authenticated endpoint
-                        .requestMatchers("/api/auth/change-password").authenticated()
-                        .requestMatchers("/api/attendance/check-in").authenticated()
-                        .requestMatchers("/api/attendance/check-out").authenticated()
-                        .requestMatchers("/api/attendance/my").authenticated()
-                        .requestMatchers("/api/attendance/my/**").authenticated()
-                        .anyRequest().authenticated())
+
+                        // Admin / HR only
+                        .requestMatchers(ADMIN_HR_URLS)
+                        .hasAnyRole("ADMIN", "HR")
+
+                        // Authenticated users
+                        .requestMatchers("/api/auth/change-password")
+                        .authenticated()
+
+                        .requestMatchers("/api/attendance/check-in")
+                        .authenticated()
+
+                        .requestMatchers("/api/attendance/check-out")
+                        .authenticated()
+
+                        .requestMatchers("/api/attendance/my")
+                        .authenticated()
+
+                        .requestMatchers("/api/attendance/my/**")
+                        .authenticated()
+
+                        /*
+                         * Every other API requires authentication.
+                         *
+                         * JwtAuthFilter runs before this authorization
+                         * decision and checks JWT + inactivity.
+                         */
+                        .anyRequest()
+                        .authenticated()
+                )
+
                 .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
+                /*
+                 * JWT authentication + inactivity validation.
+                 */
+                .addFilterBefore(
+                        jwtAuthFilter,
+                        UsernamePasswordAuthenticationFilter.class
+                );
 
         return http.build();
     }
 
     @Bean
-    public UserDetailsService userDetailsService(EmployeeRepository employeeRepository) {
-        return username -> employeeRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+    public UserDetailsService userDetailsService(
+            EmployeeRepository employeeRepository) {
+
+        return username ->
+                employeeRepository.findByEmail(username)
+                        .orElseThrow(() ->
+                                new UsernameNotFoundException(
+                                        "User not found: " + username
+                                )
+                        );
     }
 
     @Bean
-    public AuthenticationProvider authenticationProvider(UserDetailsService userDetailsService,
+    public AuthenticationProvider authenticationProvider(
+            UserDetailsService userDetailsService,
             PasswordEncoder passwordEncoder) {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+
+        DaoAuthenticationProvider provider =
+                new DaoAuthenticationProvider();
+
         provider.setUserDetailsService(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder);
+
         return provider;
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    public AuthenticationManager authenticationManager(
+            AuthenticationConfiguration config) throws Exception {
+
         return config.getAuthenticationManager();
     }
 
@@ -142,13 +198,32 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+
         CorsConfiguration config = new CorsConfiguration();
+
         config.setAllowedOriginPatterns(List.of("*"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+
+        config.setAllowedMethods(List.of(
+                "GET",
+                "POST",
+                "PUT",
+                "DELETE",
+                "PATCH",
+                "OPTIONS"
+        ));
+
         config.setAllowedHeaders(List.of("*"));
+
         config.setAllowCredentials(true);
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
+
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
+
+        source.registerCorsConfiguration(
+                "/**",
+                config
+        );
+
         return source;
     }
 }
