@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { logout } from '@/store/authSlice';
 import toast from 'react-hot-toast';
 
-const INACTIVITY_TIME =2 * 60 * 1000; // 5 minutes
+const INACTIVITY_TIME =5 * 60 * 1000; // 5 minutes
 const ACTIVITY_THROTTLE = 1000;
 
 let sessionTimerState = {
