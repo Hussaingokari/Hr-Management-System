@@ -60,3 +60,9 @@ export const uploadFile = (file) => {
 
 export const uploadOnboardingDocument = (onboardingId, documentKey, { fileUrl, fileName }) =>
   api.post(`/api/onboarding/documents/${onboardingId}/${documentKey}/upload`, { fileUrl, fileName });
+
+export const deleteNotification = (id) =>
+  api.delete(`/api/notifications/${id}`);
+
+export const clearAllNotifications = () =>
+  api.delete('/api/notifications/clear-all');

@@ -9,8 +9,6 @@ import com.hrms.repository.EmployeeRepository;
 import com.hrms.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.mail.SimpleMailMessage;
@@ -47,13 +45,19 @@ public class NotificationService {
                 .build();
 
         Notification saved = notificationRepo.save(notification);
+
         java.util.concurrent.CompletableFuture.runAsync(() -> {
-            sendEmailSafe(recipient.getEmail(), title, message);
+            sendEmailSafe(
+                    recipient.getEmail(),
+                    title,
+                    message
+            );
         });
+
         return saved;
     }
 
-    // ✅ NEW — Notify all active ADMIN + HR employees
+    // Notify all active ADMIN + HR employees
     @Transactional
     public void notifyAllAdmins(
             String title,
@@ -65,21 +69,28 @@ public class NotificationService {
 
         employeeRepository.findAll()
                 .stream()
-                .filter(e -> e.isActive() &&
-                        (e.getRole() == Role.ADMIN ||
-                                e.getRole() == Role.HR) &&
-                        (excludeId == null ||
-                                !e.getId().equals(excludeId))
+                .filter(e ->
+                        e.isActive()
+                                &&
+                        (e.getRole() == Role.ADMIN
+                                || e.getRole() == Role.HR)
+                                &&
+                        (excludeId == null
+                                || !e.getId().equals(excludeId))
                 )
                 .forEach(admin ->
                         createAndSend(
-                                admin, title, message,
-                                type, entityType, entityId
+                                admin,
+                                title,
+                                message,
+                                type,
+                                entityType,
+                                entityId
                         )
                 );
     }
 
-    // ✅ NEW — Overload without excludeId
+    // Overload without excludeId
     @Transactional
     public void notifyAllAdmins(
             String title,
@@ -87,9 +98,14 @@ public class NotificationService {
             NotificationType type,
             String entityType,
             Long entityId) {
+
         notifyAllAdmins(
-                title, message, type,
-                entityType, entityId, null
+                title,
+                message,
+                type,
+                entityType,
+                entityId,
+                null
         );
     }
 
@@ -97,21 +113,32 @@ public class NotificationService {
             String toEmail,
             String subject,
             String body) {
+
         try {
-            SimpleMailMessage mail = new SimpleMailMessage();
+            SimpleMailMessage mail =
+                    new SimpleMailMessage();
+
             mail.setTo(toEmail);
             mail.setSubject(subject);
             mail.setText(body);
+
             mailSender.send(mail);
+
         } catch (Exception e) {
-            log.warn("Email notification failed for {}: {}",
-                    toEmail, e.getMessage());
+
+            log.warn(
+                    "Email notification failed for {}: {}",
+                    toEmail,
+                    e.getMessage()
+            );
         }
     }
 
     @Transactional(readOnly = true)
     public Page<NotificationDTOs.Response> getMyNotifications(
-            Employee employee, Pageable pageable) {
+            Employee employee,
+            Pageable pageable) {
+
         return notificationRepo
                 .findByRecipient(employee, pageable)
                 .map(this::toResponse);
@@ -119,33 +146,125 @@ public class NotificationService {
 
     @Transactional(readOnly = true)
     public Page<NotificationDTOs.Response> getUnread(
-            Employee employee, Pageable pageable) {
+            Employee employee,
+            Pageable pageable) {
+
         return notificationRepo
-                .findByRecipientAndIsReadFalse(employee, pageable)
+                .findByRecipientAndIsReadFalse(
+                        employee,
+                        pageable
+                )
                 .map(this::toResponse);
     }
 
     public long getUnreadCount(Employee employee) {
+
         return notificationRepo
                 .countByRecipientAndIsReadFalse(employee);
     }
 
+    /*
+     * Mark one notification as read.
+     *
+     * Ownership is checked so one user cannot
+     * modify another user's notification.
+     */
     @Transactional
-    public void markAsRead(Long notificationId) {
-        notificationRepo.findById(notificationId)
-                .ifPresent(n -> {
-                    n.setRead(true);
-                    notificationRepo.save(n);
-                });
+    public void markAsRead(
+            Long notificationId,
+            Employee employee) {
+
+        Notification notification =
+                notificationRepo.findById(notificationId)
+                        .orElseThrow(() ->
+                                new IllegalArgumentException(
+                                        "Notification not found"
+                                )
+                        );
+
+        verifyOwnership(notification, employee);
+
+        notification.setRead(true);
+
+        notificationRepo.save(notification);
     }
 
+    /*
+     * Mark all notifications belonging to the
+     * logged-in employee as read.
+     */
     @Transactional
     public void markAllAsRead(Employee employee) {
+
         notificationRepo.markAllAsReadByRecipient(employee);
     }
 
-    private NotificationDTOs.Response toResponse(Notification n) {
-        NotificationDTOs.Response r = new NotificationDTOs.Response();
+    /*
+     * Delete ONE notification.
+     *
+     * Only the owner can delete it.
+     */
+    @Transactional
+    public void deleteNotification(
+            Long notificationId,
+            Employee employee) {
+
+        Notification notification =
+                notificationRepo.findById(notificationId)
+                        .orElseThrow(() ->
+                                new IllegalArgumentException(
+                                        "Notification not found"
+                                )
+                        );
+
+        verifyOwnership(notification, employee);
+
+        notificationRepo.delete(notification);
+    }
+
+    /*
+     * Delete ALL notifications belonging to
+     * the currently logged-in user.
+     *
+     * This works for:
+     * ADMIN
+     * HR
+     * EMPLOYEE
+     */
+    @Transactional
+    public void clearAllNotifications(Employee employee) {
+
+        notificationRepo.deleteByRecipient(employee);
+    }
+
+    /*
+     * Security check.
+     *
+     * Prevents Employee A from deleting or modifying
+     * Employee B's notification.
+     */
+    private void verifyOwnership(
+            Notification notification,
+            Employee employee) {
+
+        if (notification.getRecipient() == null
+                || employee == null
+                || !notification.getRecipient()
+                        .getId()
+                        .equals(employee.getId())) {
+
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "You do not have permission to modify this notification"
+            );
+        }
+    }
+
+    private NotificationDTOs.Response toResponse(
+            Notification n) {
+
+        NotificationDTOs.Response r =
+                new NotificationDTOs.Response();
+
         r.setId(n.getId());
         r.setTitle(n.getTitle());
         r.setMessage(n.getMessage());
@@ -154,6 +273,7 @@ public class NotificationService {
         r.setReferenceId(n.getReferenceId());
         r.setRead(n.isRead());
         r.setCreatedAt(n.getCreatedAt());
+
         return r;
     }
 }

@@ -114,3 +114,9 @@ export const markAdminNotificationRead = (id) =>
 
 export const markAllAdminNotificationsRead = () =>
   api.put('/api/notifications/mark-all-read');
+
+export const deleteAdminNotification = (id) =>
+  api.delete(`/api/notifications/${id}`);
+
+export const clearAllAdminNotifications = () =>
+  api.delete('/api/notifications/clear-all');
