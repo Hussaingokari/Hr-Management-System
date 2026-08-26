@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { getMyOnboarding, getMyDocuments, uploadFile, uploadOnboardingDocument } from '@/lib/employeeApi';
 import toast from 'react-hot-toast';
 import { FileText, Loader2, UploadCloud, MessageSquare } from 'lucide-react';
@@ -33,18 +34,22 @@ function StatusPill({ status }) {
     );
 }
 
-function DocumentRow({ documentKey, doc, onUpload, isUploading }) {
+function DocumentRow({ documentKey, doc, onUpload, isUploading, highlighted }) {
     const inputRef = useRef(null);
     const status = doc?.status;
     const canUpload = !status || status === 'REJECTED';
     const isRejected = status === 'REJECTED';
 
     return (
-        <div style={{
-            background: 'var(--card-bg)', borderRadius: '14px',
-            border: isRejected ? '1.5px solid #fecaca' : '1px solid #e2e8f0',
-            padding: '18px 20px', marginBottom: '12px',
-        }}>
+        <div
+            id={doc?.id ? `doc-${doc.id}` : undefined}
+            style={{
+                background: 'var(--card-bg)', borderRadius: '14px',
+                border: highlighted ? '2px solid #4f46e5' : (isRejected ? '1.5px solid #fecaca' : '1px solid #e2e8f0'),
+                boxShadow: highlighted ? '0 0 0 4px rgba(79,70,229,0.15)' : 'none',
+                padding: '18px 20px', marginBottom: '12px',
+                transition: 'box-shadow 0.3s, border-color 0.3s',
+            }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4f46e5', flexShrink: 0 }}>
                     <FileText size={20} strokeWidth={1.5} />
@@ -102,6 +107,9 @@ function DocumentRow({ documentKey, doc, onUpload, isUploading }) {
 }
 
 export default function EmployeeOnboardingDocumentsPage() {
+    const searchParams = useSearchParams();
+    const highlightId = searchParams.get('highlight');
+
     const [onboarding, setOnboarding] = useState(null);
     const [documents, setDocuments] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -125,6 +133,13 @@ export default function EmployeeOnboardingDocumentsPage() {
     }, []);
 
     useEffect(() => { fetchData(); }, [fetchData]);
+
+    // Scroll the highlighted document into view once it's loaded.
+    useEffect(() => {
+        if (!highlightId || loading) return;
+        const el = document.getElementById(`doc-${highlightId}`);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, [highlightId, loading, documents]);
 
     const handleUpload = async (documentKey, file) => {
         if (!onboarding?.id) return;
@@ -179,6 +194,7 @@ export default function EmployeeOnboardingDocumentsPage() {
                     doc={docsByKey[key]}
                     onUpload={handleUpload}
                     isUploading={uploadingKey === key}
+                    highlighted={highlightId != null && String(docsByKey[key]?.id) === String(highlightId)}
                 />
             ))}
         </div>

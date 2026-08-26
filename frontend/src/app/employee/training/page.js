@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
+import { useSearchParams } from 'next/navigation';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import {
@@ -53,7 +54,13 @@ const TABS = [
 
 export default function EmployeeTrainingPage() {
     const employeeId = useCurrentEmployeeId();
-    const [tab, setTab] = useState('available');
+    const searchParams = useSearchParams();
+    const highlightId = searchParams.get('highlight');
+
+    // A training notification points at a training id, which lives on the
+    // enrollment ("mine") tab. If we land here via a notification, jump
+    // straight to that tab so the highlighted enrollment is visible.
+    const [tab, setTab] = useState(highlightId ? 'mine' : 'available');
     const [trainings, setTrainings] = useState([]);
     const [myEnrollments, setMyEnrollments] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -92,6 +99,13 @@ export default function EmployeeTrainingPage() {
     useEffect(() => {
         fetchAll();
     }, [fetchAll]);
+
+    // Scroll the highlighted enrollment into view once it's loaded.
+    useEffect(() => {
+        if (!highlightId || loading || tab !== 'mine') return;
+        const el = document.getElementById(`enrollment-${highlightId}`);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, [highlightId, loading, tab, myEnrollments]);
 
     const enrollmentFor = (trainingId) =>
         myEnrollments.find(e => e.trainingId === trainingId);
@@ -416,11 +430,19 @@ export default function EmployeeTrainingPage() {
                         </div>
                     ) : (
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0' }}>
-                            {myEnrollments.map(enr => (
-                                <div key={enr.id} style={{
-                                    padding: '20px 24px',
-                                    borderBottom: '1px solid var(--card-border)',
-                                }}>
+                            {myEnrollments.map(enr => {
+                                const isHighlighted = highlightId != null && String(enr.trainingId) === String(highlightId);
+                                return (
+                                <div
+                                    key={enr.id}
+                                    id={`enrollment-${enr.trainingId}`}
+                                    style={{
+                                        padding: '20px 24px',
+                                        borderBottom: '1px solid var(--card-border)',
+                                        background: isHighlighted ? 'rgba(79,70,229,0.06)' : 'transparent',
+                                        boxShadow: isHighlighted ? 'inset 0 0 0 2px #4f46e5' : 'none',
+                                        transition: 'background 0.3s, box-shadow 0.3s',
+                                    }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px', gap: '12px' }}>
                                         <div style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)' }}>
                                             {enr.trainingTitle || 'Training Program'}
@@ -450,7 +472,8 @@ export default function EmployeeTrainingPage() {
                                         </div>
                                     )}
                                 </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     )
                 )}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 import {
@@ -72,6 +73,9 @@ function getHeaderBgClass(status) {
 }
 
 export default function EmployeePerformancePage() {
+  const searchParams = useSearchParams();
+  const highlightId = searchParams.get('highlight');
+
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
@@ -92,6 +96,13 @@ export default function EmployeePerformancePage() {
   useEffect(() => {
     fetchReviews();
   }, []);
+
+  // Scroll the highlighted review into view once it's loaded.
+  useEffect(() => {
+    if (!highlightId || loading) return;
+    const el = document.getElementById(`review-${highlightId}`);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [highlightId, loading, reviews]);
 
   const handleAcknowledge = async (reviewId) => {
     if (!comment.trim()) {
@@ -141,12 +152,19 @@ export default function EmployeePerformancePage() {
 
     return (
       <div className="space-y-6">
-        {reviews.map((r) => (
+        {reviews.map((r) => {
+          const isHighlighted = highlightId != null && String(r.id) === String(highlightId);
+          return (
           <div
             key={r.id}
+            id={`review-${r.id}`}
             className={`bg-white dark:bg-slate-900 rounded-2xl border-2 shadow-xs overflow-hidden ${getCardBorderClass(
               r.status
             )}`}
+            style={isHighlighted ? {
+              boxShadow: '0 0 0 4px rgba(79,70,229,0.25)',
+              transition: 'box-shadow 0.3s',
+            } : undefined}
           >
             {/* Review Header */}
             <div
@@ -335,7 +353,8 @@ export default function EmployeePerformancePage() {
               )}
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
     );
   };

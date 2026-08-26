@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   getMyNotifications,
   getUnreadCount,
@@ -135,6 +136,17 @@ const TYPE_META = {
   },
 };
 
+// Maps a notification's referenceType to the employee page it should open.
+// Notifications whose referenceType isn't listed here simply won't navigate
+// anywhere when clicked (they'll just be marked as read).
+const REFERENCE_ROUTES = {
+  LEAVE_REQUEST: '/employee/leave',
+  OnboardingDocument: '/employee/onboarding/documents',
+  Onboarding: '/employee/onboarding/checklist',
+  PERFORMANCE: '/employee/performance',
+  TRAINING: '/employee/training',
+};
+
 function getMeta(notification) {
   return (
     TYPE_META[notification.type] ||
@@ -160,6 +172,8 @@ function formatTimeAgo(dateStr, now) {
 }
 
 export default function NotificationsPage() {
+  const router = useRouter();
+
   const [notifications, setNotifications] =
     useState([]);
 
@@ -334,6 +348,23 @@ export default function NotificationsPage() {
       );
 
       fetchNotifications();
+    }
+  };
+
+  /*
+   * Clicking anywhere on a notification row (except the action buttons,
+   * which stop propagation) marks it as read and, if it points to a
+   * leave/document/performance/training record, navigates there with
+   * the record's id so the destination page can highlight it.
+   */
+  const handleNotificationClick = (n) => {
+    if (!n.isRead) {
+      handleMarkRead(n.id);
+    }
+
+    const path = REFERENCE_ROUTES[n.referenceType];
+    if (path && n.referenceId != null) {
+      router.push(`${path}?highlight=${n.referenceId}`);
     }
   };
 
@@ -1055,6 +1086,9 @@ export default function NotificationsPage() {
             {notifications.map(
               (n, i) => {
                 const meta = getMeta(n);
+                const isNavigable = Boolean(
+                  REFERENCE_ROUTES[n.referenceType] && n.referenceId != null
+                );
 
                 return (
                   <div
@@ -1064,13 +1098,9 @@ export default function NotificationsPage() {
                         ? 'read'
                         : 'unread'
                     }`}
-                    onClick={() => {
-                      if (!n.isRead) {
-                        handleMarkRead(
-                          n.id
-                        );
-                      }
-                    }}
+                    onClick={() =>
+                      handleNotificationClick(n)
+                    }
                     style={{
                       display: 'flex',
                       gap: '16px',
@@ -1078,9 +1108,10 @@ export default function NotificationsPage() {
                         'flex-start',
                       padding:
                         '18px 22px',
-                      cursor: n.isRead
-                        ? 'default'
-                        : 'pointer',
+                      cursor:
+                        isNavigable || !n.isRead
+                          ? 'pointer'
+                          : 'default',
                       borderTop:
                         i === 0
                           ? 'none'
