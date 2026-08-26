@@ -142,23 +142,34 @@ export default function Home() {
       </div>
 
       {/* ── CENTRAL CARD ── */}
-      <div className="w-full max-w-[420px] relative z-10 backdrop-blur-md px-10 pt-9 pb-7 rounded-[22px] flex flex-col items-center mx-4"
+      <div
+        className="w-full max-w-[420px] relative z-10 backdrop-blur-md px-10 pt-9 pb-7 rounded-[22px] flex flex-col items-center mx-4"
         style={{
-          ...(isDark ? {} : { backgroundColor: 'var(--card-bg)' }),
-          border: '1px solid var(--card-border)',
-          boxShadow: 'var(--card-shadow)',
-          transition: 'background-color 0.5s, border-color 0.5s, box-shadow 0.5s',
-        }}>
+          backgroundColor: isDark
+            ? 'rgba(15, 23, 42, 0.72)'
+            : '#f8fafc',
+
+          border: isDark
+            ? '1px solid rgba(255, 255, 255, 0.10)'
+            : '1px solid #e2e8f0',
+
+          boxShadow: isDark
+            ? 'var(--card-shadow)'
+            : '0 20px 45px rgba(15, 23, 42, 0.08)',
+
+          transition:
+            'background-color 0.5s, border-color 0.5s, box-shadow 0.5s',
+        }}
+      >
 
         {/* Inner top glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-20 blur-[35px] rounded-full pointer-events-none"
           style={{ background: 'var(--card-glow)' }} />
 
         {/* Logo */}
-        <div className="relative w-[240px] h-[138px] mb-1 shrink-0">
-          <Image src="/logo.png" alt="Saiteja Infotech" fill className="object-contain" priority />
+        <div className="relative w-[240px] h-[180px] mb-1 shrink-0">
+          <Image src="/removee.png" alt="Saiteja Infotech" fill className="object-contain" priority />
         </div>
-
         {/* HRMS */}
         <h1 className="text-[24px] font-bold mb-1 tracking-wide" style={{ color: 'var(--hrms)', transition: 'color 0.5s' }}>HRMS</h1>
 
