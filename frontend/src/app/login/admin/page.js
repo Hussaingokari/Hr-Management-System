@@ -126,16 +126,20 @@ export default function AdminLogin() {
           />
 
           <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-[#10b981] dark:bg-[#c084fc] z-10 transition-colors" />
+
         </div>
 
         <div className="h-auto p-12 lg:px-16 lg:py-14 flex flex-col justify-center bg-[#111827] dark:bg-[#0B1120] border-t dark:border-slate-800 border-transparent">
 
           <div className="flex items-center gap-3 mb-6">
 
-            <div className="w-8 h-8 rounded bg-transparent border-2 border-[#10b981] dark:border-[#c084fc] flex items-center justify-center transition-colors">
-              <span className="text-[#10b981] dark:text-[#c084fc] font-bold text-lg leading-none">
-                H
-              </span>
+            {/* Company Logo */}
+            <div className="w-[73px] h-[73px] flex items-center justify-center shrink-0 overflow-hidden">
+              <img
+                src="/removee.png"
+                alt="Saiteja Infotech"
+                className="w-[73px] h-[73px] object-contain"
+              />
             </div>
 
             <span className="text-white font-bold text-[17px] tracking-tight">
@@ -184,8 +188,7 @@ export default function AdminLogin() {
           Back
         </button>
 
-        {/* Login Content
-            Same width and spacing as Employee Login */}
+        {/* Login Content */}
         <div className="w-full max-w-sm xl:max-w-md flex flex-col pt-12 -translate-y-14">
 
           {/* Arrow Graphic */}
@@ -347,10 +350,11 @@ export default function AdminLogin() {
             <button
               type="submit"
               disabled={loading || !isFormFilled}
-              className={`w-full py-3 rounded-lg text-[13px] font-bold transition-all flex items-center justify-center gap-2 ${isFormFilled
+              className={`w-full py-3 rounded-lg text-[13px] font-bold transition-all flex items-center justify-center gap-2 ${
+                isFormFilled
                   ? 'bg-[#10b981] dark:bg-[#a855f7] text-white dark:text-white hover:bg-emerald-600 dark:hover:bg-[#9333ea] shadow-[0_4px_14px_0_rgba(16,185,129,0.39)] dark:shadow-none'
                   : 'bg-[#f1f5f9] dark:bg-[#1E293B] text-slate-400 dark:text-slate-600 cursor-not-allowed'
-                }`}
+              }`}
             >
 
               {loading ? (
@@ -412,12 +416,14 @@ export default function AdminLogin() {
             >
               Terms & Conditions
             </Link>
+
             <Link
               href="/privacy"
               className="hover:text-slate-600 font-bold uppercase tracking-wider"
             >
               Privacy Policy
             </Link>
+
           </div>
 
         </div>
