@@ -3,29 +3,30 @@ import { store } from '@/store/store';
 import { logout } from '@/store/authSlice';
 
 const baseURL =
-  process.env.NEXT_PUBLIC_API_BASE_URL !== undefined
-    ? process.env.NEXT_PUBLIC_API_BASE_URL
-    : 'http://localhost:8080';
+  process.env.NEXT_PUBLIC_API_BASE_URL?.trim() ||
+  'http://localhost:8080';
 
 const api = axios.create({
   baseURL,
   headers: {
     'Content-Type': 'application/json',
-    'Cache-Control': 'no-cache, no-store, must-revalidate',
-    'Pragma': 'no-cache',
-    'Expires': '0',
+    Accept: 'application/json',
   },
 });
 
 /*
- * Add access token to every authenticated request.
+ * ============================================================
+ * REQUEST INTERCEPTOR
+ * ============================================================
+ *
+ * Adds the JWT access token only when one exists.
  */
 api.interceptors.request.use(
   (config) => {
     if (typeof window !== 'undefined') {
       const token = sessionStorage.getItem('accessToken');
 
-      if (token && token !== 'undefined') {
+      if (token && token !== 'undefined' && token !== 'null') {
         if (
           config.headers &&
           typeof config.headers.set === 'function'
@@ -35,6 +36,7 @@ api.interceptors.request.use(
             `Bearer ${token}`
           );
         } else {
+          config.headers = config.headers || {};
           config.headers.Authorization =
             `Bearer ${token}`;
         }
@@ -47,85 +49,94 @@ api.interceptors.request.use(
 );
 
 /*
- * Handle authentication/session errors.
+ * ============================================================
+ * RESPONSE INTERCEPTOR
+ * ============================================================
+ *
+ * Handles expired/invalid JWT sessions.
  */
 api.interceptors.response.use(
   (response) => response,
 
-  (error) => {
-    const status = error.response?.status;
+  async (error) => {
+    const status = error?.response?.status;
     const message =
-      error.response?.data?.message || '';
+      error?.response?.data?.message || '';
 
     const requestUrl =
-      error.config?.url || 'unknown URL';
+      error?.config?.url || '';
 
     /*
-     * Backend sends 401 when:
-     * 1. JWT is invalid/expired
-     * 2. HRMS inactivity session has expired
+     * Ignore login and refresh endpoints.
+     *
+     * A 401 from login means invalid credentials,
+     * not an expired existing session.
      */
+    const isAuthRequest =
+      requestUrl.includes('/auth/login') ||
+      requestUrl.includes('/auth/refresh');
+
     if (
       status === 401 &&
-      !requestUrl.includes('/auth/login') &&
-      !requestUrl.includes('/auth/refresh')
+      !isAuthRequest &&
+      typeof window !== 'undefined'
     ) {
-      if (
-        typeof window !== 'undefined' &&
-        sessionStorage.getItem('accessToken')
-      ) {
+      const token =
+        sessionStorage.getItem('accessToken');
+
+      if (token) {
         console.error(
           `[Axios Interceptor] 401 Unauthorized: ${requestUrl}`
         );
 
         /*
-         * If backend specifically says the session
-         * expired because of inactivity, show that
-         * message to the user.
+         * Show the appropriate session message.
          */
-        import('react-hot-toast').then(
-          ({ toast }) => {
-            if (
-              message
-                .toLowerCase()
-                .includes('session expired')
-            ) {
-              toast.error(
-                'Your session expired due to inactivity. Please login again.',
-                {
-                  duration: 5000,
-                }
-              );
-            } else {
-              toast.error(
-                'Your session has expired. Please login again.',
-                {
-                  duration: 5000,
-                }
-              );
-            }
+        try {
+          const { toast } =
+            await import('react-hot-toast');
+
+          if (
+            message
+              .toLowerCase()
+              .includes('session expired')
+          ) {
+            toast.error(
+              'Your session expired due to inactivity. Please login again.',
+              {
+                duration: 5000,
+              }
+            );
+          } else {
+            toast.error(
+              'Your session has expired. Please login again.',
+              {
+                duration: 5000,
+              }
+            );
           }
-        );
+        } catch (toastError) {
+          console.error(
+            'Unable to display session-expired notification.',
+            toastError
+          );
+        }
 
         /*
-         * Use the existing Redux logout.
-         * This clears:
-         * - Redux authentication
-         * - accessToken
-         * - user
+         * Clear Redux/session authentication state.
          */
         store.dispatch(logout());
 
         /*
-         * Redirect to the appropriate login page.
+         * Redirect according to the current portal.
          */
         const currentPath =
           window.location.pathname;
 
         if (currentPath.startsWith('/admin')) {
-          window.location.href = '/admin/login';
+          window.location.replace('/admin/login');
         } else {
-          window.location.href = '/employee/login';
+          window.location.replace('/employee/login');
         }
       }
     }

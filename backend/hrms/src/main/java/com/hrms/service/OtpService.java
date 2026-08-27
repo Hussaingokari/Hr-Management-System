@@ -4,6 +4,7 @@ import com.hrms.entity.OtpStore;
 import com.hrms.repository.OtpStoreRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,85 +17,175 @@ import java.util.Optional;
 @Slf4j
 public class OtpService {
 
-    private final OtpStoreRepository otpStoreRepository;
+        private final OtpStoreRepository otpStoreRepository;
 
-    private final SecureRandom secureRandom = new SecureRandom();
+        private final SecureRandom secureRandom = new SecureRandom();
 
-    @Transactional
-    public String generateAndSaveOtp(String email) {
+        @Value("${app.otp.expiry:10}")
+        private long otpExpiryMinutes;
 
-        // Delete previous OTP for this email
-        otpStoreRepository.deleteByEmail(email);
+        public static final String LOGIN_OTP = "LOGIN";
 
-        // Generate a secure 6-digit OTP
-        String otp = String.format(
-                "%06d",
-                secureRandom.nextInt(1_000_000)
-        );
+        public static final String PASSWORD_RESET_OTP = "PASSWORD_RESET";
 
-        // OTP expires after 10 minutes
-        OtpStore otpStore = new OtpStore(
-                email,
-                otp,
-                LocalDateTime.now().plusMinutes(10)
-        );
+        // ============================================================
+        // LOGIN OTP
+        // ============================================================
 
-        otpStoreRepository.save(otpStore);
+        @Transactional
+        public String generateLoginOtp(String email) {
 
-        // Do not log the actual OTP
-        log.info("OTP generated for email: {}", email);
-
-        return otp;
-    }
-
-    @Transactional
-    public boolean validateOtp(String email, String otp) {
-
-        Optional<OtpStore> otpStore =
-                otpStoreRepository.findLatestActiveOtp(
-                        email,
-                        LocalDateTime.now()
-                );
-
-        if (otpStore.isEmpty()) {
-
-            log.warn(
-                    "No active OTP found for email: {}",
-                    email
-            );
-
-            return false;
+                return generateAndSaveOtp(
+                                email,
+                                LOGIN_OTP);
         }
 
-        OtpStore store = otpStore.get();
+        // ============================================================
+        // PASSWORD RESET OTP
+        // ============================================================
 
-        // Additional expiration check
-        if (store.isExpired()) {
+        @Transactional
+        public String generatePasswordResetOtp(String email) {
 
-            log.warn(
-                    "OTP expired for email: {}",
-                    email
-            );
-
-            return false;
+                return generateAndSaveOtp(
+                                email,
+                                PASSWORD_RESET_OTP);
         }
 
-        // Check OTP value
-        if (!store.getOtp().equals(otp)) {
+        // ============================================================
+        // COMMON GENERATION
+        // ============================================================
 
-            log.warn(
-                    "Invalid OTP for email: {}",
-                    email
-            );
+        private String generateAndSaveOtp(
+                        String email,
+                        String otpType) {
 
-            return false;
+                String normalizedEmail = normalizeEmail(email);
+
+                otpStoreRepository.deleteByEmailAndOtpType(
+                                normalizedEmail,
+                                otpType);
+
+                String otp = String.format(
+                                "%06d",
+                                secureRandom.nextInt(1_000_000));
+
+                OtpStore otpStore = new OtpStore(
+                                normalizedEmail,
+                                otp,
+                                LocalDateTime.now()
+                                                .plusMinutes(otpExpiryMinutes),
+                                otpType);
+
+                otpStoreRepository.saveAndFlush(otpStore);
+
+                log.info(
+                                "{} OTP generated successfully",
+                                otpType);
+
+                return otp;
         }
 
-        // Mark OTP as used
-        store.setUsed(true);
+        // ============================================================
+        // VALIDATE LOGIN OTP
+        // ============================================================
 
-        otpStoreRepository.save(store);
+        @Transactional
+        public boolean validateLoginOtp(
+                        String email,
+                        String otp) {
 
-        return true;
-    }
+                return validateOtp(
+                                email,
+                                otp,
+                                LOGIN_OTP);
+        }
+
+        // ============================================================
+        // VALIDATE PASSWORD RESET OTP
+        // ============================================================
+
+        @Transactional
+        public boolean validatePasswordResetOtp(
+                        String email,
+                        String otp) {
+
+                return validateOtp(
+                                email,
+                                otp,
+                                PASSWORD_RESET_OTP);
+        }
+
+        // ============================================================
+        // COMMON VALIDATION
+        // ============================================================
+
+        private boolean validateOtp(
+                        String email,
+                        String otp,
+                        String otpType) {
+
+                String normalizedEmail = normalizeEmail(email);
+
+                if (otp == null || otp.isBlank()) {
+                        return false;
+                }
+
+                String normalizedOtp = otp.trim();
+
+                if (!normalizedOtp.matches("\\d{6}")) {
+                        return false;
+                }
+
+                Optional<OtpStore> otpStore = otpStoreRepository.findLatestActiveOtp(
+                                normalizedEmail,
+                                otpType,
+                                LocalDateTime.now());
+
+                if (otpStore.isEmpty()) {
+                        log.warn(
+                                        "No active {} OTP found",
+                                        otpType);
+
+                        return false;
+                }
+
+                OtpStore store = otpStore.get();
+
+                if (store.isExpired()) {
+                        return false;
+                }
+
+                if (!store.getOtp().equals(normalizedOtp)) {
+                        log.warn(
+                                        "Invalid {} OTP",
+                                        otpType);
+
+                        return false;
+                }
+
+                // One-time use
+                store.setUsed(true);
+
+                otpStoreRepository.saveAndFlush(store);
+
+                log.info(
+                                "{} OTP verified successfully",
+                                otpType);
+
+                return true;
+        }
+
+        // ============================================================
+        // NORMALIZE EMAIL
+        // ============================================================
+
+        private String normalizeEmail(String email) {
+
+                if (email == null) {
+                        return "";
+                }
+
+                return email.trim().toLowerCase();
+        }
 }

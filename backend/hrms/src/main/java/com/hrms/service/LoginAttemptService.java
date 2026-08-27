@@ -13,99 +13,205 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class LoginAttemptService {
 
-    // ============================================================
-    // LOGIN LOCKOUT CONFIGURATION
-    // ============================================================
-
-    // Account will be locked after 5 consecutive failed attempts.
-    private static final int MAX_FAILED_ATTEMPTS = 2;
-
     private final EmployeeRepository employeeRepository;
     private final UserCacheService userCacheService;
 
     // ============================================================
-    // HANDLE FAILED LOGIN
+    // HANDLE FAILED PASSWORD LOGIN
     // ============================================================
 
-    /**
-     * Records one failed login attempt.
-     *
-     * REQUIRES_NEW ensures that this database update is committed
-     * independently of the login transaction.
-     */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void handleFailedLogin(String email) {
 
-        employeeRepository.findByEmail(email).ifPresent(employee -> {
+        String normalizedEmail = normalizeEmail(email);
 
-            // --------------------------------------------------------
-            // Increment failed attempts
-            // --------------------------------------------------------
+        employeeRepository.findByEmail(normalizedEmail)
+                .ifPresent(employee -> {
 
-            int attempts = employee.getFailedAttempts() + 1;
+                    // ------------------------------------------------
+                    // OTP ALREADY REQUIRED
+                    // ------------------------------------------------
 
-            employee.setFailedAttempts(attempts);
+                    if (employee.isOtpLoginRequired()) {
+                        return;
+                    }
 
-            // --------------------------------------------------------
-            // Lock account after maximum attempts
-            // --------------------------------------------------------
+                    // ------------------------------------------------
+                    // CURRENTLY LOCKED
+                    // ------------------------------------------------
 
-            if (attempts >= MAX_FAILED_ATTEMPTS) {
+                    if (!employee.isAccountNonLocked()) {
+                        return;
+                    }
 
-                employee.setLockTime(LocalDateTime.now());
-            }
+                    // ------------------------------------------------
+                    // INCREMENT FAILED ATTEMPTS
+                    // ------------------------------------------------
 
-            // --------------------------------------------------------
-            // Force database update immediately
-            // --------------------------------------------------------
+                    int attempts = employee.getFailedAttempts() + 1;
 
-            employeeRepository.saveAndFlush(employee);
+                    employee.setFailedAttempts(attempts);
 
-            // --------------------------------------------------------
-            // Remove stale cached employee
-            // --------------------------------------------------------
+                    // ------------------------------------------------
+                    // MAX FAILED ATTEMPTS REACHED
+                    // ------------------------------------------------
 
-            userCacheService.evict(employee.getEmail());
-        });
+                    if (attempts >= Employee.MAX_FAILED_ATTEMPTS) {
+
+                        int lockoutCount = employee.getLockoutCount() + 1;
+
+                        employee.setLockoutCount(
+                                lockoutCount);
+
+                        // Start temporary lock
+                        employee.setLockTime(
+                                LocalDateTime.now());
+
+                        // Start fresh attempt count
+                        employee.setFailedAttempts(0);
+
+                        // ------------------------------------------------
+                        // SECOND LOCKOUT
+                        // ------------------------------------------------
+
+                        if (lockoutCount >= 2) {
+
+                            employee.setOtpLoginRequired(true);
+                        }
+                    }
+
+                    // ------------------------------------------------
+                    // SAVE
+                    // ------------------------------------------------
+
+                    employeeRepository.saveAndFlush(employee);
+
+                    // ------------------------------------------------
+                    // CLEAR CACHE
+                    // ------------------------------------------------
+
+                    userCacheService.evict(
+                            normalizedEmail);
+                });
     }
 
     // ============================================================
-    // RESET FAILED LOGIN ATTEMPTS
+    // CLEAR EXPIRED TEMPORARY LOCK
     // ============================================================
 
-    /**
-     * Resets the failed-attempt counter after a successful login.
-     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void clearExpiredLock(String email) {
+
+        String normalizedEmail = normalizeEmail(email);
+
+        employeeRepository.findByEmail(normalizedEmail)
+                .ifPresent(employee -> {
+
+                    if (employee.getLockTime() == null) {
+                        return;
+                    }
+
+                    // Lock is still active
+                    if (!employee.isAccountNonLocked()) {
+                        return;
+                    }
+
+                    // Lock expired
+                    employee.setLockTime(null);
+
+                    employee.setFailedAttempts(0);
+
+                    /*
+                     * IMPORTANT:
+                     *
+                     * Do NOT reset lockoutCount here.
+                     */
+                    employeeRepository.saveAndFlush(
+                            employee);
+
+                    userCacheService.evict(
+                            normalizedEmail);
+                });
+    }
+
+    // ============================================================
+    // SUCCESSFUL PASSWORD LOGIN
+    // ============================================================
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void resetFailedAttempts(String email) {
 
-        employeeRepository.findByEmail(email).ifPresent(employee -> {
+        String normalizedEmail = normalizeEmail(email);
 
-            // Nothing to reset
-            if (employee.getFailedAttempts() == 0
-                    && employee.getLockTime() == null) {
+        employeeRepository.findByEmail(normalizedEmail)
+                .ifPresent(employee -> {
 
-                return;
-            }
+                    employee.setFailedAttempts(0);
 
-            // --------------------------------------------------------
-            // Reset lockout information
-            // --------------------------------------------------------
+                    employee.setLockTime(null);
 
-            employee.setFailedAttempts(0);
-            employee.setLockTime(null);
+                    /*
+                     * IMPORTANT:
+                     *
+                     * lockoutCount is NOT reset.
+                     *
+                     * Example:
+                     *
+                     * first lock = 1
+                     *
+                     * successful password login
+                     * still = 1
+                     *
+                     * next lock = 2
+                     * OTP becomes required.
+                     */
 
-            // --------------------------------------------------------
-            // Save immediately
-            // --------------------------------------------------------
+                    employeeRepository.saveAndFlush(
+                            employee);
 
-            employeeRepository.saveAndFlush(employee);
+                    userCacheService.evict(
+                            normalizedEmail);
+                });
+    }
 
-            // --------------------------------------------------------
-            // Remove stale cache
-            // --------------------------------------------------------
+    // ============================================================
+    // SUCCESSFUL OTP LOGIN
+    // ============================================================
 
-            userCacheService.evict(employee.getEmail());
-        });
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void resetAfterOtpLogin(String email) {
+
+        String normalizedEmail = normalizeEmail(email);
+
+        employeeRepository.findByEmail(normalizedEmail)
+                .ifPresent(employee -> {
+
+                    employee.setFailedAttempts(0);
+
+                    employee.setLockoutCount(0);
+
+                    employee.setLockTime(null);
+
+                    employee.setOtpLoginRequired(false);
+
+                    employeeRepository.saveAndFlush(
+                            employee);
+
+                    userCacheService.evict(
+                            normalizedEmail);
+                });
+    }
+
+    // ============================================================
+    // NORMALIZE EMAIL
+    // ============================================================
+
+    private String normalizeEmail(String email) {
+
+        if (email == null) {
+            return "";
+        }
+
+        return email.trim().toLowerCase();
     }
 }

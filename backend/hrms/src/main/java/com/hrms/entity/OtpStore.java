@@ -1,11 +1,6 @@
 package com.hrms.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -21,10 +16,10 @@ public class OtpStore {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 255)
     private String email;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 6)
     private String otp;
 
     @Column(nullable = false)
@@ -33,14 +28,23 @@ public class OtpStore {
     @Column(nullable = false)
     private boolean used = false;
 
+    /**
+     * LOGIN
+     * PASSWORD_RESET
+     */
+    @Column(nullable = false, length = 30)
+    private String otpType;
+
     public OtpStore(
             String email,
             String otp,
-            LocalDateTime expiresAt) {
+            LocalDateTime expiresAt,
+            String otpType) {
 
         this.email = email;
         this.otp = otp;
         this.expiresAt = expiresAt;
+        this.otpType = otpType;
         this.used = false;
     }
 
