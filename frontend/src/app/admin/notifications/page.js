@@ -119,6 +119,12 @@ export default function AdminNotificationsPage() {
         return;
       }
 
+      // Job-posted notification -> open the specific job in Recruitment
+      if (type.includes('JOB_POSTED') || type.includes('JOBPOSTING')) {
+        router.push(`/admin/recruitment?id=${encodeURIComponent(referenceId)}`);
+        return;
+      }
+
       if (
         type.includes('DOCUMENT') ||
         type.includes('ONBOARDING') ||

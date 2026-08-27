@@ -58,6 +58,7 @@ public class Notification {
         TRAINING_COMPLETED,
         ONBOARDING_INITIATED,
         JOB_APPLICATION,
+        JOB_POSTED,
         DOCUMENT_UPLOADED,
         DOCUMENT_APPROVED,
         DOCUMENT_REJECTED,
