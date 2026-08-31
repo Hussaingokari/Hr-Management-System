@@ -1469,7 +1469,7 @@ export default function EmployeeLogin() {
           <div className="flex flex-col text-center xl:text-left">
 
             <span className="font-semibold text-slate-500 uppercase tracking-wider">
-              © 2026 Saiteja Infotech Private Limited.
+              © 2025 Saiteja Infotech Private Limited.
             </span>
 
             <span className="text-[9px] text-slate-400 uppercase tracking-widest mt-0.5">
