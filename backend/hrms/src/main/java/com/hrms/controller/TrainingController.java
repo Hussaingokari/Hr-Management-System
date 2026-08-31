@@ -28,23 +28,45 @@ public class TrainingController {
 
         private final TrainingService trainingService;
 
+        // ============================================================
+        // CREATE
+        // ============================================================
+
         @PostMapping
         @PreAuthorize("hasAnyRole('ADMIN','HR')")
         @Operation(summary = "Create training program")
         public ResponseEntity<ApiResponse<TrainingDTOs.Response>> create(
                         @Valid @RequestBody TrainingDTOs.CreateRequest req) {
-                return ResponseEntity.status(HttpStatus.CREATED)
-                                .body(ApiResponse.success("Training created", trainingService.createTraining(req)));
+
+                return ResponseEntity
+                                .status(HttpStatus.CREATED)
+                                .body(
+                                                ApiResponse.success(
+                                                                "Training created",
+                                                                trainingService.createTraining(req)));
         }
+
+        // ============================================================
+        // UPDATE / EDIT
+        // ============================================================
 
         @PutMapping("/{id}")
         @PreAuthorize("hasAnyRole('ADMIN','HR')")
         @Operation(summary = "Update training")
         public ResponseEntity<ApiResponse<TrainingDTOs.Response>> update(
-                        @PathVariable Long id, @RequestBody TrainingDTOs.UpdateRequest req) {
-                return ResponseEntity.ok(ApiResponse.success("Training updated",
-                                trainingService.updateTraining(id, req)));
+                        @PathVariable Long id,
+                        @RequestBody TrainingDTOs.UpdateRequest req) {
+
+                return ResponseEntity.ok(
+                                ApiResponse.success(
+                                                "Training updated",
+                                                trainingService.updateTraining(id, req)));
         }
+
+        // ============================================================
+        // UPDATE STATUS
+        // Used mainly for CANCEL
+        // ============================================================
 
         @PutMapping("/{id}/status")
         @PreAuthorize("hasAnyRole('ADMIN','HR')")
@@ -52,45 +74,124 @@ public class TrainingController {
         public ResponseEntity<ApiResponse<TrainingDTOs.Response>> updateStatus(
                         @PathVariable Long id,
                         @RequestBody Map<String, String> request) {
+
                 String status = request.get("status");
-                return ResponseEntity.ok(ApiResponse.success("Training status updated",
-                                trainingService.updateStatus(id, status)));
+
+                return ResponseEntity.ok(
+                                ApiResponse.success(
+                                                "Training status updated",
+                                                trainingService.updateStatus(id, status)));
         }
+
+        // ============================================================
+        // RE-OPEN CANCELLED TRAINING
+        // ============================================================
+
+        @PutMapping("/{id}/reopen")
+        @PreAuthorize("hasAnyRole('ADMIN','HR')")
+        @Operation(summary = "Re-open cancelled training")
+        public ResponseEntity<ApiResponse<TrainingDTOs.Response>> reopen(
+                        @PathVariable Long id,
+                        @RequestBody TrainingDTOs.UpdateRequest req) {
+
+                return ResponseEntity.ok(
+                                ApiResponse.success(
+                                                "Training re-opened successfully",
+                                                trainingService.reopenTraining(id, req)));
+        }
+
+        // ============================================================
+        // DELETE PERMANENTLY
+        // ============================================================
+
+        @DeleteMapping("/{id}")
+        @PreAuthorize("hasAnyRole('ADMIN','HR')")
+        @Operation(summary = "Delete training permanently")
+        public ResponseEntity<ApiResponse<Void>> delete(
+                        @PathVariable Long id) {
+
+                trainingService.deleteTraining(id);
+
+                return ResponseEntity.ok(
+                                ApiResponse.success(
+                                                "Training deleted successfully",
+                                                null));
+        }
+
+        // ============================================================
+        // GET ALL
+        // ============================================================
 
         @GetMapping
         @Operation(summary = "Get all trainings")
         public ResponseEntity<ApiResponse<Page<TrainingDTOs.Response>>> all(
                         @RequestParam(defaultValue = "0") int page,
                         @RequestParam(defaultValue = "10") int size) {
-                return ResponseEntity.ok(ApiResponse.success("Trainings",
-                                trainingService.getAllTrainings(PageRequest.of(page, size,
-                                                Sort.by("startDate").descending()))));
+
+                return ResponseEntity.ok(
+                                ApiResponse.success(
+                                                "Trainings",
+                                                trainingService.getAllTrainings(
+                                                                PageRequest.of(
+                                                                                page,
+                                                                                size,
+                                                                                Sort.by("startDate").descending()))));
         }
+
+        // ============================================================
+        // GET BY ID
+        // ============================================================
 
         @GetMapping("/{id}")
         @Operation(summary = "Get training by ID")
-        public ResponseEntity<ApiResponse<TrainingDTOs.Response>> getById(@PathVariable Long id) {
-                return ResponseEntity.ok(ApiResponse.success("Training found", trainingService.getById(id)));
+        public ResponseEntity<ApiResponse<TrainingDTOs.Response>> getById(
+                        @PathVariable Long id) {
+
+                return ResponseEntity.ok(
+                                ApiResponse.success(
+                                                "Training found",
+                                                trainingService.getById(id)));
         }
+
+        // ============================================================
+        // GET ENROLLMENTS
+        // ============================================================
 
         @GetMapping("/{id}/enrollments")
         @PreAuthorize("hasAnyRole('ADMIN','HR')")
         @Operation(summary = "Get enrollments for a training")
         public ResponseEntity<ApiResponse<List<TrainingDTOs.EnrollmentResponse>>> getEnrollments(
                         @PathVariable Long id) {
-                return ResponseEntity.ok(ApiResponse.success("Enrollments",
-                                trainingService.getEnrollmentsForTraining(id)));
+
+                return ResponseEntity.ok(
+                                ApiResponse.success(
+                                                "Enrollments",
+                                                trainingService.getEnrollmentsForTraining(id)));
         }
+
+        // ============================================================
+        // ENROLL
+        // ============================================================
 
         @PostMapping("/{id}/enroll")
         @Operation(summary = "Enroll employee in training")
         public ResponseEntity<ApiResponse<TrainingDTOs.EnrollmentResponse>> enroll(
                         @PathVariable Long id,
-                        @RequestBody TrainingDTOs.EnrollRequest req) {
-                return ResponseEntity.status(HttpStatus.CREATED)
-                                .body(ApiResponse.success("Enrolled successfully",
-                                                trainingService.enroll(id, req.getEmployeeId())));
+                        @Valid @RequestBody TrainingDTOs.EnrollRequest req) {
+
+                return ResponseEntity
+                                .status(HttpStatus.CREATED)
+                                .body(
+                                                ApiResponse.success(
+                                                                "Enrolled successfully",
+                                                                trainingService.enroll(
+                                                                                id,
+                                                                                req.getEmployeeId())));
         }
+
+        // ============================================================
+        // COMPLETE ENROLLMENT
+        // ============================================================
 
         @PutMapping("/enrollments/{enrollmentId}/complete")
         @PreAuthorize("hasAnyRole('ADMIN','HR')")
@@ -98,9 +199,18 @@ public class TrainingController {
         public ResponseEntity<ApiResponse<TrainingDTOs.EnrollmentResponse>> complete(
                         @PathVariable Long enrollmentId,
                         @RequestBody TrainingDTOs.CompleteRequest req) {
-                return ResponseEntity.ok(ApiResponse.success("Marked complete",
-                                trainingService.markComplete(enrollmentId, req)));
+
+                return ResponseEntity.ok(
+                                ApiResponse.success(
+                                                "Marked complete",
+                                                trainingService.markComplete(
+                                                                enrollmentId,
+                                                                req)));
         }
+
+        // ============================================================
+        // MY TRAININGS
+        // ============================================================
 
         @GetMapping("/my")
         @Operation(summary = "Get my training enrollments")
@@ -108,7 +218,12 @@ public class TrainingController {
                         @AuthenticationPrincipal Employee emp,
                         @RequestParam(defaultValue = "0") int page,
                         @RequestParam(defaultValue = "10") int size) {
-                return ResponseEntity.ok(ApiResponse.success("My trainings",
-                                trainingService.getMyTrainings(emp.getId(), PageRequest.of(page, size))));
+
+                return ResponseEntity.ok(
+                                ApiResponse.success(
+                                                "My trainings",
+                                                trainingService.getMyTrainings(
+                                                                emp.getId(),
+                                                                PageRequest.of(page, size))));
         }
 }
