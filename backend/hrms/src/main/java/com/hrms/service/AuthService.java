@@ -55,13 +55,18 @@ public class AuthService {
                 Employee employee;
 
                 try {
+
                         employee = employeeRepository
                                         .findByEmail(email)
                                         .orElseThrow(() -> new BadCredentialsException(
                                                         "Invalid email or password"));
+
                 } catch (BadCredentialsException ex) {
+
                         throw ex;
+
                 } catch (Exception ex) {
+
                         log.error(
                                         "Failed to load employee during login",
                                         ex);
@@ -75,19 +80,29 @@ public class AuthService {
                 // --------------------------------------------------------
 
                 if (!employee.isActive()) {
+
                         throw new BadCredentialsException(
                                         "Your account is inactive. Please contact HR/Admin.");
                 }
 
                 // --------------------------------------------------------
                 // OTP LOGIN REQUIRED
+                // OTP IS ONLY FOR EMPLOYEES
                 // --------------------------------------------------------
 
                 /*
-                 * After the configured number of lockouts, password login
-                 * is disabled and the employee must use OTP verification.
+                 * IMPORTANT:
+                 *
+                 * OTP login is only available for EMPLOYEE accounts.
+                 *
+                 * Even if an old database record accidentally contains
+                 * otpLoginRequired = true for HR/Admin, it will NOT block
+                 * their normal password login.
                  */
-                if (employee.isOtpLoginRequired()) {
+
+                if (employee.getRole() == Role.EMPLOYEE
+                                && employee.isOtpLoginRequired()) {
+
                         throw new OtpLoginRequiredException(
                                         "OTP verification required");
                 }
@@ -141,29 +156,33 @@ public class AuthService {
                 } catch (BadCredentialsException ex) {
 
                         /*
-                         * Failed login must be recorded in a separate transaction
-                         * so the failed-attempt state is persisted even though
-                         * authentication fails.
+                         * Failed login is handled in a separate transaction
+                         * so failed-attempt state is persisted.
                          */
+
                         loginAttemptService.handleFailedLogin(email);
 
                         /*
-                         * Always reload the employee from the database.
+                         * Always reload the latest employee state.
                          */
+
                         Employee latestEmployee = employeeRepository
                                         .findByEmail(email)
                                         .orElse(null);
 
                         if (latestEmployee == null) {
+
                                 throw new BadCredentialsException(
                                                 "Invalid email or password");
                         }
 
                         // ----------------------------------------------------
                         // OTP NOW REQUIRED
+                        // ONLY EMPLOYEE CAN ENTER THIS STATE
                         // ----------------------------------------------------
 
-                        if (latestEmployee.isOtpLoginRequired()) {
+                        if (latestEmployee.getRole() == Role.EMPLOYEE
+                                        && latestEmployee.isOtpLoginRequired()) {
 
                                 throw new OtpLoginRequiredException(
                                                 "OTP verification required");
@@ -242,6 +261,7 @@ public class AuthService {
                         Employee employee) {
 
                 if (employee == null) {
+
                         throw new BadCredentialsException(
                                         "Invalid OTP login request");
                 }
@@ -250,6 +270,7 @@ public class AuthService {
                                 employee.getEmail());
 
                 if (email.isEmpty()) {
+
                         throw new BadCredentialsException(
                                         "Invalid OTP login request");
                 }
@@ -268,8 +289,20 @@ public class AuthService {
                 // --------------------------------------------------------
 
                 if (!currentEmployee.isActive()) {
+
                         throw new BadCredentialsException(
                                         "Your account is inactive. Please contact HR/Admin.");
+                }
+
+                // --------------------------------------------------------
+                // ROLE CHECK
+                // OTP LOGIN IS ONLY FOR EMPLOYEES
+                // --------------------------------------------------------
+
+                if (currentEmployee.getRole() != Role.EMPLOYEE) {
+
+                        throw new BadCredentialsException(
+                                        "OTP login is only available for employees.");
                 }
 
                 // --------------------------------------------------------
@@ -277,6 +310,7 @@ public class AuthService {
                 // --------------------------------------------------------
 
                 if (!currentEmployee.isOtpLoginRequired()) {
+
                         throw new BadCredentialsException(
                                         "OTP login is not required for this account.");
                 }
@@ -489,13 +523,18 @@ public class AuthService {
 
                 // --------------------------------------------------------
                 // OTP REQUIRED CHECK
+                // ONLY EMPLOYEE
                 // --------------------------------------------------------
 
                 /*
-                 * If an account has entered the OTP-required state,
-                 * do not allow an old refresh token to bypass that state.
+                 * Prevent an old refresh token from bypassing the
+                 * OTP requirement for an employee.
+                 *
+                 * HR/Admin accounts are never blocked by this condition.
                  */
-                if (employee.isOtpLoginRequired()) {
+
+                if (employee.getRole() == Role.EMPLOYEE
+                                && employee.isOtpLoginRequired()) {
 
                         throw new OtpLoginRequiredException(
                                         "OTP verification required");

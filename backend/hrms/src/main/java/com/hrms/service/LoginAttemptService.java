@@ -1,6 +1,7 @@
 package com.hrms.service;
 
 import com.hrms.entity.Employee;
+import com.hrms.enums.Role;
 import com.hrms.repository.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,9 +31,11 @@ public class LoginAttemptService {
 
                     // ------------------------------------------------
                     // OTP ALREADY REQUIRED
+                    // OTP LOCKOUT IS ONLY FOR EMPLOYEES
                     // ------------------------------------------------
 
-                    if (employee.isOtpLoginRequired()) {
+                    if (employee.getRole() == Role.EMPLOYEE
+                            && employee.isOtpLoginRequired()) {
                         return;
                     }
 
@@ -60,8 +63,7 @@ public class LoginAttemptService {
 
                         int lockoutCount = employee.getLockoutCount() + 1;
 
-                        employee.setLockoutCount(
-                                lockoutCount);
+                        employee.setLockoutCount(lockoutCount);
 
                         // Start temporary lock
                         employee.setLockTime(
@@ -72,9 +74,11 @@ public class LoginAttemptService {
 
                         // ------------------------------------------------
                         // SECOND LOCKOUT
+                        // OTP IS ONLY ENABLED FOR EMPLOYEES
                         // ------------------------------------------------
 
-                        if (lockoutCount >= 2) {
+                        if (employee.getRole() == Role.EMPLOYEE
+                                && lockoutCount >= 2) {
 
                             employee.setOtpLoginRequired(true);
                         }
@@ -126,6 +130,7 @@ public class LoginAttemptService {
                      *
                      * Do NOT reset lockoutCount here.
                      */
+
                     employeeRepository.saveAndFlush(
                             employee);
 
@@ -155,7 +160,7 @@ public class LoginAttemptService {
                      *
                      * lockoutCount is NOT reset.
                      *
-                     * Example:
+                     * Employee:
                      *
                      * first lock = 1
                      *
@@ -164,6 +169,9 @@ public class LoginAttemptService {
                      *
                      * next lock = 2
                      * OTP becomes required.
+                     *
+                     * HR/Admin:
+                     * OTP is never enabled by this service.
                      */
 
                     employeeRepository.saveAndFlush(
