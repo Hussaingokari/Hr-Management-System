@@ -3,10 +3,12 @@ package com.hrms.service;
 import com.hrms.dto.AuthDTOs;
 import com.hrms.entity.Employee;
 import com.hrms.enums.Role;
+import com.hrms.exception.OtpLoginRequiredException;
 import com.hrms.repository.EmployeeRepository;
 import com.hrms.security.JwtUtil;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -21,6 +23,7 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
         private final AuthenticationManager authenticationManager;
@@ -31,148 +34,348 @@ public class AuthService {
         private final LoginAttemptService loginAttemptService;
 
         // ============================================================
-        // LOGIN
+        // NORMAL PASSWORD LOGIN
         // ============================================================
 
-        public AuthDTOs.AuthResponse login(AuthDTOs.LoginRequest request) {
+        @Transactional
+        public AuthDTOs.AuthResponse login(
+                        AuthDTOs.LoginRequest request) {
 
-                final String email = request.getEmail();
+                String email = normalizeEmail(request.getEmail());
 
-                Employee emp;
+                if (email.isEmpty()) {
+                        throw new BadCredentialsException(
+                                        "Invalid email or password");
+                }
 
                 // --------------------------------------------------------
-                // FIND USER
+                // FIND EMPLOYEE
                 // --------------------------------------------------------
+
+                Employee employee;
 
                 try {
-
-                        emp = userCacheService.getByEmail(email);
-
-                } catch (Exception e) {
+                        employee = employeeRepository
+                                        .findByEmail(email)
+                                        .orElseThrow(() -> new BadCredentialsException(
+                                                        "Invalid email or password"));
+                } catch (BadCredentialsException ex) {
+                        throw ex;
+                } catch (Exception ex) {
+                        log.error(
+                                        "Failed to load employee during login",
+                                        ex);
 
                         throw new BadCredentialsException(
                                         "Invalid email or password");
                 }
 
                 // --------------------------------------------------------
-                // CHECK EXPIRED LOCK
+                // ACTIVE CHECK
                 // --------------------------------------------------------
 
-                emp = clearExpiredLock(emp);
-
-                // --------------------------------------------------------
-                // CHECK ACTIVE LOCK
-                // --------------------------------------------------------
-
-                if (!emp.isAccountNonLocked()) {
-
-                        long minutesLeft = minutesRemaining(
-                                        emp.getLockTime());
-
-                        throw new LockedException(
-                                        "Account is locked due to multiple failed login attempts. "
-                                                        + "Try again in "
-                                                        + minutesLeft
-                                                        + " minute(s).");
+                if (!employee.isActive()) {
+                        throw new BadCredentialsException(
+                                        "Your account is inactive. Please contact HR/Admin.");
                 }
 
                 // --------------------------------------------------------
-                // PORTAL VALIDATION
+                // OTP LOGIN REQUIRED
                 // --------------------------------------------------------
 
-                if ("EMPLOYEE".equalsIgnoreCase(request.getLoginType())) {
-
-                        if (emp.getRole() != Role.EMPLOYEE) {
-
-                                throw new BadCredentialsException(
-                                                "This account belongs to Admin/HR. "
-                                                                + "Please use the Admin/HR login portal.");
-                        }
-
-                } else if ("ADMIN".equalsIgnoreCase(request.getLoginType())) {
-
-                        if (emp.getRole() == Role.EMPLOYEE) {
-
-                                throw new BadCredentialsException(
-                                                "This account is an Employee account. "
-                                                                + "Please use the Employee login portal.");
-                        }
+                /*
+                 * After the configured number of lockouts, password login
+                 * is disabled and the employee must use OTP verification.
+                 */
+                if (employee.isOtpLoginRequired()) {
+                        throw new OtpLoginRequiredException(
+                                        "OTP verification required");
                 }
+
+                // --------------------------------------------------------
+                // EXPIRED TEMPORARY LOCK
+                // --------------------------------------------------------
+
+                if (employee.getLockTime() != null
+                                && employee.isAccountNonLocked()) {
+
+                        loginAttemptService.clearExpiredLock(email);
+
+                        employee = employeeRepository
+                                        .findByEmail(email)
+                                        .orElseThrow(() -> new BadCredentialsException(
+                                                        "Invalid email or password"));
+                }
+
+                // --------------------------------------------------------
+                // CURRENTLY LOCKED
+                // --------------------------------------------------------
+
+                if (!employee.isAccountNonLocked()) {
+
+                        throw buildLockedException(
+                                        employee.getLockTime());
+                }
+
+                // --------------------------------------------------------
+                // LOGIN TYPE VALIDATION
+                // --------------------------------------------------------
+
+                validateLoginType(
+                                employee,
+                                request.getLoginType());
 
                 // --------------------------------------------------------
                 // PASSWORD AUTHENTICATION
                 // --------------------------------------------------------
 
-                Authentication auth;
+                Authentication authentication;
 
                 try {
 
-                        auth = authenticationManager.authenticate(
+                        authentication = authenticationManager.authenticate(
                                         new UsernamePasswordAuthenticationToken(
                                                         email,
                                                         request.getPassword()));
 
                 } catch (BadCredentialsException ex) {
 
-                        // IMPORTANT:
-                        // Save the failed attempt in an independent transaction.
+                        /*
+                         * Failed login must be recorded in a separate transaction
+                         * so the failed-attempt state is persisted even though
+                         * authentication fails.
+                         */
                         loginAttemptService.handleFailedLogin(email);
 
-                        // Return the normal authentication error.
-                        throw ex;
+                        /*
+                         * Always reload the employee from the database.
+                         */
+                        Employee latestEmployee = employeeRepository
+                                        .findByEmail(email)
+                                        .orElse(null);
+
+                        if (latestEmployee == null) {
+                                throw new BadCredentialsException(
+                                                "Invalid email or password");
+                        }
+
+                        // ----------------------------------------------------
+                        // OTP NOW REQUIRED
+                        // ----------------------------------------------------
+
+                        if (latestEmployee.isOtpLoginRequired()) {
+
+                                throw new OtpLoginRequiredException(
+                                                "OTP verification required");
+                        }
+
+                        // ----------------------------------------------------
+                        // TEMPORARY LOCK CREATED
+                        // ----------------------------------------------------
+
+                        if (latestEmployee.getLockTime() != null
+                                        && !latestEmployee.isAccountNonLocked()) {
+
+                                throw buildLockedException(
+                                                latestEmployee.getLockTime());
+                        }
+
+                        // ----------------------------------------------------
+                        // NORMAL INVALID PASSWORD
+                        // ----------------------------------------------------
+
+                        throw new BadCredentialsException(
+                                        "Invalid email or password");
                 }
 
-                // --------------------------------------------------------
-                // SUCCESSFUL LOGIN
-                // --------------------------------------------------------
+                // ========================================================
+                // SUCCESSFUL PASSWORD LOGIN
+                // ========================================================
 
-                Employee authenticated = (Employee) auth.getPrincipal();
+                Employee authenticatedEmployee = (Employee) authentication.getPrincipal();
 
                 // --------------------------------------------------------
-                // RESET FAILED LOGIN COUNTER
+                // RESET CURRENT FAILED ATTEMPTS
                 // --------------------------------------------------------
 
                 loginAttemptService.resetFailedAttempts(
-                                authenticated.getEmail());
+                                authenticatedEmployee.getEmail());
 
                 // --------------------------------------------------------
-                // START SESSION ACTIVITY
+                // START / UPDATE SESSION ACTIVITY
                 // --------------------------------------------------------
 
                 sessionActivityService.recordActivity(
-                                authenticated.getEmail());
+                                authenticatedEmployee.getEmail());
 
                 // --------------------------------------------------------
-                // CREATE RESPONSE
+                // RELOAD AFTER SECURITY STATE UPDATE
                 // --------------------------------------------------------
+
+                Employee latestEmployee = employeeRepository
+                                .findByEmail(
+                                                authenticatedEmployee.getEmail())
+                                .orElseThrow(() -> new BadCredentialsException(
+                                                "User account not found"));
+
+                // --------------------------------------------------------
+                // CLEAR CACHE
+                // --------------------------------------------------------
+
+                userCacheService.evict(
+                                latestEmployee.getEmail());
+
+                // --------------------------------------------------------
+                // BUILD JWT RESPONSE
+                // --------------------------------------------------------
+
+                return buildAuthResponse(
+                                latestEmployee);
+        }
+
+        // ============================================================
+        // LOGIN USING OTP
+        // ============================================================
+
+        @Transactional
+        public AuthDTOs.AuthResponse loginWithOtp(
+                        Employee employee) {
+
+                if (employee == null) {
+                        throw new BadCredentialsException(
+                                        "Invalid OTP login request");
+                }
+
+                String email = normalizeEmail(
+                                employee.getEmail());
+
+                if (email.isEmpty()) {
+                        throw new BadCredentialsException(
+                                        "Invalid OTP login request");
+                }
+
+                // --------------------------------------------------------
+                // ALWAYS LOAD FRESH EMPLOYEE
+                // --------------------------------------------------------
+
+                Employee currentEmployee = employeeRepository
+                                .findByEmail(email)
+                                .orElseThrow(() -> new BadCredentialsException(
+                                                "User account not found"));
+
+                // --------------------------------------------------------
+                // ACTIVE CHECK
+                // --------------------------------------------------------
+
+                if (!currentEmployee.isActive()) {
+                        throw new BadCredentialsException(
+                                        "Your account is inactive. Please contact HR/Admin.");
+                }
+
+                // --------------------------------------------------------
+                // OTP REQUIRED CHECK
+                // --------------------------------------------------------
+
+                if (!currentEmployee.isOtpLoginRequired()) {
+                        throw new BadCredentialsException(
+                                        "OTP login is not required for this account.");
+                }
+
+                // --------------------------------------------------------
+                // RESET LOGIN LOCK STATE
+                // --------------------------------------------------------
+
+                loginAttemptService.resetAfterOtpLogin(
+                                email);
+
+                // --------------------------------------------------------
+                // RELOAD AFTER RESET
+                // --------------------------------------------------------
+
+                Employee authenticatedEmployee = employeeRepository
+                                .findByEmail(email)
+                                .orElseThrow(() -> new BadCredentialsException(
+                                                "User account not found"));
+
+                // --------------------------------------------------------
+                // CLEAR CACHE
+                // --------------------------------------------------------
+
+                userCacheService.evict(email);
+
+                // --------------------------------------------------------
+                // RECORD SESSION ACTIVITY
+                // --------------------------------------------------------
+
+                sessionActivityService.recordActivity(email);
+
+                // --------------------------------------------------------
+                // BUILD JWT
+                // --------------------------------------------------------
+
+                return buildAuthResponse(
+                                authenticatedEmployee);
+        }
+
+        // ============================================================
+        // BUILD AUTH RESPONSE
+        // ============================================================
+
+        private AuthDTOs.AuthResponse buildAuthResponse(
+                        Employee employee) {
+
+                if (employee == null
+                                || employee.getRole() == null) {
+
+                        throw new BadCredentialsException(
+                                        "Invalid employee account");
+                }
 
                 AuthDTOs.AuthResponse response = new AuthDTOs.AuthResponse();
 
+                // --------------------------------------------------------
+                // ACCESS TOKEN
+                // --------------------------------------------------------
+
                 response.setAccessToken(
-                                jwtUtil.generateToken(authenticated));
+                                jwtUtil.generateToken(employee));
+
+                // --------------------------------------------------------
+                // REFRESH TOKEN
+                // --------------------------------------------------------
 
                 response.setRefreshToken(
-                                jwtUtil.generateRefreshToken(authenticated));
+                                jwtUtil.generateRefreshToken(employee));
+
+                response.setTokenType("Bearer");
+
+                // --------------------------------------------------------
+                // USER INFORMATION
+                // --------------------------------------------------------
 
                 response.setRole(
-                                authenticated.getRole().name());
+                                employee.getRole().name());
 
                 response.setEmployeeId(
-                                authenticated.getId());
+                                employee.getId());
 
                 response.setEmployeeCode(
-                                authenticated.getEmployeeId());
+                                employee.getEmployeeId());
 
                 response.setName(
-                                authenticated.getFirstName()
-                                                + " "
-                                                + authenticated.getLastName());
+                                buildEmployeeName(employee));
 
                 response.setEmail(
-                                authenticated.getEmail());
+                                employee.getEmail());
+
+                // --------------------------------------------------------
+                // TOKEN EXPIRATION
+                // --------------------------------------------------------
 
                 response.setExpiresIn(
                                 jwtUtil.getExpiration());
+
+                response.setRequiresOtp(false);
 
                 return response;
         }
@@ -181,16 +384,40 @@ public class AuthService {
         // REFRESH TOKEN
         // ============================================================
 
-        @Transactional(readOnly = true)
         public AuthDTOs.AuthResponse refresh(
                         AuthDTOs.RefreshTokenRequest request) {
 
+                if (request == null
+                                || request.getRefreshToken() == null
+                                || request.getRefreshToken().isBlank()) {
+
+                        throw new BadCredentialsException(
+                                        "Invalid refresh token");
+                }
+
+                String refreshToken = request.getRefreshToken().trim();
+
                 // --------------------------------------------------------
-                // VALIDATE REFRESH TOKEN
+                // VALIDATE TOKEN
                 // --------------------------------------------------------
 
-                if (!jwtUtil.validateToken(
-                                request.getRefreshToken())) {
+                try {
+
+                        if (!jwtUtil.validateToken(refreshToken)) {
+
+                                throw new BadCredentialsException(
+                                                "Invalid or expired refresh token");
+                        }
+
+                } catch (BadCredentialsException ex) {
+
+                        throw ex;
+
+                } catch (Exception ex) {
+
+                        log.warn(
+                                        "Refresh token validation failed",
+                                        ex);
 
                         throw new BadCredentialsException(
                                         "Invalid or expired refresh token");
@@ -200,132 +427,224 @@ public class AuthService {
                 // EXTRACT EMAIL
                 // --------------------------------------------------------
 
-                String email = jwtUtil.extractEmail(
-                                request.getRefreshToken());
-
-                Employee emp;
-
-                // --------------------------------------------------------
-                // FIND USER
-                // --------------------------------------------------------
+                String email;
 
                 try {
 
-                        emp = userCacheService.getByEmail(email);
+                        email = normalizeEmail(
+                                        jwtUtil.extractEmail(refreshToken));
 
-                } catch (Exception e) {
+                } catch (Exception ex) {
+
+                        log.warn(
+                                        "Unable to extract identity from refresh token",
+                                        ex);
 
                         throw new BadCredentialsException(
-                                        "User not found");
+                                        "Invalid or expired refresh token");
+                }
+
+                if (email.isEmpty()) {
+
+                        throw new BadCredentialsException(
+                                        "Invalid or expired refresh token");
                 }
 
                 // --------------------------------------------------------
-                // CREATE NEW TOKENS
-                //
-                // Do not reset inactivity timer here.
+                // FIND CURRENT EMPLOYEE
                 // --------------------------------------------------------
 
-                AuthDTOs.AuthResponse response = new AuthDTOs.AuthResponse();
+                Employee employee;
 
-                response.setAccessToken(
-                                jwtUtil.generateToken(emp));
+                try {
 
-                response.setRefreshToken(
-                                jwtUtil.generateRefreshToken(emp));
+                        employee = employeeRepository
+                                        .findByEmail(email)
+                                        .orElseThrow(() -> new BadCredentialsException(
+                                                        "Invalid or expired refresh token"));
 
-                response.setRole(
-                                emp.getRole().name());
+                } catch (BadCredentialsException ex) {
 
-                response.setEmployeeId(
-                                emp.getId());
+                        throw ex;
 
-                response.setEmployeeCode(
-                                emp.getEmployeeId());
+                } catch (Exception ex) {
 
-                response.setName(
-                                emp.getFirstName()
-                                                + " "
-                                                + emp.getLastName());
+                        log.error(
+                                        "Failed to load employee during token refresh",
+                                        ex);
 
-                response.setEmail(
-                                emp.getEmail());
+                        throw new BadCredentialsException(
+                                        "Unable to refresh authentication token");
+                }
 
-                response.setExpiresIn(
-                                jwtUtil.getExpiration());
+                // --------------------------------------------------------
+                // ACTIVE CHECK
+                // --------------------------------------------------------
 
-                return response;
+                if (!employee.isActive()) {
+
+                        throw new BadCredentialsException(
+                                        "Account is inactive");
+                }
+
+                // --------------------------------------------------------
+                // OTP REQUIRED CHECK
+                // --------------------------------------------------------
+
+                /*
+                 * If an account has entered the OTP-required state,
+                 * do not allow an old refresh token to bypass that state.
+                 */
+                if (employee.isOtpLoginRequired()) {
+
+                        throw new OtpLoginRequiredException(
+                                        "OTP verification required");
+                }
+
+                // --------------------------------------------------------
+                // TEMPORARY LOCK CHECK
+                // --------------------------------------------------------
+
+                if (!employee.isAccountNonLocked()) {
+
+                        throw buildLockedException(
+                                        employee.getLockTime());
+                }
+
+                // --------------------------------------------------------
+                // BUILD NEW ACCESS + REFRESH TOKENS
+                // --------------------------------------------------------
+
+                return buildAuthResponse(employee);
         }
 
         // ============================================================
-        // CLEAR EXPIRED LOCK
+        // LOGIN TYPE VALIDATION
         // ============================================================
 
-        private Employee clearExpiredLock(Employee emp) {
+        private void validateLoginType(
+                        Employee employee,
+                        String loginType) {
 
-                // No lock exists
-                if (emp.getLockTime() == null) {
-                        return emp;
+                if (employee == null
+                                || employee.getRole() == null) {
+
+                        throw new BadCredentialsException(
+                                        "Invalid employee account");
+                }
+
+                if (loginType == null
+                                || loginType.isBlank()) {
+
+                        return;
+                }
+
+                String normalizedLoginType = loginType.trim().toUpperCase();
+
+                // --------------------------------------------------------
+                // EMPLOYEE LOGIN
+                // --------------------------------------------------------
+
+                if ("EMPLOYEE".equals(normalizedLoginType)) {
+
+                        if (employee.getRole() != Role.EMPLOYEE) {
+
+                                throw new BadCredentialsException(
+                                                "This account belongs to Admin/HR. " +
+                                                                "Please use the Admin/HR login portal.");
+                        }
+
+                        return;
                 }
 
                 // --------------------------------------------------------
-                // CHECK LOCK EXPIRATION
+                // ADMIN / HR LOGIN
                 // --------------------------------------------------------
 
-                long elapsedMinutes = Duration.between(
-                                emp.getLockTime(),
-                                LocalDateTime.now()).toMinutes();
+                if ("ADMIN".equals(normalizedLoginType)) {
 
-                boolean expired = elapsedMinutes >= Employee.LOCK_DURATION_MINUTES;
+                        if (employee.getRole() == Role.EMPLOYEE) {
 
-                if (!expired) {
-                        return emp;
+                                throw new BadCredentialsException(
+                                                "This account is an Employee account. " +
+                                                                "Please use the Employee login portal.");
+                        }
+
+                        return;
                 }
 
                 // --------------------------------------------------------
-                // LOAD FRESH EMPLOYEE FROM DATABASE
+                // INVALID LOGIN TYPE
                 // --------------------------------------------------------
 
-                Employee managed = employeeRepository.findByEmail(
-                                emp.getEmail()).orElse(emp);
-
-                // --------------------------------------------------------
-                // RESET LOCK
-                // --------------------------------------------------------
-
-                managed.setFailedAttempts(0);
-                managed.setLockTime(null);
-
-                Employee saved = employeeRepository.saveAndFlush(managed);
-
-                // --------------------------------------------------------
-                // CLEAR CACHE
-                // --------------------------------------------------------
-
-                userCacheService.evict(
-                                saved.getEmail());
-
-                return saved;
+                throw new BadCredentialsException(
+                                "Invalid login type");
         }
 
         // ============================================================
-        // CALCULATE REMAINING LOCK TIME
+        // BUILD LOCKED EXCEPTION
         // ============================================================
 
-        private long minutesRemaining(
+        private LockedException buildLockedException(
                         LocalDateTime lockTime) {
 
                 if (lockTime == null) {
-                        return 0;
+
+                        return new LockedException(
+                                        "Account temporarily locked. " +
+                                                        "Please try again later.");
                 }
 
-                long elapsed = Duration.between(
-                                lockTime,
-                                LocalDateTime.now()).toMinutes();
+                LocalDateTime unlockTime = lockTime.plusMinutes(
+                                Employee.LOCK_DURATION_MINUTES);
 
-                long remaining = Employee.LOCK_DURATION_MINUTES
-                                - elapsed;
+                long remainingSeconds = Duration.between(
+                                LocalDateTime.now(),
+                                unlockTime)
+                                .getSeconds();
 
-                // Never show 0 while account is still locked
-                return Math.max(remaining, 1);
+                long remainingMinutes = (Math.max(0, remainingSeconds) + 59) / 60;
+
+                return new LockedException(
+                                "Account temporarily locked. " +
+                                                "Please try again in " +
+                                                Math.max(1, remainingMinutes) +
+                                                " minute(s).");
+        }
+
+        // ============================================================
+        // BUILD EMPLOYEE NAME
+        // ============================================================
+
+        private String buildEmployeeName(
+                        Employee employee) {
+
+                String firstName = employee.getFirstName() == null
+                                ? ""
+                                : employee.getFirstName().trim();
+
+                String lastName = employee.getLastName() == null
+                                ? ""
+                                : employee.getLastName().trim();
+
+                String fullName = (firstName + " " + lastName).trim();
+
+                return fullName.isEmpty()
+                                ? "Employee"
+                                : fullName;
+        }
+
+        // ============================================================
+        // NORMALIZE EMAIL
+        // ============================================================
+
+        private String normalizeEmail(
+                        String email) {
+
+                if (email == null) {
+                        return "";
+                }
+
+                return email.trim().toLowerCase();
         }
 }

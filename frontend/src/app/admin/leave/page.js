@@ -1,23 +1,23 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
-import { CheckCircle, Clock, XCircle, Undo2, Coffee, HeartPulse, Sun, Baby, PersonStanding, ClipboardList, PartyPopper, Loader2 } from 'lucide-react';
+import { CheckCircle, Clock, XCircle, Undo2, Coffee, HeartPulse, Sun, Baby, PersonStanding, ClipboardList, PartyPopper, Loader2, Check, X } from 'lucide-react';
 
 function StatusPill({ status }) {
   const map = {
     APPROVED: { bg: 'rgba(22, 163, 74, 0.15)', color: '#15803D', icon: <CheckCircle size={14} /> },
-    PENDING: { bg: 'rgba(180, 83, 9, 0.2)', color: '#B45309', icon: <Clock size={14} /> },
+    PENDING: { bg: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b', icon: <Clock size={14} /> },
     REJECTED: { bg: 'rgba(220, 38, 38, 0.15)', color: '#B91C1C', icon: <XCircle size={14} /> },
     CANCELLATION_PENDING: { bg: 'rgba(126, 34, 206, 0.2)', color: '#7E22CE', icon: <Undo2 size={14} /> },
     CANCELLED: { bg: '#1E293B', color: 'var(--text-secondary)', icon: '·' },
   };
   const s = map[status] || map.PENDING;
   return (
-    <span style={{ background: s.bg, color: s.color, padding: '4px 12px', borderRadius: '999px', fontSize: '11.5px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-      <span style={{ display: 'flex' }}>{s.icon}</span>{status?.replace(/_/g, ' ')}
+    <span style={{ background: s.bg, color: s.color, padding: '4px 12px', borderRadius: '999px', fontSize: '11.5px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '5px', justifySelf: 'start', flexShrink: 0 }}>
+      <span style={{ display: 'flex' }}>{s.icon}</span>{status === 'CANCELLATION_PENDING' ? 'Cancel Pending' : status?.replace(/_/g, ' ')}
     </span>
   );
 }
@@ -40,13 +40,15 @@ export default function AdminLeavePage() {
   const [approved, setApproved] = useState([]);
   const [rejected, setRejected] = useState([]);
   const [cancellations, setCancellations] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [actioning, setActioning] = useState(null);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const loadedTabs = useRef(new Set());
 
   const fetchData = useCallback(async () => {
-    setLoading(true);
+    const isFirstLoad = !loadedTabs.current.has(tab);
+    if (isFirstLoad) setInitialLoading(true);
     try {
       if (tab === 'PENDING') {
         const res = await api.get(`/api/leaves/pending?page=${page}&size=20`);
@@ -65,11 +67,12 @@ export default function AdminLeavePage() {
         if (tab === 'REJECTED') setRejected(all.filter(l => l.status === 'REJECTED'));
         setTotalPages(0);
       }
+      loadedTabs.current.add(tab);
     } catch (err) {
       toast.error("Couldn't load requests");
       console.error(err);
     } finally {
-      setLoading(false);
+      setInitialLoading(false);
     }
   }, [tab, page]);
 
@@ -94,7 +97,7 @@ export default function AdminLeavePage() {
           cancellations;
 
   useEffect(() => {
-    if (!highlightId || loading) return;
+    if (!highlightId || initialLoading) return;
     const target = currentData.find((l) => String(l.id) === String(highlightId));
     if (!target) return;
 
@@ -111,7 +114,7 @@ export default function AdminLeavePage() {
     }, 4000);
 
     return () => clearTimeout(timer);
-  }, [highlightId, loading, currentData]);
+  }, [highlightId, initialLoading, currentData]);
 
   const handleAction = async (id, action) => {
     setActioning(id + action);
@@ -127,7 +130,7 @@ export default function AdminLeavePage() {
       toast.error(msg.includes('already') ? '⚡ Someone already actioned this one' : msg);
       fetchData();
     } finally {
-      setActioning(null);
+      setActioning(null)
     }
   };
 
@@ -177,7 +180,7 @@ export default function AdminLeavePage() {
         <span style={{ color: 'var(--text-secondary)' }}>→</span>
         <span style={{ background: 'rgba(180, 83, 9, 0.2)', color: '#B45309', padding: '5px 14px', borderRadius: '999px', fontSize: '12px', fontWeight: 700 }}>2. Admin or HR reviews</span>
         <span style={{ color: 'var(--text-secondary)' }}>→</span>
-        <span style={{ background: 'rgba(22, 163, 74, 0.15)', color: '#15803D', padding: '5px 14px', borderRadius: '999px', fontSize: '12px', fontWeight: 700 }}>3. Approved ✅ / Rejected</span>
+        <span style={{ background: 'rgba(22, 163, 74, 0.15)', color: '#15803D', padding: '5px 14px', borderRadius: '999px', fontSize: '12px', fontWeight: 700 }}>3. Approved  / Rejected</span>
       </div>
 
       <div style={{ display: 'flex', gap: '4px', background: 'var(--bg-secondary)', borderRadius: '14px', padding: '4px', width: 'fit-content', marginBottom: '20px' }}>
@@ -199,7 +202,7 @@ export default function AdminLeavePage() {
           ))}
         </div>
 
-        {loading ? (
+        {initialLoading && currentData.length === 0 ? (
           <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</div>
         ) : currentData.length === 0 ? (
           <div style={{ padding: '80px', textAlign: 'center' }}>
@@ -239,11 +242,11 @@ export default function AdminLeavePage() {
                   <div>
                     {tab === 'PENDING' && (
                       <div style={{ display: 'flex', gap: '8px' }}>
-                        <button onClick={() => handleAction(l.id, 'APPROVED')} disabled={!!actioning} style={{ padding: '7px 14px', background: 'rgba(22, 163, 74, 0.15)', color: '#15803D', border: 'none', borderRadius: '9px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '85px' }}>
-                          {actioning === l.id + 'APPROVED' ? <Loader2 size={14} className="animate-spin" /> : '✓ Approve'}
+                        <button onClick={() => handleAction(l.id, 'APPROVED')} disabled={!!actioning} style={{ padding: '6px 14px', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: '1px solid #10b981', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background-color 0.2s', opacity: actioning ? 0.7 : 1 }}>
+                          {actioning === l.id + 'APPROVED' ? <><Loader2 size={12} className="animate-spin" style={{ display: 'inline', marginRight: '4px' }} /> Processing...</> : <><Check size={12} style={{ display: 'inline', marginRight: '4px' }} /> Approve</>}
                         </button>
-                        <button onClick={() => handleAction(l.id, 'REJECTED')} disabled={!!actioning} style={{ padding: '7px 14px', background: 'rgba(220, 38, 38, 0.15)', color: '#DC2626', border: 'none', borderRadius: '9px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '80px' }}>
-                          {actioning === l.id + 'REJECTED' ? <Loader2 size={14} className="animate-spin" /> : '✗ Reject'}
+                        <button onClick={() => handleAction(l.id, 'REJECTED')} disabled={!!actioning} style={{ padding: '6px 14px', background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', border: '1px solid #ef4444', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background-color 0.2s', opacity: actioning ? 0.7 : 1 }}>
+                          {actioning === l.id + 'REJECTED' ? <><Loader2 size={12} className="animate-spin" style={{ display: 'inline', marginRight: '4px' }} /> Processing...</> : <><X size={12} style={{ display: 'inline', marginRight: '4px' }} /> Reject</>}
                         </button>
                       </div>
                     )}

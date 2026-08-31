@@ -6,6 +6,7 @@ import com.hrms.entity.JobApplication;
 import com.hrms.entity.JobApplication.ApplicationStatus;
 import com.hrms.entity.JobPosting;
 import com.hrms.entity.JobPosting.PostingStatus;
+import com.hrms.entity.Notification.NotificationType;
 import com.hrms.repository.JobApplicationRepository;
 import com.hrms.repository.JobPostingRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ public class RecruitmentService {
     private final JobPostingRepository jobPostingRepo;
     private final JobApplicationRepository applicationRepo;
     private final EmployeeService employeeService;
+    private final NotificationService notificationService;
 
     @Transactional
     public RecruitmentDTOs.JobResponse createJob(Long creatorId, RecruitmentDTOs.CreateJobRequest req) {
@@ -40,7 +42,20 @@ public class RecruitmentService {
                 .status(PostingStatus.OPEN)
                 .createdBy(creator)
                 .build();
-        return toJobResponse(jobPostingRepo.save(job));
+
+        JobPosting savedJob = jobPostingRepo.save(job);
+
+        // Notify every active employee that a new job opening is available.
+        notificationService.notifyAllEmployees(
+                "New Job Opening: " + savedJob.getTitle(),
+                "A new position has been posted: " + savedJob.getTitle()
+                        + (savedJob.getDepartment() != null ? " (" + savedJob.getDepartment() + ")" : ""),
+                NotificationType.JOB_POSTED,
+                "JobPosting",
+                savedJob.getId()
+        );
+
+        return toJobResponse(savedJob);
     }
 
     @Transactional

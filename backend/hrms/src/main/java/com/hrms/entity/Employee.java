@@ -3,12 +3,12 @@ package com.hrms.entity;
 import com.hrms.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.math.BigDecimal;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -16,7 +16,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "employees")
-@org.hibernate.annotations.DynamicUpdate
+@DynamicUpdate
 @Getter
 @Setter
 @NoArgsConstructor
@@ -25,13 +25,18 @@ import java.util.List;
 public class Employee implements UserDetails {
 
     // ============================================================
-    // LOGIN LOCKOUT CONFIGURATION
+    // LOGIN LOCK CONFIGURATION
     // ============================================================
 
     /**
-     * Account remains locked for this many minutes.
+     * Each temporary lock lasts for 2 minutes.
      */
     public static final int LOCK_DURATION_MINUTES = 2;
+
+    /**
+     * Two incorrect passwords cause a temporary lock.
+     */
+    public static final int MAX_FAILED_ATTEMPTS = 2;
 
     // ============================================================
     // BASIC EMPLOYEE INFORMATION
@@ -86,15 +91,46 @@ public class Employee implements UserDetails {
     private String azureOid;
 
     // ============================================================
-    // LOGIN LOCKOUT TRACKING
+    // LOGIN SECURITY
     // ============================================================
 
+    /**
+     * Number of consecutive failed password attempts
+     *
+     * 0 = no failed attempts
+     * 1 = one failed attempt
+     * 2 = temporary lock is created
+     */
     @Builder.Default
     @Column(name = "failed_attempts", nullable = false)
     private int failedAttempts = 0;
 
+    /**
+     * Number of temporary lockouts.
+     *
+     * 0 = never locked
+     * 1 = first lock
+     * 2 = second lock -> OTP required
+     */
+    @Builder.Default
+    @Column(name = "lockout_count", nullable = false)
+    private int lockoutCount = 0;
+
+    /**
+     * Time at which the current temporary lock started.
+     */
     @Column(name = "lock_time")
     private LocalDateTime lockTime;
+
+    /**
+     * True after the second temporary lockout.
+     *
+     * When true, normal password login is disabled
+     * and OTP login is required.
+     */
+    @Builder.Default
+    @Column(name = "otp_login_required", nullable = false)
+    private boolean otpLoginRequired = false;
 
     // ============================================================
     // AUDIT
@@ -134,38 +170,22 @@ public class Employee implements UserDetails {
 
     @Override
     public String getPassword() {
-
         return password;
     }
 
     @Override
     public String getUsername() {
-
         return email;
     }
 
     @Override
     public boolean isAccountNonExpired() {
-
         return true;
     }
 
     /**
-     * IMPORTANT:
-     *
-     * Spring Security expects:
-     *
-     * true = account is NOT locked
-     * false = account IS locked
-     *
-     * If lock_time is NULL:
-     * account is unlocked.
-     *
-     * If lock_time exists but the lock duration has expired:
-     * account is unlocked.
-     *
-     * Otherwise:
-     * account is locked.
+     * true = account is NOT currently temporarily locked
+     * false = account IS currently temporarily locked
      */
     @Override
     public boolean isAccountNonLocked() {
@@ -174,24 +194,19 @@ public class Employee implements UserDetails {
             return true;
         }
 
-        long elapsedSeconds = Duration.between(
-                lockTime,
-                LocalDateTime.now()).getSeconds();
-
-        long lockDurationSeconds = LOCK_DURATION_MINUTES * 60L;
-
-        return elapsedSeconds >= lockDurationSeconds;
+        return !LocalDateTime.now()
+                .isBefore(
+                        lockTime.plusMinutes(
+                                LOCK_DURATION_MINUTES));
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-
         return true;
     }
 
     @Override
     public boolean isEnabled() {
-
         return active;
     }
 }

@@ -147,6 +147,11 @@ const REFERENCE_ROUTES = {
   TRAINING: '/employee/training',
 };
 
+// Job details page expects a plain ?id= (matches the existing "View Details"
+// button on the jobs list page), not the ?highlight= pattern the other
+// pages use — so it's handled separately in handleNotificationClick below.
+const JOB_POSTING_ROUTE = '/employee/jobs/details';
+
 function getMeta(notification) {
   return (
     TYPE_META[notification.type] ||
@@ -362,8 +367,16 @@ export default function NotificationsPage() {
       handleMarkRead(n.id);
     }
 
+    if (n.referenceId == null) return;
+
+    // Job details page expects ?id=, every other page expects ?highlight=
+    if (n.referenceType === 'JobPosting') {
+      router.push(`${JOB_POSTING_ROUTE}?id=${n.referenceId}`);
+      return;
+    }
+
     const path = REFERENCE_ROUTES[n.referenceType];
-    if (path && n.referenceId != null) {
+    if (path) {
       router.push(`${path}?highlight=${n.referenceId}`);
     }
   };
@@ -1087,7 +1100,8 @@ export default function NotificationsPage() {
               (n, i) => {
                 const meta = getMeta(n);
                 const isNavigable = Boolean(
-                  REFERENCE_ROUTES[n.referenceType] && n.referenceId != null
+                  (REFERENCE_ROUTES[n.referenceType] || n.referenceType === 'JobPosting')
+                  && n.referenceId != null
                 );
 
                 return (

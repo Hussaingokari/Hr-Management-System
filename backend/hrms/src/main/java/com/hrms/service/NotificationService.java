@@ -109,6 +109,31 @@ public class NotificationService {
         );
     }
 
+    // ✅ NEW — Notify every active employee (used when a new job is posted,
+    // so the whole company sees the opening in their notifications).
+    @Transactional
+    public void notifyAllEmployees(
+            String title,
+            String message,
+            NotificationType type,
+            String entityType,
+            Long entityId) {
+
+        employeeRepository.findAll()
+                .stream()
+                .filter(Employee::isActive)
+                .forEach(emp ->
+                        createAndSend(
+                                emp,
+                                title,
+                                message,
+                                type,
+                                entityType,
+                                entityId
+                        )
+                );
+    }
+
     private void sendEmailSafe(
             String toEmail,
             String subject,
