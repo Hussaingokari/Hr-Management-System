@@ -11,7 +11,7 @@ function StatusPill({ status }) {
     APPROVED: { bg: 'rgba(22, 163, 74, 0.15)', color: '#15803D', icon: <CheckCircle size={14} /> },
     PENDING: { bg: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b', icon: <Clock size={14} /> },
     REJECTED: { bg: 'rgba(220, 38, 38, 0.15)', color: '#B91C1C', icon: <XCircle size={14} /> },
-    CANCELLATION_PENDING: { bg: 'rgba(126, 34, 206, 0.2)', color: '#7E22CE', icon: <Undo2 size={14} /> },
+    CANCELLATION_PENDING: { bg: 'rgba(126, 34, 206, 0.15)', color: '#7E22CE', icon: <Undo2 size={14} /> },
     CANCELLED: { bg: '#1E293B', color: 'var(--text-secondary)', icon: '·' },
   };
   const s = map[status] || map.PENDING;
@@ -34,8 +34,9 @@ const typeMeta = {
 export default function AdminLeavePage() {
   const searchParams = useSearchParams();
   const highlightId = searchParams.get('highlightId');
+  const queryTab = searchParams.get('tab');
 
-  const [tab, setTab] = useState('PENDING');
+  const [tab, setTab] = useState(queryTab || 'PENDING');
   const [pending, setPending] = useState([]);
   const [approved, setApproved] = useState([]);
   const [rejected, setRejected] = useState([]);
@@ -44,6 +45,10 @@ export default function AdminLeavePage() {
   const [actioning, setActioning] = useState(null);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [approvedCount, setApprovedCount] = useState(0);
+  const [rejectedCount, setRejectedCount] = useState(0);
+  const [cancellationsCount, setCancellationsCount] = useState(0);
   const loadedTabs = useRef(new Set());
 
   const fetchData = useCallback(async () => {
@@ -67,6 +72,21 @@ export default function AdminLeavePage() {
         if (tab === 'REJECTED') setRejected(all.filter(l => l.status === 'REJECTED'));
         setTotalPages(0);
       }
+
+      // Fetch count totals in parallel to keep tab badges updated
+      const [pendingRes, cancellationsRes, allRes] = await Promise.all([
+        api.get(`/api/leaves/pending?page=0&size=1`),
+        api.get(`/api/leaves/pending-cancellations?page=0&size=1`),
+        api.get(`/api/leaves?page=0&size=100`)
+      ]);
+
+      setPendingCount(pendingRes.data?.data?.totalElements || 0);
+      setCancellationsCount(cancellationsRes.data?.data?.totalElements || 0);
+
+      const allList = allRes.data?.data?.content || [];
+      setApprovedCount(allList.filter(l => l.status === 'APPROVED').length);
+      setRejectedCount(allList.filter(l => l.status === 'REJECTED').length);
+
       loadedTabs.current.add(tab);
     } catch (err) {
       toast.error("Couldn't load requests");
@@ -85,10 +105,10 @@ export default function AdminLeavePage() {
   // A leave notification should always land in Pending first so approval is immediately available.
   useEffect(() => {
     if (highlightId) {
-      setTab('PENDING');
+      setTab(queryTab || 'PENDING');
       setPage(0);
     }
-  }, [highlightId]);
+  }, [highlightId, queryTab]);
 
   const currentData =
     tab === 'PENDING' ? pending :
@@ -153,10 +173,10 @@ export default function AdminLeavePage() {
   };
 
   const tabs = [
-    { key: 'PENDING', label: `Pending Approvals (${pending.length})`, icon: <Clock size={16} /> },
-    { key: 'APPROVED', label: `Approved (${approved.length})`, icon: <CheckCircle size={16} /> },
-    { key: 'REJECTED', label: `Rejected (${rejected.length})`, icon: <XCircle size={16} /> },
-    { key: 'CANCELLATIONS', label: `Cancellations (${cancellations.length})`, icon: <Undo2 size={16} /> },
+    { key: 'PENDING', label: `Pending Approvals (${pendingCount})`, icon: <Clock size={16} /> },
+    { key: 'APPROVED', label: `Approved (${approvedCount})`, icon: <CheckCircle size={16} /> },
+    { key: 'REJECTED', label: `Rejected (${rejectedCount})`, icon: <XCircle size={16} /> },
+    { key: 'CANCELLATIONS', label: `Cancellations (${cancellationsCount})`, icon: <Undo2 size={16} /> },
   ];
 
   const lastColumnLabel =
@@ -195,7 +215,7 @@ export default function AdminLeavePage() {
         ))}
       </div>
 
-      <div style={{ background: 'var(--card-bg)', borderRadius: '18px', border: '1px solid var(--card-border)', boxShadow: '0 2px 10px rgba(0,0,0,0.3)' }}>
+      <div style={{ background: 'var(--card-bg)', borderRadius: '18px', border: '1px solid var(--card-border)', boxShadow: '0 2px 10px rgba(0,0,0,0.3)', overflow: 'hidden' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1.1fr 1fr 1fr 0.5fr 1.3fr 2fr', padding: '10px 22px', background: 'var(--card-bg)', borderBottom: '1px solid var(--card-border)' }}>
           {['Employee', 'Type', 'From', 'To', 'Days', 'Status', lastColumnLabel].map(h => (
             <div key={h} style={{ fontSize: '10.5px', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.4px' }}>{h}</div>
@@ -252,11 +272,11 @@ export default function AdminLeavePage() {
                     )}
                     {tab === 'CANCELLATIONS' && (
                       <div style={{ display: 'flex', gap: '8px' }}>
-                        <button onClick={() => handleCancelAction(l.id, true)} disabled={!!actioning} style={{ padding: '7px 14px', background: 'rgba(22, 163, 74, 0.15)', color: '#15803D', border: 'none', borderRadius: '9px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '85px' }}>
-                          {actioning === l.id + 'true' ? <Loader2 size={14} className="animate-spin" /> : '✓ Confirm'}
+                        <button onClick={() => handleCancelAction(l.id, true)} disabled={!!actioning} style={{ padding: '6px 14px', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: '1px solid #10b981', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background-color 0.2s', opacity: actioning ? 0.7 : 1 }}>
+                          {actioning === l.id + 'true' ? <><Loader2 size={12} className="animate-spin" style={{ display: 'inline', marginRight: '4px' }} /> Processing...</> : <><Check size={12} style={{ display: 'inline', marginRight: '4px' }} /> Confirm</>}
                         </button>
-                        <button onClick={() => handleCancelAction(l.id, false)} disabled={!!actioning} style={{ padding: '7px 14px', background: 'rgba(220, 38, 38, 0.15)', color: '#DC2626', border: 'none', borderRadius: '9px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '80px' }}>
-                          {actioning === l.id + 'false' ? <Loader2 size={14} className="animate-spin" /> : '✗ Deny'}
+                        <button onClick={() => handleCancelAction(l.id, false)} disabled={!!actioning} style={{ padding: '6px 14px', background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', border: '1px solid #ef4444', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background-color 0.2s', opacity: actioning ? 0.7 : 1 }}>
+                          {actioning === l.id + 'false' ? <><Loader2 size={12} className="animate-spin" style={{ display: 'inline', marginRight: '4px' }} /> Processing...</> : <><X size={12} style={{ display: 'inline', marginRight: '4px' }} /> Deny</>}
                         </button>
                       </div>
                     )}

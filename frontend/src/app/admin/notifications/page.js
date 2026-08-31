@@ -115,7 +115,14 @@ export default function AdminNotificationsPage() {
       }
 
       if (type.includes('LEAVE')) {
-        router.push(`/admin/leave?highlightId=${encodeURIComponent(referenceId)}`);
+        const notifType = String(notification.type || '').toUpperCase();
+        const isCancellation =
+          notifType === 'LEAVE_CANCELLED' ||
+          String(notification.title || '').toLowerCase().includes('cancel');
+        const targetTab = isCancellation ? 'CANCELLATIONS' : 'PENDING';
+        router.push(
+          `/admin/leave?highlightId=${encodeURIComponent(referenceId)}&tab=${targetTab}`
+        );
         return;
       }
 
