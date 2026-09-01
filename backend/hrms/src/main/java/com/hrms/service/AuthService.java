@@ -16,7 +16,6 @@ import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -37,7 +36,6 @@ public class AuthService {
         // NORMAL PASSWORD LOGIN
         // ============================================================
 
-        @Transactional
         public AuthDTOs.AuthResponse login(
                         AuthDTOs.LoginRequest request) {
 
@@ -86,19 +84,17 @@ public class AuthService {
                 }
 
                 // --------------------------------------------------------
-                // OTP LOGIN REQUIRED
-                // OTP IS ONLY FOR EMPLOYEES
+                // LOGIN TYPE
                 // --------------------------------------------------------
 
-                /*
-                 * IMPORTANT:
-                 *
-                 * OTP login is only available for EMPLOYEE accounts.
-                 *
-                 * Even if an old database record accidentally contains
-                 * otpLoginRequired = true for HR/Admin, it will NOT block
-                 * their normal password login.
-                 */
+                validateLoginType(
+                                employee,
+                                request.getLoginType());
+
+                // --------------------------------------------------------
+                // OTP REQUIRED
+                // ONLY EMPLOYEES
+                // --------------------------------------------------------
 
                 if (employee.getRole() == Role.EMPLOYEE
                                 && employee.isOtpLoginRequired()) {
@@ -108,13 +104,18 @@ public class AuthService {
                 }
 
                 // --------------------------------------------------------
-                // EXPIRED TEMPORARY LOCK
+                // EXPIRED LOCK
                 // --------------------------------------------------------
 
                 if (employee.getLockTime() != null
                                 && employee.isAccountNonLocked()) {
 
                         loginAttemptService.clearExpiredLock(email);
+
+                        /*
+                         * Reload employee after the separate transaction
+                         * has committed.
+                         */
 
                         employee = employeeRepository
                                         .findByEmail(email)
@@ -133,14 +134,6 @@ public class AuthService {
                 }
 
                 // --------------------------------------------------------
-                // LOGIN TYPE VALIDATION
-                // --------------------------------------------------------
-
-                validateLoginType(
-                                employee,
-                                request.getLoginType());
-
-                // --------------------------------------------------------
                 // PASSWORD AUTHENTICATION
                 // --------------------------------------------------------
 
@@ -156,14 +149,14 @@ public class AuthService {
                 } catch (BadCredentialsException ex) {
 
                         /*
-                         * Failed login is handled in a separate transaction
-                         * so failed-attempt state is persisted.
+                         * Update failed login state in a separate transaction.
                          */
 
                         loginAttemptService.handleFailedLogin(email);
 
                         /*
-                         * Always reload the latest employee state.
+                         * Reload employee after failed-login transaction
+                         * has committed.
                          */
 
                         Employee latestEmployee = employeeRepository
@@ -177,8 +170,8 @@ public class AuthService {
                         }
 
                         // ----------------------------------------------------
-                        // OTP NOW REQUIRED
-                        // ONLY EMPLOYEE CAN ENTER THIS STATE
+                        // SECOND LOCKOUT
+                        // OTP ONLY FOR EMPLOYEE
                         // ----------------------------------------------------
 
                         if (latestEmployee.getRole() == Role.EMPLOYEE
@@ -189,7 +182,7 @@ public class AuthService {
                         }
 
                         // ----------------------------------------------------
-                        // TEMPORARY LOCK CREATED
+                        // TEMPORARY LOCK
                         // ----------------------------------------------------
 
                         if (latestEmployee.getLockTime() != null
@@ -200,7 +193,7 @@ public class AuthService {
                         }
 
                         // ----------------------------------------------------
-                        // NORMAL INVALID PASSWORD
+                        // NORMAL WRONG PASSWORD
                         // ----------------------------------------------------
 
                         throw new BadCredentialsException(
@@ -221,14 +214,7 @@ public class AuthService {
                                 authenticatedEmployee.getEmail());
 
                 // --------------------------------------------------------
-                // START / UPDATE SESSION ACTIVITY
-                // --------------------------------------------------------
-
-                sessionActivityService.recordActivity(
-                                authenticatedEmployee.getEmail());
-
-                // --------------------------------------------------------
-                // RELOAD AFTER SECURITY STATE UPDATE
+                // RELOAD AFTER RESET
                 // --------------------------------------------------------
 
                 Employee latestEmployee = employeeRepository
@@ -245,7 +231,14 @@ public class AuthService {
                                 latestEmployee.getEmail());
 
                 // --------------------------------------------------------
-                // BUILD JWT RESPONSE
+                // SESSION
+                // --------------------------------------------------------
+
+                sessionActivityService.recordActivity(
+                                latestEmployee.getEmail());
+
+                // --------------------------------------------------------
+                // JWT
                 // --------------------------------------------------------
 
                 return buildAuthResponse(
@@ -256,7 +249,6 @@ public class AuthService {
         // LOGIN USING OTP
         // ============================================================
 
-        @Transactional
         public AuthDTOs.AuthResponse loginWithOtp(
                         Employee employee) {
 
@@ -266,8 +258,7 @@ public class AuthService {
                                         "Invalid OTP login request");
                 }
 
-                String email = normalizeEmail(
-                                employee.getEmail());
+                String email = normalizeEmail(employee.getEmail());
 
                 if (email.isEmpty()) {
 
@@ -296,7 +287,6 @@ public class AuthService {
 
                 // --------------------------------------------------------
                 // ROLE CHECK
-                // OTP LOGIN IS ONLY FOR EMPLOYEES
                 // --------------------------------------------------------
 
                 if (currentEmployee.getRole() != Role.EMPLOYEE) {
@@ -316,7 +306,7 @@ public class AuthService {
                 }
 
                 // --------------------------------------------------------
-                // RESET LOGIN LOCK STATE
+                // RESET LOGIN SECURITY STATE
                 // --------------------------------------------------------
 
                 loginAttemptService.resetAfterOtpLogin(
@@ -338,13 +328,13 @@ public class AuthService {
                 userCacheService.evict(email);
 
                 // --------------------------------------------------------
-                // RECORD SESSION ACTIVITY
+                // SESSION
                 // --------------------------------------------------------
 
                 sessionActivityService.recordActivity(email);
 
                 // --------------------------------------------------------
-                // BUILD JWT
+                // JWT
                 // --------------------------------------------------------
 
                 return buildAuthResponse(
@@ -367,25 +357,13 @@ public class AuthService {
 
                 AuthDTOs.AuthResponse response = new AuthDTOs.AuthResponse();
 
-                // --------------------------------------------------------
-                // ACCESS TOKEN
-                // --------------------------------------------------------
-
                 response.setAccessToken(
                                 jwtUtil.generateToken(employee));
-
-                // --------------------------------------------------------
-                // REFRESH TOKEN
-                // --------------------------------------------------------
 
                 response.setRefreshToken(
                                 jwtUtil.generateRefreshToken(employee));
 
                 response.setTokenType("Bearer");
-
-                // --------------------------------------------------------
-                // USER INFORMATION
-                // --------------------------------------------------------
 
                 response.setRole(
                                 employee.getRole().name());
@@ -401,10 +379,6 @@ public class AuthService {
 
                 response.setEmail(
                                 employee.getEmail());
-
-                // --------------------------------------------------------
-                // TOKEN EXPIRATION
-                // --------------------------------------------------------
 
                 response.setExpiresIn(
                                 jwtUtil.getExpiration());
@@ -431,10 +405,6 @@ public class AuthService {
 
                 String refreshToken = request.getRefreshToken().trim();
 
-                // --------------------------------------------------------
-                // VALIDATE TOKEN
-                // --------------------------------------------------------
-
                 try {
 
                         if (!jwtUtil.validateToken(refreshToken)) {
@@ -456,10 +426,6 @@ public class AuthService {
                         throw new BadCredentialsException(
                                         "Invalid or expired refresh token");
                 }
-
-                // --------------------------------------------------------
-                // EXTRACT EMAIL
-                // --------------------------------------------------------
 
                 String email;
 
@@ -484,10 +450,6 @@ public class AuthService {
                                         "Invalid or expired refresh token");
                 }
 
-                // --------------------------------------------------------
-                // FIND CURRENT EMPLOYEE
-                // --------------------------------------------------------
-
                 Employee employee;
 
                 try {
@@ -511,10 +473,6 @@ public class AuthService {
                                         "Unable to refresh authentication token");
                 }
 
-                // --------------------------------------------------------
-                // ACTIVE CHECK
-                // --------------------------------------------------------
-
                 if (!employee.isActive()) {
 
                         throw new BadCredentialsException(
@@ -522,16 +480,9 @@ public class AuthService {
                 }
 
                 // --------------------------------------------------------
-                // OTP REQUIRED CHECK
-                // ONLY EMPLOYEE
+                // OTP REQUIRED
+                // ONLY EMPLOYEES
                 // --------------------------------------------------------
-
-                /*
-                 * Prevent an old refresh token from bypassing the
-                 * OTP requirement for an employee.
-                 *
-                 * HR/Admin accounts are never blocked by this condition.
-                 */
 
                 if (employee.getRole() == Role.EMPLOYEE
                                 && employee.isOtpLoginRequired()) {
@@ -541,7 +492,7 @@ public class AuthService {
                 }
 
                 // --------------------------------------------------------
-                // TEMPORARY LOCK CHECK
+                // TEMPORARY LOCK
                 // --------------------------------------------------------
 
                 if (!employee.isAccountNonLocked()) {
@@ -549,10 +500,6 @@ public class AuthService {
                         throw buildLockedException(
                                         employee.getLockTime());
                 }
-
-                // --------------------------------------------------------
-                // BUILD NEW ACCESS + REFRESH TOKENS
-                // --------------------------------------------------------
 
                 return buildAuthResponse(employee);
         }
@@ -611,10 +558,6 @@ public class AuthService {
 
                         return;
                 }
-
-                // --------------------------------------------------------
-                // INVALID LOGIN TYPE
-                // --------------------------------------------------------
 
                 throw new BadCredentialsException(
                                 "Invalid login type");
@@ -684,6 +627,8 @@ public class AuthService {
                         return "";
                 }
 
-                return email.trim().toLowerCase();
+                return email
+                                .trim()
+                                .toLowerCase();
         }
 }
