@@ -538,4 +538,218 @@ public class LeaveService {
 
                 return r;
         }
+        /*
+ * ============================================================
+ * DELETE ONE LEAVE — ADMIN / HR
+ * ============================================================
+ */
+@Transactional
+@CacheEvict(
+        value = "dashboardData",
+        allEntries = true
+)
+public void deleteLeave(Long leaveId) {
+
+    LeaveRequest leave =
+            leaveRepo.findById(leaveId)
+                    .orElseThrow(
+                            () -> new NoSuchElementException(
+                                    "Leave not found: " + leaveId
+                            )
+                    );
+
+    if (
+            leave.getStatus() == LeaveStatus.APPROVED
+                    ||
+            leave.getStatus() == LeaveStatus.CANCELLATION_PENDING
+    ) {
+
+        leaveBalanceService.restoreBalance(
+                leave.getEmployee(),
+                leave.getLeaveType(),
+                leave.getTotalDays()
+        );
+    }
+
+    leaveRepo.delete(leave);
+    leaveRepo.flush();
+}
+
+
+/*
+ * ============================================================
+ * CLEAR ALL LEAVES OF ONE STATUS — ADMIN / HR
+ * ============================================================
+ */
+@Transactional
+@CacheEvict(
+        value = "dashboardData",
+        allEntries = true
+)
+public void clearAllLeaves(LeaveStatus status) {
+
+    List<LeaveRequest> leaves =
+            leaveRepo.findAllByStatus(status);
+
+    if (
+            leaves == null
+                    ||
+            leaves.isEmpty()
+    ) {
+        return;
+    }
+
+    for (LeaveRequest leave : leaves) {
+
+        if (
+                leave.getStatus() == LeaveStatus.APPROVED
+                        ||
+                leave.getStatus() == LeaveStatus.CANCELLATION_PENDING
+        ) {
+
+            leaveBalanceService.restoreBalance(
+                    leave.getEmployee(),
+                    leave.getLeaveType(),
+                    leave.getTotalDays()
+            );
+        }
+    }
+
+    leaveRepo.deleteAllInBatch(leaves);
+    leaveRepo.flush();
+}
+
+
+/*
+ * ============================================================
+ * DELETE ONE LEAVE — EMPLOYEE
+ * ============================================================
+ */
+@Transactional
+@CacheEvict(
+        value = "dashboardData",
+        allEntries = true
+)
+public void deleteMyLeave(
+        Long leaveId,
+        Long employeeId
+) {
+
+    Employee employee =
+            employeeRepository.findById(employeeId)
+                    .orElseThrow(
+                            () -> new NoSuchElementException(
+                                    "Employee not found: "
+                                            + employeeId
+                            )
+                    );
+
+    LeaveRequest leave =
+            leaveRepo.findById(leaveId)
+                    .orElseThrow(
+                            () -> new NoSuchElementException(
+                                    "Leave request not found: "
+                                            + leaveId
+                            )
+                    );
+
+    /*
+     * Employee can delete ONLY their own leave.
+     */
+    if (
+            leave.getEmployee() == null
+                    ||
+            !leave.getEmployee()
+                    .getId()
+                    .equals(employee.getId())
+    ) {
+
+        throw new org.springframework.security.access.AccessDeniedException(
+                "You can delete only your own leave requests"
+        );
+    }
+
+    /*
+     * Restore balance if it was deducted.
+     */
+    if (
+            leave.getStatus() == LeaveStatus.APPROVED
+                    ||
+            leave.getStatus() == LeaveStatus.CANCELLATION_PENDING
+    ) {
+
+        leaveBalanceService.restoreBalance(
+                leave.getEmployee(),
+                leave.getLeaveType(),
+                leave.getTotalDays()
+        );
+    }
+
+    leaveRepo.delete(leave);
+    leaveRepo.flush();
+}
+
+
+/*
+ * ============================================================
+ * CLEAR ALL LEAVES — EMPLOYEE
+ * ============================================================
+ */
+@Transactional
+@CacheEvict(
+        value = "dashboardData",
+        allEntries = true
+)
+public void deleteAllMyLeaves(
+        Long employeeId
+) {
+
+    Employee employee =
+            employeeRepository.findById(employeeId)
+                    .orElseThrow(
+                            () -> new NoSuchElementException(
+                                    "Employee not found: "
+                                            + employeeId
+                            )
+                    );
+
+    /*
+     * Get ONLY this employee's leaves.
+     */
+    List<LeaveRequest> leaves =
+            leaveRepo.findAllByEmployee(employee);
+
+    if (
+            leaves == null
+                    ||
+            leaves.isEmpty()
+    ) {
+        return;
+    }
+
+    /*
+     * Restore balances where necessary.
+     */
+    for (LeaveRequest leave : leaves) {
+
+        if (
+                leave.getStatus() == LeaveStatus.APPROVED
+                        ||
+                leave.getStatus() == LeaveStatus.CANCELLATION_PENDING
+        ) {
+
+            leaveBalanceService.restoreBalance(
+                    leave.getEmployee(),
+                    leave.getLeaveType(),
+                    leave.getTotalDays()
+            );
+        }
+    }
+
+    /*
+     * Delete ONLY this employee's leaves.
+     */
+    leaveRepo.deleteAllInBatch(leaves);
+    leaveRepo.flush();
+}
 }
