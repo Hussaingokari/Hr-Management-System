@@ -23,7 +23,8 @@ import {
   Wallet,
   GraduationCap,
   Send,
-  FileText
+  FileText,
+  ChevronDown
 } from 'lucide-react';
 
 const EMP_MENU = [
@@ -155,6 +156,7 @@ export default function Sidebar({ role }) {
   const { user } = useSelector((s) => s.auth);
 
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
 
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
@@ -174,6 +176,15 @@ export default function Sidebar({ role }) {
         handleToggle
       );
   }, []);
+
+const isOnboardingChildPage =
+  pathname.startsWith('/admin/onboarding/');
+
+useEffect(() => {
+  if (isOnboardingChildPage) {
+    setIsOnboardingOpen(true);
+  }
+}, [isOnboardingChildPage]);
 
   const menu =
     role === 'ADMIN' || role === 'HR'
@@ -365,86 +376,264 @@ export default function Sidebar({ role }) {
               flexShrink: 0
             }}
           >
-            {menu.map((item) => (
-              <Link
-                key={item.key}
-                href={item.key}
-                onClick={() =>
-                  setIsMobileOpen(false)
-                }
-                style={{
-                  ...navItemStyle(item.key),
-                  position: 'relative',
-                  textDecoration: 'none'
-                }}
-                onMouseEnter={(e) => {
-                  if (!isItemActive(item.key)) {
-                    e.currentTarget.style.background =
-                      isDark
-                        ? 'rgba(255,255,255,0.03)'
-                        : '#f8fafc';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isItemActive(item.key)) {
-                    e.currentTarget.style.background =
-                      'transparent';
-                  }
-                }}
-              >
+            {menu.map((item) => {
+              const isAdminOnboarding =
+                (role === 'ADMIN' || role === 'HR') &&
+                item.key === '/admin/onboarding';
 
-                <div
+              if (isAdminOnboarding) {
+                const isOnboardingActive =
+                       pathname === '/admin/onboarding' ||
+                           pathname.startsWith('/admin/onboarding/');
+
+                return (
+                  <div key={item.key}>
+                    <Link
+                      href={item.key}
+                     onClick={() => {
+                               setIsOnboardingOpen((prev) => !prev);
+                                 setIsMobileOpen(false);
+                                  router.push('/admin/onboarding');
+                            } }
+                      style={{
+                        ...navItemStyle(item.key),
+                        position: 'relative',
+                        textDecoration: 'none',
+                        ...(isOnboardingActive && {
+                          background:
+                            'linear-gradient(90deg, rgba(16, 185, 129, 0.25) 0%, rgba(16, 185, 129, 0.02) 100%)',
+                          color: '#ffffff',
+                          border: '1px solid rgba(16, 185, 129, 0.2)',
+                          fontWeight: '600'
+                        })
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isOnboardingActive) {
+                          e.currentTarget.style.background =
+                            isDark
+                              ? 'rgba(255,255,255,0.03)'
+                              : '#f8fafc';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isOnboardingActive) {
+                          e.currentTarget.style.background =
+                            'transparent';
+                        }
+                      }}
+                    >
+                      <div
+                        style={{
+                          color: isOnboardingActive
+                            ? '#34d399'
+                            : isDark
+                              ? '#cbd5e1'
+                              : '#64748b',
+                          display: 'flex'
+                        }}
+                      >
+                        {item.icon}
+                      </div>
+
+                      <span
+                        style={{
+                          color: isOnboardingActive
+                            ? isDark
+                              ? '#ffffff'
+                              : '#0f172a'
+                            : isDark
+                              ? '#cbd5e1'
+                              : '#475569'
+                        }}
+                      >
+                        {item.label}
+                      </span>
+
+                      <div
+                        style={{
+                          marginLeft: 'auto',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '28px',
+                          height: '28px',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          color: isOnboardingActive
+                            ? '#34d399'
+                            : '#94a3b8',
+                          transition: 'all 0.2s',
+                          flexShrink: 0
+                        }}
+                      >
+                        <ChevronDown
+                          size={14}
+                          style={{
+                            transition: 'transform 0.2s',
+                            transform: isOnboardingOpen
+                              ? 'rotate(180deg)'
+                              : 'rotate(0deg)'
+                          }}
+                        />
+                      </div>
+                    </Link>
+
+                    {isOnboardingOpen &&
+                      menu
+                        .filter((m) =>
+                          m.key.startsWith('/admin/onboarding/') &&
+                          m.key !== '/admin/onboarding'
+                        )
+                        .map((sub) => (
+                          <Link
+                            key={sub.key}
+                            href={sub.key}
+                            onClick={() =>
+                              setIsMobileOpen(false)
+                            }
+                            style={{
+                              ...navItemStyle(sub.key),
+                              position: 'relative',
+                              textDecoration: 'none'
+                            }}
+                            onMouseEnter={(e) => {
+                              if (!isItemActive(sub.key)) {
+                                e.currentTarget.style.background =
+                                  isDark
+                                    ? 'rgba(255,255,255,0.03)'
+                                    : '#f8fafc';
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              if (!isItemActive(sub.key)) {
+                                e.currentTarget.style.background =
+                                  'transparent';
+                              }
+                            }}
+                          >
+                            <div
+                              style={{
+                                color: isItemActive(sub.key)
+                                  ? '#34d399'
+                                  : isDark
+                                    ? '#cbd5e1'
+                                    : '#64748b',
+                                display: 'flex'
+                              }}
+                            >
+                              {sub.icon}
+                            </div>
+
+                            <span
+                              style={{
+                                color: isItemActive(sub.key)
+                                  ? isDark
+                                    ? '#ffffff'
+                                    : '#0f172a'
+                                  : isDark
+                                    ? '#cbd5e1'
+                                    : '#475569'
+                              }}
+                            >
+                              {sub.label}
+                            </span>
+                          </Link>
+                        ))}
+                  </div>
+                );
+              }
+
+              if (
+                (role === 'ADMIN' || role === 'HR') &&
+                (item.key === '/admin/onboarding/greetings' ||
+                  item.key === '/admin/onboarding/offerletter' ||
+                  item.key === '/admin/onboarding/interview' ||
+                  item.key === '/admin/onboarding/document-request')
+              ) {
+                return null;
+              }
+
+              return (
+                <Link
+                  key={item.key}
+                  href={item.key}
+                  onClick={() =>
+                    setIsMobileOpen(false)
+                  }
                   style={{
-                    color: isItemActive(item.key)
-                      ? '#34d399'
-                      : isDark
-                        ? '#cbd5e1'
-                        : '#64748b',
-                    display: 'flex'
+                    ...navItemStyle(item.key),
+                    position: 'relative',
+                    textDecoration: 'none'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isItemActive(item.key)) {
+                      e.currentTarget.style.background =
+                        isDark
+                          ? 'rgba(255,255,255,0.03)'
+                          : '#f8fafc';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isItemActive(item.key)) {
+                      e.currentTarget.style.background =
+                        'transparent';
+                    }
                   }}
                 >
-                  {item.icon}
-                </div>
 
-                <span
-                  style={{
-                    color: isItemActive(item.key)
-                      ? isDark
-                        ? '#ffffff'
-                        : '#0f172a'
-                      : isDark
-                        ? '#cbd5e1'
-                        : '#475569'
-                  }}
-                >
-                  {item.label}
-                </span>
-
-                {item.badge && (
                   <div
                     style={{
-                      position: 'absolute',
-                      right: '12px',
-                      background: '#8b5cf6',
-                      color: 'white',
-                      fontSize: '11px',
-                      fontWeight: '700',
-                      width: '20px',
-                      height: '20px',
-                      borderRadius: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxShadow:
-                        '0 2px 8px rgba(139, 92, 246, 0.4)'
+                      color: isItemActive(item.key)
+                        ? '#34d399'
+                        : isDark
+                          ? '#cbd5e1'
+                          : '#64748b',
+                      display: 'flex'
                     }}
                   >
-                    {item.badge}
+                    {item.icon}
                   </div>
-                )}
 
-              </Link>
-            ))}
+                  <span
+                    style={{
+                      color: isItemActive(item.key)
+                        ? isDark
+                          ? '#ffffff'
+                          : '#0f172a'
+                        : isDark
+                          ? '#cbd5e1'
+                          : '#475569'
+                    }}
+                  >
+                    {item.label}
+                  </span>
+
+                  {item.badge && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        right: '12px',
+                        background: '#8b5cf6',
+                        color: 'white',
+                        fontSize: '11px',
+                        fontWeight: '700',
+                        width: '20px',
+                        height: '20px',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow:
+                          '0 2px 8px rgba(139, 92, 246, 0.4)'
+                      }}
+                    >
+                      {item.badge}
+                    </div>
+                  )}
+
+                </Link>
+              );
+            })}
           </div>
 
           {/* Spacer */}
