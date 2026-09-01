@@ -61,7 +61,7 @@ function RejectModal({ doc, onClose, onConfirm, submitting }) {
   );
 }
 
-function DocumentCard({ doc, tab, onApprove, onReject, actingId, highlighted }) {
+function DocumentCard({ doc, tab, onApprove, onReject, onReupload, actingId, highlighted }) {
   const isActing = actingId === doc.id;
   return (
     <div
@@ -101,6 +101,14 @@ function DocumentCard({ doc, tab, onApprove, onReject, actingId, highlighted }) 
             <button onClick={() => onReject(doc)} disabled={isActing} style={{ padding: '7px 14px', background: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: '8px', fontSize: '12px', fontWeight: '700', cursor: isActing ? 'not-allowed' : 'pointer' }}>Reject</button>
           </div>
         )}
+
+        {tab === 'APPROVED' && (
+          <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+            <button onClick={() => onReupload(doc)} disabled={isActing} style={{ padding: '7px 14px', background: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: '8px', fontSize: '12px', fontWeight: '700', cursor: isActing ? 'not-allowed' : 'pointer', opacity: isActing ? 0.7 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+              {isActing ? <><Loader2 size={12} className="animate-spin" /> ...</> : 'Re-upload'}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -122,7 +130,7 @@ export default function DocumentRequestsPage() {
     try {
       const res = await api.get('/api/onboarding/documents/counts');
       setCounts(res.data?.data || { pending: 0, approved: 0, rejected: 0 });
-    } catch {}
+    } catch { }
   }, []);
 
   const fetchDocs = useCallback(async (status) => {
@@ -195,6 +203,29 @@ export default function DocumentRequestsPage() {
     }
   };
 
+  const handleReupload = async (doc) => {
+    setActingId(doc.id);
+
+    try {
+      await api.put(`/api/onboarding/documents/${doc.id}/reupload`);
+
+      toast.success(
+        `${DOC_KEY_LABELS[doc.documentKey] || doc.documentKey} marked for re-upload`
+      );
+
+      await Promise.all([
+        fetchDocs(tab),
+        fetchCounts()
+      ]);
+    } catch (err) {
+      toast.error(
+        err.response?.data?.message || 'Failed to request re-upload'
+      );
+    } finally {
+      setActingId(null);
+    }
+  };
+
   const TABS = [
     { key: 'PENDING', label: 'Pending', count: counts.pending },
     { key: 'APPROVED', label: 'Approved', count: counts.approved },
@@ -238,6 +269,7 @@ export default function DocumentRequestsPage() {
             tab={tab}
             onApprove={handleApprove}
             onReject={setRejectTarget}
+            onReupload={handleReupload}
             actingId={actingId}
             highlighted={String(doc.id) === String(highlightId)}
           />

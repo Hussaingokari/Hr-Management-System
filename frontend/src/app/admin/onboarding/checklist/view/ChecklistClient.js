@@ -26,13 +26,43 @@ const DOC_KEY_LABELS = {
 
 function DocStatusBadge({ status }) {
     const map = {
-        UNDER_REVIEW: { bg: '#fef9c3', color: '#ca8a04', label: 'Pending' },
-        APPROVED: { bg: '#dcfce7', color: '#16a34a', label: 'Approved' },
-        REJECTED: { bg: '#fee2e2', color: '#dc2626', label: 'Rejected' },
+        UNDER_REVIEW: {
+            bg: '#fef9c3',
+            color: '#ca8a04',
+            label: 'Pending'
+        },
+        APPROVED: {
+            bg: '#dcfce7',
+            color: '#16a34a',
+            label: 'Approved'
+        },
+        REJECTED: {
+            bg: '#fee2e2',
+            color: '#dc2626',
+            label: 'Rejected'
+        },
+        REUPLOAD_REQUIRED: {
+            bg: '#fef3c7',
+            color: '#d97706',
+            label: 'Re-upload Required'
+        },
     };
-    const s = map[status] || { bg: '#f1f5f9', color: 'var(--text-secondary)', label: 'Not submitted' };
+
+    const s = map[status] || {
+        bg: '#f1f5f9',
+        color: 'var(--text-secondary)',
+        label: 'Not submitted'
+    };
+
     return (
-        <span style={{ background: s.bg, color: s.color, padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '700' }}>
+        <span style={{
+            background: s.bg,
+            color: s.color,
+            padding: '3px 10px',
+            borderRadius: '20px',
+            fontSize: '11px',
+            fontWeight: '700'
+        }}>
             {s.label}
         </span>
     );
@@ -285,7 +315,80 @@ export default function OnboardingProfilePage() {
                                             </div>
                                         )}
                                     </div>
-                                    <DocStatusBadge status={doc?.status} />
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        flexShrink: 0
+                                    }}>
+                                        <DocStatusBadge status={doc?.status} />
+
+                                        {/* Employee uploaded → Pending + Approve */}
+                                        {doc?.status === 'UNDER_REVIEW' && (
+                                            <button
+                                                onClick={async () => {
+                                                    try {
+                                                        await api.put(
+                                                            `/api/onboarding/documents/${doc.id}/approve`
+                                                        );
+
+                                                        toast.success('Document approved');
+                                                        await fetchData();
+                                                    } catch (err) {
+                                                        toast.error(
+                                                            err.response?.data?.message ||
+                                                            'Failed to approve document'
+                                                        );
+                                                    }
+                                                }}
+                                                style={{
+                                                    padding: '6px 10px',
+                                                    border: 'none',
+                                                    borderRadius: '7px',
+                                                    background: '#dcfce7',
+                                                    color: '#16a34a',
+                                                    fontSize: '11px',
+                                                    fontWeight: '700',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                Approve
+                                            </button>
+                                        )}
+
+                                        {/* Approved → Re-upload */}
+                                        {doc?.status === 'APPROVED' && (
+                                            <button
+                                                onClick={async () => {
+                                                    try {
+                                                        await api.put(
+                                                            `/api/onboarding/documents/${doc.id}/reupload`
+                                                        );
+
+                                                        toast.success('Re-upload requested');
+                                                        await fetchData();
+                                                    } catch (err) {
+                                                        toast.error(
+                                                            err.response?.data?.message ||
+                                                            'Failed to request re-upload'
+                                                        );
+                                                    }
+                                                }}
+                                                style={{
+                                                    padding: '6px 10px',
+                                                    border: 'none',
+                                                    borderRadius: '7px',
+                                                    background: '#fee2e2',
+                                                    color: '#dc2626',
+                                                    fontSize: '11px',
+                                                    fontWeight: '700',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                Re-upload
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             );
                         })}

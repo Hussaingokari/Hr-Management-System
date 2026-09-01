@@ -6,6 +6,7 @@ import com.hrms.service.OnboardingDocumentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 
 @RestController
 @RequestMapping("/api/onboarding-documents")
@@ -19,5 +20,17 @@ public class OnboardingDocumentController {
             @RequestBody DocumentUploadRequest request) {
         OnboardingDocument saved = documentService.registerDocument(request);
         return ResponseEntity.ok(saved);
+    }
+
+    @PutMapping("/{id}/reupload")
+    public ResponseEntity<OnboardingDocument> requestReupload(
+            @PathVariable Long id,
+            Authentication authentication) {
+
+        OnboardingDocument updated = documentService.requestReupload(
+                id,
+                authentication.getName());
+
+        return ResponseEntity.ok(updated);
     }
 }

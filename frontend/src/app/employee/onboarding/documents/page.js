@@ -20,6 +20,11 @@ function StatusPill({ status }) {
         UNDER_REVIEW: { bg: '#fef9c3', color: '#ca8a04', label: 'Under Review' },
         APPROVED: { bg: '#dcfce7', color: '#16a34a', label: 'Approved' },
         REJECTED: { bg: '#fee2e2', color: '#dc2626', label: 'Rejected' },
+        REUPLOAD_REQUIRED: {
+            bg: '#fef3c7',
+            color: '#d97706',
+            label: 'Re-upload Required'
+        },
     };
     const s = map[status] || { bg: '#f1f5f9', color: 'var(--text-secondary)', label: 'Not Submitted' };
     return (
@@ -37,8 +42,9 @@ function StatusPill({ status }) {
 function DocumentRow({ documentKey, doc, onUpload, isUploading, highlighted }) {
     const inputRef = useRef(null);
     const status = doc?.status;
-    const canUpload = !status || status === 'REJECTED';
+    const canUpload = !status || status === 'REJECTED' || status === 'REUPLOAD_REQUIRED';
     const isRejected = status === 'REJECTED';
+    const isReuploadRequired = status === 'REUPLOAD_REQUIRED';
 
     return (
         <div
@@ -83,11 +89,11 @@ function DocumentRow({ documentKey, doc, onUpload, isUploading, highlighted }) {
                     style={{
                         padding: '10px 20px', borderRadius: '10px', border: 'none',
                         fontSize: '13px', fontWeight: '700', whiteSpace: 'nowrap',
-                        background: !canUpload ? '#e2e8f0' : isRejected ? '#fee2e2' : '#eff6ff',
-                        color: !canUpload ? '#94a3b8' : isRejected ? '#dc2626' : '#3b82f6',
+                        background: !canUpload ? '#e2e8f0' : (isRejected || isReuploadRequired) ? '#fee2e2' : '#eff6ff',
+                        color: !canUpload ? '#94a3b8' : (isRejected || isReuploadRequired) ? '#dc2626' : '#3b82f6',
                         cursor: (!canUpload || isUploading) ? 'not-allowed' : 'pointer',
                     }}>
-                    {isUploading ? <><Loader2 size={12} className="animate-spin" style={{ display: 'inline', marginRight: '4px' }} /> Uploading...</> : isRejected ? 'Re-upload' : 'Upload'}
+                    {isUploading ? <><Loader2 size={12} className="animate-spin" style={{ display: 'inline', marginRight: '4px' }} /> Uploading...</> : (isRejected || isReuploadRequired) ? 'Re-upload' : 'Upload'}
                 </button>
             </div>
 
