@@ -531,9 +531,6 @@ export default function EmployeeDashboard() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
                       <Badge status={l.status} />
                       <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{l.totalDays} days</span>
-                      <span style={{ cursor: 'pointer', color: 'var(--text-secondary)', display: 'flex' }}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1" /><circle cx="12" cy="5" r="1" /><circle cx="12" cy="19" r="1" /></svg>
-                      </span>
                     </div>
                   </div>
                 ))
