@@ -127,13 +127,13 @@ const ADMIN_MENU = [
     icon: <Send size={18} strokeWidth={2} />
   },
   {
-    key: '/admin/onboarding/offerletter',
-    label: 'Send Offer Letter',
+    key: '/admin/onboarding/interview',
+    label: 'Send Interview',
     icon: <Send size={18} strokeWidth={2} />
   },
   {
-    key: '/admin/onboarding/interview',
-    label: 'Send Interview',
+    key: '/admin/onboarding/offerletter',
+    label: 'Send Offer Letter',
     icon: <Send size={18} strokeWidth={2} />
   },
   {
