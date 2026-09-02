@@ -13,6 +13,7 @@ import {
   Users,
   Pencil,
   Save,
+  LockKeyhole,
 } from 'lucide-react';
 
 const STATUSES = [
@@ -521,6 +522,228 @@ function DeleteJobModal({
 }
 
 // ---------------------------------------------------------------------------
+// PERMISSION DENIED MODAL
+// ---------------------------------------------------------------------------
+function PermissionDeniedModal({ onClose }) {
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(15, 23, 42, 0.68)',
+        backdropFilter: 'blur(7px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 3000,
+        padding: '20px',
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: '100%',
+          maxWidth: '430px',
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border-color)',
+          borderRadius: '20px',
+          boxShadow: '0 30px 70px rgba(0,0,0,0.30)',
+          overflow: 'hidden',
+          animation: 'modalFadeIn 0.18s ease-out',
+        }}
+      >
+        <div style={{ padding: '28px 26px 24px', textAlign: 'center' }}>
+          <div
+            style={{
+              width: '58px',
+              height: '58px',
+              margin: '0 auto 16px',
+              borderRadius: '16px',
+              background: '#fee2e2',
+              color: '#dc2626',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <LockKeyhole size={27} strokeWidth={2.2} />
+          </div>
+
+          <div
+            style={{
+              fontSize: '19px',
+              fontWeight: '800',
+              color: 'var(--text-primary)',
+              marginBottom: '8px',
+            }}
+          >
+            Permission Denied
+          </div>
+
+          <div
+            style={{
+              fontSize: '13px',
+              lineHeight: '1.6',
+              color: 'var(--text-secondary)',
+              maxWidth: '340px',
+              margin: '0 auto',
+            }}
+          >
+            You don't have permission to delete recruitment postings.
+          </div>
+
+          <div
+            style={{
+              marginTop: '8px',
+              fontSize: '12px',
+              lineHeight: '1.5',
+              color: 'var(--text-muted)',
+            }}
+          >
+            Only an <strong style={{ color: 'var(--text-secondary)' }}>Admin</strong> can
+            delete recruitment postings.
+          </div>
+        </div>
+
+        <div
+          style={{
+            padding: '14px 24px 20px',
+            borderTop: '1px solid var(--border-color)',
+          }}
+        >
+          <button
+            type="button"
+            onClick={onClose}
+            style={{
+              width: '100%',
+              padding: '11px 18px',
+              border: 'none',
+              borderRadius: '10px',
+              background: 'var(--accent-primary)',
+              color: '#fff',
+              fontSize: '13px',
+              fontWeight: '800',
+              cursor: 'pointer',
+            }}
+          >
+            OK
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// ROLE HELPER
+// ---------------------------------------------------------------------------
+function getCurrentUserRole() {
+  if (typeof window === 'undefined') return null;
+
+  const normalizeRole = (role) => {
+    if (!role || typeof role !== 'string') return null;
+
+    const normalized = role
+      .replace(/^ROLE_/i, '')
+      .trim()
+      .toUpperCase();
+
+    return ['ADMIN', 'HR'].includes(normalized) ? normalized : null;
+  };
+
+  const readRole = (value) => {
+    if (!value) return null;
+
+    if (typeof value === 'string') {
+      return normalizeRole(value);
+    }
+
+    if (typeof value !== 'object') return null;
+
+    const direct =
+      normalizeRole(value.role) ||
+      normalizeRole(value.userRole) ||
+      normalizeRole(value.authority);
+
+    if (direct) return direct;
+
+    for (const key of ['roles', 'authorities', 'permissions']) {
+      if (!Array.isArray(value[key])) continue;
+
+      for (const item of value[key]) {
+        const role =
+          typeof item === 'string'
+            ? normalizeRole(item)
+            : normalizeRole(item?.authority || item?.role);
+
+        if (role) return role;
+      }
+    }
+
+    return null;
+  };
+
+  const readJwt = (token) => {
+    if (!token || typeof token !== 'string') return null;
+
+    try {
+      const parts = token.replace(/^Bearer\s+/i, '').split('.');
+      if (parts.length !== 3) return null;
+
+      const base64 = parts[1]
+        .replace(/-/g, '+')
+        .replace(/_/g, '/');
+
+      const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
+      const payload = JSON.parse(window.atob(padded));
+
+      return readRole(payload);
+    } catch {
+      return null;
+    }
+  };
+
+  const keys = [
+    'user',
+    'currentUser',
+    'auth',
+    'authUser',
+    'userData',
+    'profile',
+    'accessToken',
+    'access_token',
+    'token',
+    'jwt',
+  ];
+
+  for (const key of keys) {
+    try {
+      const raw = window.localStorage.getItem(key);
+      if (!raw) continue;
+
+      try {
+        const parsed = JSON.parse(raw);
+        const role = readRole(parsed);
+        if (role) return role;
+      } catch {
+        // Value is not JSON; it may be a JWT.
+      }
+
+      const jwtRole = readJwt(raw);
+      if (jwtRole) return jwtRole;
+
+      const stringRole = normalizeRole(raw);
+      if (stringRole) return stringRole;
+    } catch {
+      // Ignore storage read errors.
+    }
+  }
+
+  return null;
+}
+
+// ---------------------------------------------------------------------------
 // EDIT JOB MODAL
 // ---------------------------------------------------------------------------
 function EditJobModal({
@@ -937,12 +1160,23 @@ export default function RecruitmentPage() {
   const [jobToDelete, setJobToDelete] = useState(null);
   const [deletingJob, setDeletingJob] = useState(false);
 
+  // Delete permission is ADMIN-only.
+  const [currentUserRole, setCurrentUserRole] = useState(null);
+  const [showPermissionPopup, setShowPermissionPopup] = useState(false);
+
   const [selectedApp, setSelectedApp] = useState(null);
   const [newStatus, setNewStatus] = useState('');
   const [interviewDate, setInterviewDate] = useState('');
   const [interviewScore, setInterviewScore] = useState('');
   const [interviewNotes, setInterviewNotes] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
+
+  // ---------------------------------------------------------
+  // LOAD CURRENT USER ROLE
+  // ---------------------------------------------------------
+  useEffect(() => {
+    setCurrentUserRole(getCurrentUserRole());
+  }, []);
 
   // ---------------------------------------------------------
   // VIEW RESUME
@@ -1274,6 +1508,15 @@ export default function RecruitmentPage() {
   const handleDeleteClick = (e, job) => {
     e.stopPropagation();
 
+    const role = currentUserRole || getCurrentUserRole();
+
+    // HR and other non-admin users cannot even open the delete confirmation.
+    if (role && role !== 'ADMIN') {
+      setShowPermissionPopup(true);
+      return;
+    }
+
+    // Backend remains the final authorization layer.
     setJobToDelete(job);
   };
 
@@ -1318,6 +1561,12 @@ export default function RecruitmentPage() {
         'Delete job failed:',
         err
       );
+
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        setJobToDelete(null);
+        setShowPermissionPopup(true);
+        return;
+      }
 
       toast.error(
         err.response?.data?.message ||
@@ -2974,6 +3223,12 @@ export default function RecruitmentPage() {
           onConfirm={
             handleDeleteJob
           }
+        />
+      )}
+
+      {showPermissionPopup && (
+        <PermissionDeniedModal
+          onClose={() => setShowPermissionPopup(false)}
         />
       )}
     </div>
