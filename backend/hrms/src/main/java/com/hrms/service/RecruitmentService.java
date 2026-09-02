@@ -52,28 +52,73 @@ public class RecruitmentService {
                         + (savedJob.getDepartment() != null ? " (" + savedJob.getDepartment() + ")" : ""),
                 NotificationType.JOB_POSTED,
                 "JobPosting",
-                savedJob.getId()
-        );
+                savedJob.getId());
 
         return toJobResponse(savedJob);
     }
 
     @Transactional
-    public RecruitmentDTOs.JobResponse updateJob(Long jobId, RecruitmentDTOs.UpdateJobRequest req) {
+    public RecruitmentDTOs.JobResponse updateJob(
+            Long jobId,
+            RecruitmentDTOs.UpdateJobRequest req) {
+
         JobPosting job = findJobById(jobId);
-        if (req.getTitle() != null)
+
+        if (req.getTitle() != null) {
             job.setTitle(req.getTitle());
-        if (req.getDescription() != null)
+        }
+
+        if (req.getDepartment() != null) {
+            job.setDepartment(req.getDepartment());
+        }
+
+        if (req.getLocation() != null) {
+            job.setLocation(req.getLocation());
+        }
+
+        if (req.getEmploymentType() != null) {
+            job.setEmploymentType(req.getEmploymentType());
+        }
+
+        if (req.getDescription() != null) {
             job.setDescription(req.getDescription());
-        if (req.getRequirements() != null)
+        }
+
+        if (req.getRequirements() != null) {
             job.setRequirements(req.getRequirements());
-        if (req.getSalaryRange() != null)
+        }
+
+        if (req.getExperienceRequired() != null) {
+            job.setExperienceRequired(req.getExperienceRequired());
+        }
+
+        if (req.getSalaryRange() != null) {
             job.setSalaryRange(req.getSalaryRange());
-        if (req.getApplicationDeadline() != null)
-            job.setApplicationDeadline(req.getApplicationDeadline());
-        if (req.getStatus() != null)
+        }
+
+        if (req.getApplicationDeadline() != null) {
+            job.setApplicationDeadline(
+                    req.getApplicationDeadline());
+        }
+
+        if (req.getStatus() != null) {
             job.setStatus(req.getStatus());
-        return toJobResponse(jobPostingRepo.save(job));
+        }
+
+        return toJobResponse(
+                jobPostingRepo.save(job));
+    }
+
+    @Transactional
+    public void deleteJob(Long jobId) {
+
+        JobPosting job = findJobById(jobId);
+
+        // Delete applications first because they reference the job posting.
+        applicationRepo.deleteByJobPosting(job);
+
+        // Then delete the job posting.
+        jobPostingRepo.delete(job);
     }
 
     @Transactional(readOnly = true)

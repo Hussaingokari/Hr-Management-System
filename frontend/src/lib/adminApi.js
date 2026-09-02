@@ -120,3 +120,8 @@ export const deleteAdminNotification = (id) =>
 
 export const clearAllAdminNotifications = () =>
   api.delete('/api/notifications/clear-all');
+export const deleteJobPosting = (jobId) =>
+  api.delete(`/api/recruitment/jobs/${jobId}`);
+export const updateJobPosting = (jobId, data) =>
+  api.put(`/api/recruitment/jobs/${jobId}`, data);
+

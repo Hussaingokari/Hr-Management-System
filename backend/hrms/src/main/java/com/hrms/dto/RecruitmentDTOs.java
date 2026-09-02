@@ -30,8 +30,12 @@ public class RecruitmentDTOs {
     @Data
     public static class UpdateJobRequest {
         private String title;
+        private String department;
+        private String location;
+        private String employmentType;
         private String description;
         private String requirements;
+        private String experienceRequired;
         private String salaryRange;
         private LocalDate applicationDeadline;
         private PostingStatus status;

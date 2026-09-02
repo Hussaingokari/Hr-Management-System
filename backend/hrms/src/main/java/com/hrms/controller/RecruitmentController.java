@@ -141,4 +141,16 @@ public class RecruitmentController {
                 return ResponseEntity.ok(ApiResponse.success("Application updated",
                                 recruitmentService.updateApplication(id, req)));
         }
+
+        @DeleteMapping("/jobs/{jobId}")
+        @PreAuthorize("hasRole('ADMIN')")
+        @Operation(summary = "Delete a job posting")
+        public ResponseEntity<ApiResponse<Void>> deleteJob(
+                        @PathVariable Long jobId) {
+
+                recruitmentService.deleteJob(jobId);
+
+                return ResponseEntity.ok(
+                                ApiResponse.success("Job deleted successfully", null));
+        }
 }
