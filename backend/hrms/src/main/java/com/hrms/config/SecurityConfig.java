@@ -48,7 +48,8 @@ public class SecurityConfig {
      *
      * app.frontend.url
      *
-     * The default value allows local development.
+     * The default value allows production if the environment
+     * variable is not explicitly supplied.
      *
      * IMPORTANT:
      * Do NOT put localhost into the production server environment.
@@ -145,26 +146,58 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
-                        // CORS preflight
+                        // ====================================================
+                        // CORS PREFLIGHT
+                        // ====================================================
+
                         .requestMatchers(
                                 HttpMethod.OPTIONS,
                                 "/**")
                         .permitAll()
 
-                        // Public endpoints
+                        // ====================================================
+                        // PUBLIC ENDPOINTS
+                        // ====================================================
+
                         .requestMatchers(PUBLIC_URLS)
                         .permitAll()
 
-                        // Admin / HR endpoints
+                        // ====================================================
+                        // ADMIN ONLY - DELETE JOB
+                        // ====================================================
+
+                        /*
+                         * HR must NOT be allowed to delete jobs.
+                         *
+                         * ADMIN -> allowed
+                         * HR -> 403 Forbidden
+                         * EMPLOYEE -> 403 Forbidden
+                         */
+
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/api/recruitment/jobs/**")
+                        .hasRole("ADMIN")
+
+                        // ====================================================
+                        // ADMIN / HR ENDPOINTS
+                        // ====================================================
+
                         .requestMatchers(ADMIN_HR_URLS)
                         .hasAnyRole("ADMIN", "HR")
 
-                        // Change password
+                        // ====================================================
+                        // CHANGE PASSWORD
+                        // ====================================================
+
                         .requestMatchers(
                                 "/api/auth/change-password")
                         .authenticated()
 
-                        // Attendance
+                        // ====================================================
+                        // ATTENDANCE
+                        // ====================================================
+
                         .requestMatchers(
                                 "/api/attendance/check-in")
                         .authenticated()
@@ -181,7 +214,10 @@ public class SecurityConfig {
                                 "/api/attendance/my/**")
                         .authenticated()
 
-                        // Everything else
+                        // ====================================================
+                        // EVERYTHING ELSE
+                        // ====================================================
+
                         .anyRequest()
                         .authenticated())
 
