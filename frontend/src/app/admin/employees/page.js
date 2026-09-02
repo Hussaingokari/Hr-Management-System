@@ -81,6 +81,8 @@ const INPUT_CLASS = `
     focus:border-indigo-500
     dark:focus:border-[#378ADD]
     transition-colors
+    [&::-ms-reveal]:hidden
+    [&::-ms-clear]:hidden
 `;
 
 function InputField({
@@ -94,6 +96,7 @@ function InputField({
     max,
     maxLength,
     numericOnly = false,
+    inputClassName = '',
 }) {
     return (
         <div className="min-w-0">
@@ -124,7 +127,7 @@ function InputField({
                 max={max}
                 maxLength={maxLength}
                 inputMode={numericOnly ? 'numeric' : undefined}
-                className={INPUT_CLASS}
+                className={`${INPUT_CLASS} ${inputClassName}`}
                 onChange={(e) => {
                     let newValue = e.target.value;
 
@@ -1664,6 +1667,7 @@ export default function EmployeeManagementPage() {
                                         onChange={
                                             handleFieldChange
                                         }
+                                        inputClassName="!pr-10"
                                     />
 
                                     <button
