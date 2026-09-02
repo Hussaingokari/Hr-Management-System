@@ -13,6 +13,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import com.hrms.dto.SendNotificationRequest;
+import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/notifications")
@@ -131,4 +134,33 @@ public class NotificationController {
                 ApiResponse.success("All notifications deleted")
         );
     }
+    // ============================================================
+// SEND MANUAL NOTIFICATION
+// ADMIN ONLY
+// ============================================================
+
+@PostMapping("/send")
+@PreAuthorize("hasRole('ADMIN')")
+@Operation(
+        summary = "Send notification to employees"
+)
+public ResponseEntity<ApiResponse<Integer>> sendNotification(
+        @AuthenticationPrincipal Employee emp,
+        @Valid @RequestBody SendNotificationRequest request) {
+
+    int sentCount =
+            notificationService.sendManualNotification(
+                    emp,
+                    request
+            );
+
+    return ResponseEntity.ok(
+            ApiResponse.success(
+                    "Notification sent successfully to "
+                            + sentCount
+                            + " employee(s)",
+                    sentCount
+            )
+    );
+}
 }

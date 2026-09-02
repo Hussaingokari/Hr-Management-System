@@ -15,6 +15,13 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.hrms.dto.SendNotificationRequest;
+import org.springframework.security.access.AccessDeniedException;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -301,4 +308,257 @@ public class NotificationService {
 
         return r;
     }
+    // ============================================================
+// ADMIN / CEO MANUAL NOTIFICATION
+// ============================================================
+
+@Transactional
+public int sendManualNotification(
+        Employee sender,
+        SendNotificationRequest request) {
+
+    // ------------------------------------------------------------
+    // SECURITY
+    // ------------------------------------------------------------
+
+    if (sender == null) {
+        throw new AccessDeniedException(
+                "Authenticated user is required"
+        );
+    }
+
+    /*
+     * Your current application has ADMIN, HR and EMPLOYEE roles.
+     *
+     * For this new feature, we are allowing ADMIN only.
+     *
+     * If later your application introduces a separate CEO role,
+     * we can add that role here.
+     */
+
+    if (sender.getRole() != Role.ADMIN) {
+        throw new AccessDeniedException(
+                "Only Admin can send manual notifications"
+        );
+    }
+
+    // ------------------------------------------------------------
+    // VALIDATE REQUEST
+    // ------------------------------------------------------------
+
+    if (request == null) {
+        throw new IllegalArgumentException(
+                "Notification request is required"
+        );
+    }
+
+    if (request.getType() == null) {
+        throw new IllegalArgumentException(
+                "Notification type is required"
+        );
+    }
+
+    if (request.getSendTo() == null) {
+        throw new IllegalArgumentException(
+                "Recipient type is required"
+        );
+    }
+
+    if (request.getTitle() == null
+            || request.getTitle().trim().isEmpty()) {
+
+        throw new IllegalArgumentException(
+                "Notification title is required"
+        );
+    }
+
+    if (request.getMessage() == null
+            || request.getMessage().trim().isEmpty()) {
+
+        throw new IllegalArgumentException(
+                "Notification message is required"
+        );
+    }
+
+    // ------------------------------------------------------------
+    // DETERMINE RECIPIENTS
+    // ------------------------------------------------------------
+
+    List<Employee> recipients;
+
+    switch (request.getSendTo()) {
+
+        case ALL -> {
+
+            /*
+             * Get only active employees.
+             */
+            recipients =
+                    employeeRepository.findByActiveTrue();
+
+            if (recipients.isEmpty()) {
+                throw new IllegalArgumentException(
+                        "No active employees found"
+                );
+            }
+        }
+
+        case INDIVIDUAL -> {
+
+            validateEmployeeIds(
+                    request.getEmployeeIds(),
+                    1
+            );
+
+            if (request.getEmployeeIds().size() != 1) {
+                throw new IllegalArgumentException(
+                        "Individual notification requires exactly one employee"
+                );
+            }
+
+            Long employeeId =
+                    request.getEmployeeIds().get(0);
+
+            Employee employee =
+                    employeeRepository.findById(employeeId)
+                            .orElseThrow(() ->
+                                    new IllegalArgumentException(
+                                            "Employee not found: "
+                                                    + employeeId
+                                    )
+                            );
+
+            if (!employee.isActive()) {
+                throw new IllegalArgumentException(
+                        "Selected employee is inactive: "
+                                + employee.getEmployeeId()
+                );
+            }
+
+            recipients =
+                    List.of(employee);
+        }
+
+        case MULTIPLE -> {
+
+            validateEmployeeIds(
+                    request.getEmployeeIds(),
+                    2
+            );
+
+            /*
+             * Remove duplicate employee IDs.
+             */
+            Set<Long> uniqueIds =
+                    new HashSet<>(
+                            request.getEmployeeIds()
+                    );
+
+            recipients =
+                    employeeRepository
+                            .findAllById(uniqueIds);
+
+            if (recipients.isEmpty()) {
+                throw new IllegalArgumentException(
+                        "No valid employees found"
+                );
+            }
+
+            /*
+             * Make sure every requested employee exists.
+             */
+            if (recipients.size()
+                    != uniqueIds.size()) {
+
+                throw new IllegalArgumentException(
+                        "One or more selected employees were not found"
+                );
+            }
+
+            /*
+             * Do not send to inactive employees.
+             */
+            List<Employee> inactiveEmployees =
+                    recipients.stream()
+                            .filter(employee ->
+                                    !employee.isActive())
+                            .toList();
+
+            if (!inactiveEmployees.isEmpty()) {
+
+                String inactiveIds =
+                        inactiveEmployees.stream()
+                                .map(Employee::getEmployeeId)
+                                .reduce(
+                                        (a, b) ->
+                                                a + ", " + b
+                                )
+                                .orElse("");
+
+                throw new IllegalArgumentException(
+                        "Selected employee(s) are inactive: "
+                                + inactiveIds
+                );
+            }
+        }
+
+        default -> throw new IllegalArgumentException(
+                "Invalid recipient type"
+        );
+    }
+
+    // ------------------------------------------------------------
+    // CREATE NOTIFICATION FOR EACH RECIPIENT
+    // ------------------------------------------------------------
+
+    String title =
+            request.getTitle().trim();
+
+    String message =
+            request.getMessage().trim();
+
+    int sentCount = 0;
+
+    for (Employee recipient : recipients) {
+
+        createAndSend(
+                recipient,
+                title,
+                message,
+                request.getType(),
+                "MANUAL_NOTIFICATION",
+                null
+        );
+
+        sentCount++;
+    }
+
+    return sentCount;
+}
+// ============================================================
+// VALIDATE EMPLOYEE IDS
+// ============================================================
+
+private void validateEmployeeIds(
+        List<Long> employeeIds,
+        int minimumRequired) {
+
+    if (employeeIds == null
+            || employeeIds.isEmpty()) {
+
+        throw new IllegalArgumentException(
+                "At least "
+                        + minimumRequired
+                        + " employee ID(s) must be selected"
+        );
+    }
+
+    if (employeeIds.stream()
+            .anyMatch(id -> id == null || id <= 0)) {
+
+        throw new IllegalArgumentException(
+                "Employee IDs must be valid"
+        );
+    }
+}
 }

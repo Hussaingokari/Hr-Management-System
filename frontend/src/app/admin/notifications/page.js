@@ -10,6 +10,8 @@ import {
   markAllAdminNotificationsRead,
   deleteAdminNotification,
   clearAllAdminNotifications,
+  sendAdminNotification,
+  getAllEmployees,
 } from '@/lib/adminApi';
 
 import api from '@/lib/axios';
@@ -47,6 +49,36 @@ export default function AdminNotificationsPage() {
 
   const [loading, setLoading] = useState(true);
 
+  // ============================================================
+  // SEND NOTIFICATION
+  // ============================================================
+
+  const [showSendNotification, setShowSendNotification] =
+    useState(false);
+
+  const [employees, setEmployees] = useState([]);
+
+  const [notificationType, setNotificationType] =
+    useState('GENERAL');
+
+  const [recipientType, setRecipientType] =
+    useState('ALL');
+
+  const [selectedEmployeeIds, setSelectedEmployeeIds] =
+    useState([]);
+
+  const [notificationTitle, setNotificationTitle] =
+    useState('');
+
+  const [notificationMessage, setNotificationMessage] =
+    useState('');
+
+  const [sendingNotification, setSendingNotification] =
+    useState(false);
+
+  const [loadingEmployees, setLoadingEmployees] =
+    useState(false);
+
   const [filter, setFilter] = useState('ALL');
 
   const [markingAll, setMarkingAll] = useState(false);
@@ -72,6 +104,13 @@ export default function AdminNotificationsPage() {
   const [totalPages, setTotalPages] = useState(0);
 
   const [now, setNow] = useState(() => Date.now());
+
+  // ============================================================
+  // NOTIFICATION DETAILS MODAL (formal letter style)
+  // ============================================================
+
+  const [selectedNotification, setSelectedNotification] =
+    useState(null);
 
 
   /*
@@ -162,6 +201,188 @@ export default function AdminNotificationsPage() {
 
     return () => clearTimeout(timer);
   }, [fetchNotifications]);
+
+
+  // ============================================================
+  // LOAD EMPLOYEES FOR SEND NOTIFICATION
+  // ============================================================
+
+  const loadEmployeesForNotification = useCallback(async () => {
+    setLoadingEmployees(true);
+
+    try {
+      const response = await getAllEmployees(
+        0,
+        1000,
+        'All Departments'
+      );
+
+      const data = response?.data?.data;
+
+      const employeeList =
+        data?.content ||
+        (Array.isArray(data) ? data : []);
+
+      setEmployees(
+        employeeList.filter(
+          (employee) => employee?.active !== false
+        )
+      );
+    } catch (error) {
+      console.error(
+        'Failed to load employees:',
+        error
+      );
+
+      toast.error(
+        error?.response?.data?.message ||
+        'Failed to load employees'
+      );
+    } finally {
+      setLoadingEmployees(false);
+    }
+  }, []);
+
+  // ============================================================
+  // OPEN SEND NOTIFICATION
+  // ============================================================
+
+  const openSendNotification = async () => {
+    setNotificationType('GENERAL');
+    setRecipientType('ALL');
+    setSelectedEmployeeIds([]);
+    setNotificationTitle('');
+    setNotificationMessage('');
+
+    setShowSendNotification(true);
+
+    if (employees.length === 0) {
+      await loadEmployeesForNotification();
+    }
+  };
+
+  // ============================================================
+  // CLOSE SEND NOTIFICATION
+  // ============================================================
+
+  const closeSendNotification = () => {
+    if (sendingNotification) {
+      return;
+    }
+
+    setShowSendNotification(false);
+    setSelectedEmployeeIds([]);
+    setNotificationTitle('');
+    setNotificationMessage('');
+    setNotificationType('GENERAL');
+    setRecipientType('ALL');
+  };
+
+  // ============================================================
+  // SEND MANUAL NOTIFICATION
+  // ============================================================
+
+  const handleSendNotification = async (event) => {
+    event.preventDefault();
+
+    const trimmedTitle =
+      notificationTitle.trim();
+
+    const trimmedMessage =
+      notificationMessage.trim();
+
+    if (!trimmedTitle) {
+      toast.error(
+        'Please enter a notification title'
+      );
+      return;
+    }
+
+    if (!trimmedMessage) {
+      toast.error(
+        'Please enter a notification message'
+      );
+      return;
+    }
+
+    if (
+      recipientType === 'INDIVIDUAL' &&
+      selectedEmployeeIds.length !== 1
+    ) {
+      toast.error(
+        'Please select exactly one employee'
+      );
+      return;
+    }
+
+    if (
+      recipientType === 'MULTIPLE' &&
+      selectedEmployeeIds.length === 0
+    ) {
+      toast.error(
+        'Please select at least one employee'
+      );
+      return;
+    }
+
+    setSendingNotification(true);
+
+    try {
+      const payload = {
+        type: notificationType,
+
+        sendTo: recipientType,
+
+        employeeIds:
+          recipientType === 'ALL'
+            ? []
+            : selectedEmployeeIds.map(Number),
+
+        title: trimmedTitle,
+
+        message: trimmedMessage,
+      };
+
+      const response =
+        await sendAdminNotification(payload);
+
+      const sentCount =
+        response?.data?.data ?? 0;
+
+      toast.success(
+        `Notification sent successfully to ${sentCount} employee(s)`
+      );
+
+      setShowSendNotification(false);
+
+      setSelectedEmployeeIds([]);
+      setNotificationTitle('');
+      setNotificationMessage('');
+      setNotificationType('GENERAL');
+      setRecipientType('ALL');
+
+      await fetchNotifications();
+
+      window.dispatchEvent(
+        new Event('notificationsUpdated')
+      );
+
+    } catch (error) {
+
+      console.error(
+        'Failed to send notification:',
+        error
+      );
+
+      toast.error(
+        error?.response?.data?.message ||
+        'Failed to send notification'
+      );
+
+    } finally {
+      setSendingNotification(false);
+    }
+  };
 
 
   /*
@@ -270,7 +491,11 @@ export default function AdminNotificationsPage() {
   /*
    * Notification click
    *
-   * Existing Admin navigation is preserved.
+   * Reference-linked notifications (Leave, Job, Document/Onboarding)
+   * keep the existing Admin navigation.
+   *
+   * General/manual notifications (Festival, Announcement, Greeting,
+   * Important Circular, General) open the formal letter Details modal.
    */
   const handleNotificationClick = async (
     notification
@@ -297,91 +522,87 @@ export default function AdminNotificationsPage() {
         notification.reference_id;
 
 
-      if (!referenceId) {
+      if (referenceId) {
 
-        toast.error(
-          'This notification is not linked to an approval request.'
-        );
+        /*
+         * Leave
+         */
+        if (type.includes('LEAVE')) {
 
-        return;
+          const notifType =
+            String(
+              notification.type || ''
+            ).toUpperCase();
+
+          const isCancellation =
+            notifType ===
+              'LEAVE_CANCELLED' ||
+            String(
+              notification.title || ''
+            )
+              .toLowerCase()
+              .includes('cancel');
+
+          const targetTab =
+            isCancellation
+              ? 'CANCELLATIONS'
+              : 'PENDING';
+
+
+          router.push(
+            `/admin/leave?highlightId=${encodeURIComponent(
+              referenceId
+            )}&tab=${targetTab}`
+          );
+
+          return;
+        }
+
+
+        /*
+         * Job Posted
+         */
+        if (
+          type.includes('JOB_POSTED') ||
+          type.includes('JOBPOSTING')
+        ) {
+
+          router.push(
+            `/admin/recruitment?id=${encodeURIComponent(
+              referenceId
+            )}`
+          );
+
+          return;
+        }
+
+
+        /*
+         * Document / Onboarding
+         */
+        if (
+          type.includes('DOCUMENT') ||
+          type.includes('ONBOARDING') ||
+          type.includes('DOC')
+        ) {
+
+          router.push(
+            `/admin/onboarding/document-requests?highlightId=${encodeURIComponent(
+              referenceId
+            )}`
+          );
+
+          return;
+        }
+
       }
 
 
       /*
-       * Leave
+       * General/manual notification:
+       * open formal letter details modal.
        */
-      if (type.includes('LEAVE')) {
-
-        const notifType =
-          String(
-            notification.type || ''
-          ).toUpperCase();
-
-        const isCancellation =
-          notifType ===
-            'LEAVE_CANCELLED' ||
-          String(
-            notification.title || ''
-          )
-            .toLowerCase()
-            .includes('cancel');
-
-        const targetTab =
-          isCancellation
-            ? 'CANCELLATIONS'
-            : 'PENDING';
-
-
-        router.push(
-          `/admin/leave?highlightId=${encodeURIComponent(
-            referenceId
-          )}&tab=${targetTab}`
-        );
-
-        return;
-      }
-
-
-      /*
-       * Job Posted
-       */
-      if (
-        type.includes('JOB_POSTED') ||
-        type.includes('JOBPOSTING')
-      ) {
-
-        router.push(
-          `/admin/recruitment?id=${encodeURIComponent(
-            referenceId
-          )}`
-        );
-
-        return;
-      }
-
-
-      /*
-       * Document / Onboarding
-       */
-      if (
-        type.includes('DOCUMENT') ||
-        type.includes('ONBOARDING') ||
-        type.includes('DOC')
-      ) {
-
-        router.push(
-          `/admin/onboarding/document-requests?highlightId=${encodeURIComponent(
-            referenceId
-          )}`
-        );
-
-        return;
-      }
-
-
-      toast(
-        'This notification does not have an approval destination.'
-      );
+      setSelectedNotification(notification);
 
     } catch (error) {
 
@@ -633,6 +854,12 @@ export default function AdminNotificationsPage() {
     if (t.includes('job'))
       return '💼';
 
+    if (t.includes('festival'))
+      return '🎉';
+
+    if (t.includes('circular') || t.includes('announcement'))
+      return '📢';
+
 
     return '🔔';
   };
@@ -814,6 +1041,118 @@ export default function AdminNotificationsPage() {
           cursor: not-allowed;
         }
 
+        .admin-send-notification-modal {
+          width: 100%;
+          max-width: 680px;
+          max-height: calc(100vh - 40px);
+          overflow-y: auto;
+          background: var(--card-bg);
+          border: 1px solid var(--card-border);
+          border-radius: 16px;
+          padding: 24px;
+          box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+        }
+
+        .admin-send-notification-label {
+          display: block;
+          margin-bottom: 7px;
+          color: var(--text-primary);
+          font-size: 13px;
+          font-weight: 700;
+        }
+
+        .admin-send-notification-input,
+        .admin-send-notification-select,
+        .admin-send-notification-textarea {
+          width: 100%;
+          box-sizing: border-box;
+          border: 1px solid var(--card-border);
+          border-radius: 9px;
+          background: var(--background);
+          color: var(--text-primary);
+          outline: none;
+          font-size: 13px;
+          padding: 10px 12px;
+        }
+
+        .admin-send-notification-input:focus,
+        .admin-send-notification-select:focus,
+        .admin-send-notification-textarea:focus {
+          border-color: #4f46e5;
+        }
+
+        .admin-send-notification-textarea {
+          min-height: 130px;
+          resize: vertical;
+          line-height: 1.5;
+        }
+
+        .admin-send-notification-employee-list {
+          max-height: 190px;
+          overflow-y: auto;
+          border: 1px solid var(--card-border);
+          border-radius: 9px;
+          background: var(--background);
+        }
+
+        .admin-send-notification-employee-item {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 10px 12px;
+          border-bottom: 1px solid var(--card-border);
+          cursor: pointer;
+        }
+
+        .admin-send-notification-employee-item:last-child {
+          border-bottom: none;
+        }
+
+        .admin-send-notification-employee-item:hover {
+          background: rgba(79, 70, 229, 0.06);
+        }
+
+        .admin-send-notification-employee-item input {
+          accent-color: #4f46e5;
+        }
+
+        .admin-send-notification-cancel {
+          padding: 10px 18px;
+          border-radius: 9px;
+          border: 1px solid var(--card-border);
+          background: var(--card-bg);
+          color: var(--text-primary);
+          font-size: 13px;
+          font-weight: 700;
+          cursor: pointer;
+        }
+
+        .admin-send-notification-submit {
+          padding: 10px 18px;
+          border-radius: 9px;
+          border: none;
+          background: #4f46e5;
+          color: white;
+          font-size: 13px;
+          font-weight: 700;
+          cursor: pointer;
+        }
+
+               .admin-send-notification-cancel:disabled,
+        .admin-send-notification-submit:disabled {
+          opacity: 0.55;
+          cursor: not-allowed;
+        }
+
+        .dark .admin-send-notification-select {
+          color-scheme: dark;
+        }
+
+        .dark .admin-send-notification-select option {
+          background: #171c24;
+          color: #f1f5f9;
+        }
+
         @media (max-width: 768px) {
 
           .admin-notification-row {
@@ -828,6 +1167,261 @@ export default function AdminNotificationsPage() {
         }
 
       `}</style>
+
+
+      {/* =====================================================
+          NOTIFICATION DETAILS — FORMAL LETTER STYLE
+          ===================================================== */}
+
+      {selectedNotification && (
+        <div
+          className="admin-notification-modal-overlay"
+          style={{ zIndex: 10000 }}
+          onClick={() => setSelectedNotification(null)}
+        >
+
+          <div
+            style={{
+              width: '100%',
+              maxWidth: '620px',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              background: 'var(--card-bg)',
+              borderRadius: '14px',
+              boxShadow: '0 25px 70px rgba(0,0,0,0.35)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+
+            {/* HEADER BAR */}
+
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '16px 20px',
+                borderBottom: '1px solid var(--card-border)',
+                position: 'sticky',
+                top: 0,
+                background: 'var(--card-bg)',
+                zIndex: 2,
+              }}
+            >
+
+              <button
+                onClick={() => setSelectedNotification(null)}
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  border: 'none',
+                  borderRadius: '8px',
+                  background: 'var(--background)',
+                  color: 'var(--text-primary)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+                aria-label="Back"
+              >
+                ←
+              </button>
+
+              <p
+                style={{
+                  margin: 0,
+                  fontWeight: '700',
+                  fontSize: '14px',
+                  color: 'var(--text-primary)',
+                }}
+              >
+                Notification
+              </p>
+
+              <button
+                onClick={() => setSelectedNotification(null)}
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  border: 'none',
+                  borderRadius: '8px',
+                  background: 'transparent',
+                  color: 'var(--text-secondary)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+                aria-label="Close"
+              >
+                <X size={18} />
+              </button>
+
+            </div>
+
+            {/* LETTER BODY */}
+
+            <div style={{ padding: '40px 40px 24px' }}>
+
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  paddingBottom: '20px',
+                  borderBottom: '1.5px solid var(--text-primary)',
+                  marginBottom: '28px',
+                }}
+              >
+
+                <div
+  style={{
+    width: '44px',
+    height: '44px',
+    borderRadius: '10px',
+    background: '#eef2ff',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  }}
+>
+  <img
+    src="/removee.png"
+    alt="Saiteja Infotech Private Limited"
+    style={{
+      width: '100%',
+      height: '100%',
+      objectFit: 'contain',
+      padding: '2px',
+    }}
+  />
+</div>
+
+                <div>
+                  <div
+                    style={{
+                      fontWeight: '700',
+                      fontSize: '15px',
+                      color: 'var(--text-primary)',
+                    }}
+                  >
+                    Saiteja Infotech Private Limited
+                  </div>
+                  <div
+                    style={{
+                      fontSize: '12px',
+                      color: 'var(--text-muted)',
+                    }}
+                  >
+                    Office circular
+                  </div>
+                </div>
+
+              </div>
+
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  fontSize: '13px',
+                  color: 'var(--text-secondary)',
+                  marginBottom: '24px',
+                }}
+              >
+                {/* <span>To: You</span> */}
+                <span>To: <strong style={{ fontWeight: '700' }}>You</strong></span>
+                <span>
+                  {selectedNotification.createdAt
+                    ? new Date(selectedNotification.createdAt).toLocaleDateString('en-IN', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                      })
+                    : ''}
+                </span>
+              </div>
+
+              <h1
+                style={{
+                  fontSize: '20px',
+                  margin: '0 0 24px',
+                  fontWeight: '800',
+                  color: 'var(--text-primary)',
+                }}
+              >
+                {selectedNotification.title}
+              </h1>
+
+              <div
+                style={{
+                  fontSize: '15px',
+                  lineHeight: '1.8',
+                  color: 'var(--text-primary)',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                }}
+              >
+                {selectedNotification.message}
+              </div>
+
+              <div style={{ marginTop: '32px' }}>
+                <div
+                  style={{
+                    fontSize: '15px',
+                    color: 'var(--text-primary)',
+                    marginBottom: '4px',
+                  }}
+                >
+                  Warm regards,
+                </div>
+                <div
+                  style={{
+                    fontSize: '15px',
+                    fontWeight: '700',
+                    color: 'var(--text-primary)',
+                  }}
+                >
+                  Saiteja Infotech Private Limited
+                </div>
+              </div>
+
+            </div>
+
+            {/* FOOTER */}
+
+            <div
+              style={{
+                padding: '14px 20px',
+                borderTop: '1px solid var(--card-border)',
+                display: 'flex',
+                justifyContent: 'flex-end',
+              }}
+            >
+
+              <button
+                onClick={() => setSelectedNotification(null)}
+                style={{
+                  padding: '9px 20px',
+                  border: 'none',
+                  borderRadius: '9px',
+                  background: '#4f46e5',
+                  color: 'white',
+                  fontSize: '13px',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                }}
+              >
+                Close
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+      )}
 
 
       {/* =====================================================
@@ -910,6 +1504,31 @@ export default function AdminNotificationsPage() {
             justifyContent: 'flex-end',
           }}
         >
+
+          {/* Send Notification */}
+
+          <button
+            onClick={openSendNotification}
+            style={{
+              padding: '11px 20px',
+              background: '#4f46e5',
+              color: 'white',
+              border: '1.5px solid #4f46e5',
+              borderRadius: '10px',
+              fontSize: '13px',
+              fontWeight: '700',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              boxShadow:
+                '0 4px 12px rgba(79, 70, 229, 0.18)',
+            }}
+          >
+            💬 Send Notification
+          </button>
+
 
           {/* Mark all as read */}
 
@@ -1166,6 +1785,11 @@ export default function AdminNotificationsPage() {
 
             {notifications.map((n) => {
 
+              const shortMessage =
+                n.message?.length > 160
+                  ? `${n.message.substring(0, 160)}...`
+                  : n.message;
+
               return (
 
                 <div
@@ -1278,7 +1902,7 @@ export default function AdminNotificationsPage() {
                           marginBottom: '6px',
                         }}
                       >
-                        {n.message}
+                        {shortMessage}
                       </div>
                     )}
 
@@ -1515,6 +2139,463 @@ export default function AdminNotificationsPage() {
         )}
 
       </div>
+
+
+      {/* =====================================================
+          SEND NOTIFICATION MODAL
+          ===================================================== */}
+
+      {showSendNotification && (
+        <div
+          className="admin-notification-modal-overlay"
+          onClick={() => {
+            if (!sendingNotification) {
+              closeSendNotification();
+            }
+          }}
+        >
+          <div
+            className="admin-send-notification-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+
+            {/* HEADER */}
+
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: '12px',
+                marginBottom: '20px',
+              }}
+            >
+              <div>
+
+                <h2
+                  className="admin-notification-modal-title"
+                  style={{
+                    fontSize: '20px',
+                  }}
+                >
+                  💬 Send Notification
+                </h2>
+
+                <p
+                  className="admin-notification-modal-text"
+                  style={{
+                    margin: '5px 0 0',
+                  }}
+                >
+                  Send an important message directly
+                  to employee portal(s).
+                </p>
+
+              </div>
+
+              <button
+                onClick={closeSendNotification}
+                disabled={sendingNotification}
+                style={{
+                  width: '34px',
+                  height: '34px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: 'transparent',
+                  color: 'var(--text-secondary)',
+                  cursor: sendingNotification
+                    ? 'not-allowed'
+                    : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <X size={18} />
+              </button>
+
+            </div>
+
+            <form
+              onSubmit={handleSendNotification}
+            >
+
+              {/* NOTIFICATION TYPE */}
+
+              <div style={{ marginBottom: '16px' }}>
+
+                <label
+                  className="admin-send-notification-label"
+                >
+                  Notification Type
+                </label>
+
+                <select
+                  className="admin-send-notification-select"
+                  value={notificationType}
+                  onChange={(e) =>
+                    setNotificationType(e.target.value)
+                  }
+                  disabled={sendingNotification}
+                >
+
+                  <option value="GENERAL">
+                    General Information
+                  </option>
+
+                  <option value="GREETING">
+                    Greeting
+                  </option>
+
+                  <option value="FESTIVAL">
+                    Festival
+                  </option>
+
+                  <option value="ANNOUNCEMENT">
+                    Announcement
+                  </option>
+
+                  <option value="IMPORTANT_CIRCULAR">
+                    Important Circular
+                  </option>
+
+                </select>
+
+              </div>
+
+              {/* SEND TO */}
+
+              <div style={{ marginBottom: '16px' }}>
+
+                <label
+                  className="admin-send-notification-label"
+                >
+                  Send To
+                </label>
+
+                <select
+                  className="admin-send-notification-select"
+                  value={recipientType}
+                  onChange={async (e) => {
+
+                    const value =
+                      e.target.value;
+
+                    setRecipientType(value);
+
+                    setSelectedEmployeeIds([]);
+
+                    if (
+                      value !== 'ALL' &&
+                      employees.length === 0
+                    ) {
+                      await loadEmployeesForNotification();
+                    }
+
+                  }}
+                  disabled={sendingNotification}
+                >
+
+                  <option value="ALL">
+                    All Employees
+                  </option>
+
+                  <option value="INDIVIDUAL">
+                    Individual Employee
+                  </option>
+
+                  <option value="MULTIPLE">
+                    Multiple Employees
+                  </option>
+
+                </select>
+
+              </div>
+
+              {/* EMPLOYEE SELECTION */}
+
+              {recipientType !== 'ALL' && (
+
+                <div style={{ marginBottom: '16px' }}>
+
+                  <label
+                    className="admin-send-notification-label"
+                  >
+                    {recipientType === 'INDIVIDUAL'
+                      ? 'Employee'
+                      : 'Employees'}
+                  </label>
+
+                  {loadingEmployees ? (
+
+                    <div
+                      style={{
+                        padding: '12px',
+                        border:
+                          '1px solid var(--card-border)',
+                        borderRadius: '9px',
+                        color: 'var(--text-muted)',
+                        fontSize: '13px',
+                        background:
+                          'var(--background)',
+                      }}
+                    >
+                      Loading employees...
+                    </div>
+
+                  ) : employees.length === 0 ? (
+
+                    <div
+                      style={{
+                        padding: '12px',
+                        border:
+                          '1px solid var(--card-border)',
+                        borderRadius: '9px',
+                        color: 'var(--text-muted)',
+                        fontSize: '13px',
+                        background:
+                          'var(--background)',
+                      }}
+                    >
+                      No active employees found.
+                    </div>
+
+                  ) : recipientType === 'INDIVIDUAL' ? (
+
+                    <select
+                      className="admin-send-notification-select"
+                      value={
+                        selectedEmployeeIds[0] ?? ''
+                      }
+                      onChange={(e) =>
+                        setSelectedEmployeeIds(
+                          e.target.value
+                            ? [Number(e.target.value)]
+                            : []
+                        )
+                      }
+                      disabled={sendingNotification}
+                    >
+
+                      <option value="">
+                        Select an employee
+                      </option>
+
+                      {employees.map(
+                        (employee) => (
+
+                          <option
+                            key={employee.id}
+                            value={employee.id}
+                          >
+                            {employee.firstName || ''}{' '}
+                            {employee.lastName || ''}
+                            {' — '}
+                            {employee.employeeId ||
+                              employee.email ||
+                              `#${employee.id}`}
+                          </option>
+
+                        )
+                      )}
+
+                    </select>
+
+                  ) : (
+
+                    <div
+                      className="admin-send-notification-employee-list"
+                    >
+
+                      {employees.map(
+                        (employee) => {
+
+                          const employeeId =
+                            Number(employee.id);
+
+                          const checked =
+                            selectedEmployeeIds.includes(
+                              employeeId
+                            );
+
+                          return (
+
+                            <label
+                              key={employee.id}
+                              className="admin-send-notification-employee-item"
+                            >
+
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() => {
+
+                                  setSelectedEmployeeIds(
+                                    (previous) =>
+
+                                      checked
+                                        ? previous.filter(
+                                            (id) =>
+                                              id !==
+                                              employeeId
+                                          )
+                                        : [
+                                            ...previous,
+                                            employeeId,
+                                          ]
+                                  );
+
+                                }}
+                                disabled={
+                                  sendingNotification
+                                }
+                              />
+
+                              <span
+                                style={{
+                                  color:
+                                    'var(--text-primary)',
+                                  fontSize: '13px',
+                                  fontWeight: '600',
+                                }}
+                              >
+                                {employee.firstName || ''}{' '}
+                                {employee.lastName || ''}
+                              </span>
+
+                              <span
+                                style={{
+                                  color:
+                                    'var(--text-muted)',
+                                  fontSize: '12px',
+                                  marginLeft: 'auto',
+                                }}
+                              >
+                                {employee.employeeId ||
+                                  employee.email ||
+                                  `#${employee.id}`}
+                              </span>
+
+                            </label>
+
+                          );
+                        }
+                      )}
+
+                    </div>
+
+                  )}
+
+                  {recipientType === 'MULTIPLE' &&
+                    selectedEmployeeIds.length > 0 && (
+
+                      <div
+                        style={{
+                          marginTop: '7px',
+                          fontSize: '12px',
+                          color:
+                            'var(--text-muted)',
+                        }}
+                      >
+                        {selectedEmployeeIds.length}{' '}
+                        employee(s) selected
+                      </div>
+
+                    )}
+
+                </div>
+
+              )}
+
+              {/* TITLE */}
+
+              <div style={{ marginBottom: '16px' }}>
+
+                <label
+                  className="admin-send-notification-label"
+                >
+                  Title
+                </label>
+
+                <input
+                  type="text"
+                  className="admin-send-notification-input"
+                  value={notificationTitle}
+                  onChange={(e) =>
+                    setNotificationTitle(
+                      e.target.value
+                    )
+                  }
+                  maxLength={150}
+                  placeholder="Enter notification title"
+                  disabled={sendingNotification}
+                />
+
+              </div>
+
+              {/* MESSAGE */}
+
+              <div style={{ marginBottom: '20px' }}>
+
+                <label
+                  className="admin-send-notification-label"
+                >
+                  Message
+                </label>
+
+                <textarea
+                  className="admin-send-notification-textarea"
+                  value={notificationMessage}
+                  onChange={(e) =>
+                    setNotificationMessage(
+                      e.target.value
+                    )
+                  }
+                  placeholder="Write the important message for the employee(s)..."
+                  disabled={sendingNotification}
+                />
+
+              </div>
+
+              {/* BUTTONS */}
+
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  gap: '10px',
+                }}
+              >
+
+                <button
+                  type="button"
+                  className="admin-send-notification-cancel"
+                  onClick={closeSendNotification}
+                  disabled={sendingNotification}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  className="admin-send-notification-submit"
+                  disabled={
+                    sendingNotification ||
+                    loadingEmployees
+                  }
+                >
+                  {sendingNotification
+                    ? 'Sending...'
+                    : '💬 Send Notification'}
+                </button>
+
+              </div>
+
+            </form>
+
+          </div>
+        </div>
+      )}
 
 
       {/* =====================================================
