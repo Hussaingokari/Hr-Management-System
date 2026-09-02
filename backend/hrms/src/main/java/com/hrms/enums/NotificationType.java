@@ -1,29 +1,28 @@
 public enum NotificationType {
-    // Leave
+
+    // Existing system notifications
     LEAVE_APPLIED,
     LEAVE_APPROVED,
     LEAVE_REJECTED,
     LEAVE_CANCELLED,
-
-    // Attendance
     ATTENDANCE_REMINDER,
-
-    // Payroll
     PAYROLL_GENERATED,
+    PERFORMANCE_REVIEWED,
+    TRAINING_ENROLLED,
+    TRAINING_COMPLETED,
+    ONBOARDING_INITIATED,
+    JOB_APPLICATION,
+    JOB_POSTED,
+    DOCUMENT_UPLOADED,
+    DOCUMENT_APPROVED,
+    DOCUMENT_REJECTED,
+    CHECKLIST_COMPLETED,
+    GENERAL,
 
-    // Performance
-    PERFORMANCE_REVIEWED,    // ← NEW
-
-    // Training
-    TRAINING_ENROLLED,       // ← NEW
-    TRAINING_COMPLETED,      // ← NEW
-
-    // Onboarding
-    ONBOARDING_INITIATED,    // ← NEW
-
-    // Recruitment
-    JOB_APPLICATION,         // ← NEW
-
-    // General
-    GENERAL
+    // Manual Admin notifications
+    GREETING,
+    FESTIVAL,
+    ANNOUNCEMENT,
+    IMPORTANT_CIRCULAR,
+    GENERAL_INFORMATION
 }

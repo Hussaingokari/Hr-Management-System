@@ -86,6 +86,11 @@ public class Notification {
         CHECKLIST_COMPLETED,
 
         // General
-        GENERAL
+        GENERAL,
+        // ✅ NEW — Manual Admin Notifications
+    GREETING,
+    FESTIVAL,
+    ANNOUNCEMENT,
+    IMPORTANT_CIRCULAR
     }
 }
