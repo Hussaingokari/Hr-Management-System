@@ -562,7 +562,7 @@ export default function AdminLeavePage() {
 
     try {
       await api.delete(
-        `/api/leaves/clear-all?status=${deleteStatus}`
+        `/api/leaves/clear/${deleteStatus}`
       );
 
       toast.success(
