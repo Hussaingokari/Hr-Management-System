@@ -840,7 +840,7 @@ export default function EmployeeDashboard() {
       toast.error(
         error?.response?.data
           ?.message ||
-          'Check-in failed'
+        'Check-in failed'
       );
     } finally {
       setCheckingIn(false);
@@ -879,7 +879,7 @@ export default function EmployeeDashboard() {
       toast.error(
         error?.response?.data
           ?.message ||
-          'Check-out failed'
+        'Check-out failed'
       );
     } finally {
       setCheckingOut(false);
@@ -939,17 +939,17 @@ export default function EmployeeDashboard() {
   const checkInTime =
     todayAtt?.checkIn
       ? todayAtt.checkIn.substring(
-          0,
-          5
-        )
+        0,
+        5
+      )
       : '--:--';
 
   const checkOutTime =
     todayAtt?.checkOut
       ? todayAtt.checkOut.substring(
-          0,
-          5
-        )
+        0,
+        5
+      )
       : '--:--';
 
   /* =======================================================
@@ -1075,7 +1075,6 @@ export default function EmployeeDashboard() {
                       : 'Good evening'}
                   , {firstName}
                 </span>
-
                 <Sparkles
                   size={17}
                   color="#f59e0b"
@@ -1094,7 +1093,7 @@ export default function EmployeeDashboard() {
 
                 {user?.department
                   ? ' • ' +
-                    user.department
+                  user.department
                   : ''}
               </div>
             </div>
@@ -1130,58 +1129,7 @@ export default function EmployeeDashboard() {
               {formattedDate}
             </div>
 
-            <button
-              type="button"
-              onClick={() =>
-                router.push(
-                  '/employee/notifications'
-                )
-              }
-              style={{
-                display: 'flex',
-                alignItems:
-                  'center',
-                gap: '7px',
-                border: 'none',
-                background:
-                  'transparent',
-                color:
-                  'var(--text-primary)',
-                cursor: 'pointer',
-                fontSize: '11px',
-                fontWeight: 700,
-                padding: 0,
-              }}
-            >
-              <Bell size={15} />
-
-              Notifications
-
-              {unreadCount > 0 && (
-                <span
-                  style={{
-                    minWidth: '19px',
-                    height: '19px',
-                    padding:
-                      '0 5px',
-                    borderRadius:
-                      '999px',
-                    background:
-                      '#ef4444',
-                    color: '#fff',
-                    fontSize: '9px',
-                    display: 'inline-flex',
-                    alignItems:
-                      'center',
-                    justifyContent:
-                      'center',
-                    fontWeight: 800,
-                  }}
-                >
-                  {unreadCount}
-                </span>
-              )}
-            </button>
+            
           </div>
         </div>
       </div>
@@ -1222,8 +1170,8 @@ export default function EmployeeDashboard() {
               value={
                 annualBalance
                   ? String(
-                      annualBalance.remaining
-                    ) + ' days'
+                    annualBalance.remaining
+                  ) + ' days'
                   : '0 days'
               }
               subtitle="Remaining balance"
@@ -1455,14 +1403,14 @@ export default function EmployeeDashboard() {
                         '50%',
                       background:
                         todayAtt?.checkIn &&
-                        !todayAtt?.checkOut
+                          !todayAtt?.checkOut
                           ? '#10b981'
                           : todayAtt?.checkOut
-                          ? '#f59e0b'
-                          : '#94a3b8',
+                            ? '#f59e0b'
+                            : '#94a3b8',
                       boxShadow:
                         todayAtt?.checkIn &&
-                        !todayAtt?.checkOut
+                          !todayAtt?.checkOut
                           ? '0 0 0 4px rgba(16,185,129,.10)'
                           : 'none',
                     }}
@@ -1479,8 +1427,8 @@ export default function EmployeeDashboard() {
                     {todayAtt?.checkOut
                       ? 'Workday completed'
                       : todayAtt?.checkIn
-                      ? 'Currently working'
-                      : 'Not checked in yet'}
+                        ? 'Currently working'
+                        : 'Not checked in yet'}
                   </span>
                 </div>
 
@@ -1525,7 +1473,7 @@ export default function EmployeeDashboard() {
                         : '#fff',
                     cursor:
                       todayAtt?.checkIn ||
-                      checkingIn
+                        checkingIn
                         ? 'not-allowed'
                         : 'pointer',
                     fontSize: '11px',
@@ -1553,8 +1501,8 @@ export default function EmployeeDashboard() {
                   {checkingIn
                     ? 'Checking...'
                     : todayAtt?.checkIn
-                    ? 'Checked In'
-                    : 'Check In'}
+                      ? 'Checked In'
+                      : 'Check In'}
                 </button>
 
                 <button
@@ -1576,18 +1524,18 @@ export default function EmployeeDashboard() {
                       todayAtt?.checkOut
                         ? 'rgba(245,158,11,.10)'
                         : todayAtt?.checkIn
-                        ? '#f59e0b'
-                        : 'var(--bg-primary)',
+                          ? '#f59e0b'
+                          : 'var(--bg-primary)',
                     color:
                       todayAtt?.checkOut
                         ? '#f59e0b'
                         : todayAtt?.checkIn
-                        ? '#fff'
-                        : 'var(--text-secondary)',
+                          ? '#fff'
+                          : 'var(--text-secondary)',
                     cursor:
                       !todayAtt?.checkIn ||
-                      todayAtt?.checkOut ||
-                      checkingOut
+                        todayAtt?.checkOut ||
+                        checkingOut
                         ? 'not-allowed'
                         : 'pointer',
                     fontSize: '11px',
@@ -1602,8 +1550,8 @@ export default function EmployeeDashboard() {
                       !todayAtt?.checkIn
                         ? 0.55
                         : checkingOut
-                        ? 0.7
-                        : 1,
+                          ? 0.7
+                          : 1,
                   }}
                 >
                   <LogOut size={15} />
@@ -1611,8 +1559,8 @@ export default function EmployeeDashboard() {
                   {checkingOut
                     ? 'Checking...'
                     : todayAtt?.checkOut
-                    ? 'Checked Out'
-                    : 'Check Out'}
+                      ? 'Checked Out'
+                      : 'Check Out'}
                 </button>
               </div>
             </div>
@@ -1645,7 +1593,7 @@ export default function EmployeeDashboard() {
               />
 
               {balance.length ===
-              0 ? (
+                0 ? (
                 <EmptyState
                   icon={Palmtree}
                   title="No leave balance"
@@ -1668,7 +1616,7 @@ export default function EmployeeDashboard() {
                     ) => {
                       const style =
                         leaveStyles[
-                          item.leaveType
+                        item.leaveType
                         ] ||
                         leaveStyles.UNPAID;
 
@@ -1688,11 +1636,11 @@ export default function EmployeeDashboard() {
                       const percentage =
                         total > 0
                           ? Math.min(
-                              100,
-                              (remaining /
-                                total) *
-                                100
-                            )
+                            100,
+                            (remaining /
+                              total) *
+                            100
+                          )
                           : 0;
 
                       return (
@@ -1757,9 +1705,9 @@ export default function EmployeeDashboard() {
 
                               {item.leaveType
                                 ? item.leaveType.replace(
-                                    /_/g,
-                                    ' '
-                                  )
+                                  /_/g,
+                                  ' '
+                                )
                                 : 'LEAVE'}
                             </div>
 
@@ -1776,9 +1724,9 @@ export default function EmployeeDashboard() {
                               }}
                             >
                               {item.leaveType ===
-                              'UNPAID'
+                                'UNPAID'
                                 ? item.used ||
-                                  0
+                                0
                                 : remaining}
 
                               <span
@@ -1794,11 +1742,11 @@ export default function EmployeeDashboard() {
                                 }}
                               >
                                 {item.leaveType ===
-                                'UNPAID'
+                                  'UNPAID'
                                   ? 'used'
                                   : '/ ' +
-                                    total +
-                                    ' days'}
+                                  total +
+                                  ' days'}
                               </span>
                             </div>
                           </div>
@@ -2014,7 +1962,7 @@ export default function EmployeeDashboard() {
               />
 
               {leaves.length ===
-              0 ? (
+                0 ? (
                 <EmptyState
                   icon={FileText}
                   title="No leave requests"
@@ -2047,10 +1995,10 @@ export default function EmployeeDashboard() {
                               '13px 0',
                             borderBottom:
                               index <
-                              Math.min(
-                                leaves.length,
-                                4
-                              ) -
+                                Math.min(
+                                  leaves.length,
+                                  4
+                                ) -
                                 1
                                 ? '1px solid var(--card-border)'
                                 : 'none',
@@ -2118,9 +2066,9 @@ export default function EmployeeDashboard() {
                               >
                                 {leave.leaveType
                                   ? leave.leaveType.replace(
-                                      /_/g,
-                                      ' '
-                                    )
+                                    /_/g,
+                                    ' '
+                                  )
                                   : 'Leave'}{' '}
                                 Leave
                               </div>
@@ -2210,7 +2158,7 @@ export default function EmployeeDashboard() {
               />
 
               {notifications.length ===
-              0 ? (
+                0 ? (
                 <EmptyState
                   icon={Bell}
                   title="You're all caught up"
@@ -2241,10 +2189,10 @@ export default function EmployeeDashboard() {
                               '13px 0',
                             borderBottom:
                               index <
-                              Math.min(
-                                notifications.length,
-                                4
-                              ) -
+                                Math.min(
+                                  notifications.length,
+                                  4
+                                ) -
                                 1
                                 ? '1px solid var(--card-border)'
                                 : 'none',
@@ -2367,15 +2315,15 @@ export default function EmployeeDashboard() {
                           >
                             {notification.createdAt
                               ? new Date(
-                                  notification.createdAt
-                                ).toLocaleDateString(
-                                  'en-IN',
-                                  {
-                                    day: '2-digit',
-                                    month:
-                                      'short',
-                                  }
-                                )
+                                notification.createdAt
+                              ).toLocaleDateString(
+                                'en-IN',
+                                {
+                                  day: '2-digit',
+                                  month:
+                                    'short',
+                                }
+                              )
                               : ''}
                           </div>
                         </div>
