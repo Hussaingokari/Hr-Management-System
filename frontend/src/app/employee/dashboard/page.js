@@ -1068,8 +1068,12 @@ export default function EmployeeDashboard() {
                     fontWeight: 850,
                   }}
                 >
-                  Good morning,{' '}
-                  {firstName}
+                  {new Date().getHours() < 12
+                    ? 'Good morning'
+                    : new Date().getHours() < 17
+                      ? 'Good afternoon'
+                      : 'Good evening'}
+                  , {firstName}
                 </span>
 
                 <Sparkles
